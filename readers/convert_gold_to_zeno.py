@@ -6,18 +6,18 @@ import json
 from kilt.kilt_utils import load_data
 import argparse
 import os
-# , read_json, write_json
+from file_utils import read_json, write_json
 
-def read_json(filename):
-    print('reading from ', filename)
-    with open(filename) as f:
-        data = json.load(f)
-    return data
+# def read_json(filename):
+#     print('reading from ', filename)
+#     with open(filename) as f:
+#         data = json.load(f)
+#     return data
 
-def write_json(data, filename):
-    print('writing into ', filename)
-    with open(filename, 'w') as f:
-        json.dump(data,f)
+# def write_json(data, filename):
+#     print('writing into ', filename)
+#     with open(filename, 'w') as f:
+#         json.dump(data,f)
 
 
 def convert_gold_to_zeno():
