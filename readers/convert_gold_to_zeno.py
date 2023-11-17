@@ -8,16 +8,6 @@ import argparse
 import os
 from file_utils import read_json, write_json
 
-# def read_json(filename):
-#     print('reading from ', filename)
-#     with open(filename) as f:
-#         data = json.load(f)
-#     return data
-
-# def write_json(data, filename):
-#     print('writing into ', filename)
-#     with open(filename, 'w') as f:
-#         json.dump(data,f)
 
 
 def convert_gold_to_zeno(gold_file):
