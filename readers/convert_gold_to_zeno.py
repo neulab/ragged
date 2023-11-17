@@ -20,9 +20,9 @@ from file_utils import read_json, write_json
 #         json.dump(data,f)
 
 
-def convert_gold_to_zeno():
+def convert_gold_to_zeno(gold_file):
     # wiki_par_ids_data = read_json("/data/user_data/jhsia2/dbqa/data/gold-nq-dev-kilt.json")
-    gold_data = load_data("/data/user_data/jhsia2/dbqa/data/nq-dev-kilt.jsonl")
+    gold_data = load_data(gold_file)
     # tsv_file = "/data/user_data/jhsia2/dbqa/data/kilt_knowledgesource.tsv"
 
     par_id_to_text_map = {}
@@ -64,6 +64,6 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", help='dataset')
     args = parser.parse_args()
     data_dir = os.path.join('/data/user_data/jhsia2/dbqa/data')
-
-    zeno_format_data = convert_gold_to_zeno()
+    gold_file  = os.path.join(data_dir, f'{args.dataset}-dev-kilt.jsonl')
+    zeno_format_data = convert_gold_to_zeno(gold_file)
     write_json(zeno_format_data, os.path.join(data_dir, f'gold_{args.dataset}_zeno_file.json'))
