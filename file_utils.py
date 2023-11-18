@@ -1,6 +1,7 @@
 import json
-
+import pdb
 def load_data(file_path, sort_by_id = True):
+    print('loading from', file_path)
     data = []
     with open(file_path, 'r') as file:
         for line in file:
@@ -13,6 +14,7 @@ def load_data(file_path, sort_by_id = True):
     return data
 
 def load_jsonl(file_path):
+    print('loading from', file_path)
     data = []
     with open(file_path, 'r') as file:
         for line in file:
@@ -22,6 +24,7 @@ def load_jsonl(file_path):
     return data
 
 def store_data(filename, data):
+    print('writing to', filename)
     with open(filename, "w+") as outfile:
         for idx, element in enumerate(data):
             # print(round(idx * 100 / len(data), 2), "%", end="\r")
@@ -30,10 +33,12 @@ def store_data(filename, data):
             outfile.write("\n")
 
 def read_json(filename):
+    print('reading from', filename)
     assert filename.endswith("json"), "file provided to read_json does not end with .json extension. Please recheck!"
     return json.load(open(filename))
 
 def write_json(data, filename):
+    print('writing to', filename)
     assert filename.endswith("json"), "file provided to write_json does not end with .json extension. Please recheck!"
     with open(filename, "w") as f:
         json.dump(data, f, indent=4, sort_keys=False)
