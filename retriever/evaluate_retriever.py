@@ -54,15 +54,15 @@ def get_retriever_results(guess_file, gold_file):
 
                 for ev in gold['output']:
                     if 'provenance' in ev:
-                        
-                        gold_wiki_id = ev['provenance'][0]['wikipedia_id'] if 'wikipedia_id' in ev['provenance'][0] else None
-                        if (gold_wiki_id):
-                            gold_wiki_ids.add(gold_wiki_id)
-                            start_par_id = ev['provenance'][0]['start_paragraph_id'] if 'start_paragraph_id' in ev['provenance'][0] else None
-                            end_par_id = ev['provenance'][0]['end_paragraph_id'] if 'end_paragraph_id' in ev['provenance'][0] else None
-                            if (start_par_id and end_par_id):
-                                for p_id in range(start_par_id, end_par_id+1):
-                                    gold_wiki_par_ids.add(gold_wiki_id + '_' + str(p_id))
+                        for prov in ev['provenance']:
+                            gold_wiki_id = prov['wikipedia_id'] if 'wikipedia_id' in prov else None
+                            if (gold_wiki_id):
+                                gold_wiki_ids.add(gold_wiki_id)
+                                start_par_id = prov['start_paragraph_id'] if 'start_paragraph_id' in prov else None
+                                end_par_id = prov['end_paragraph_id'] if 'end_paragraph_id' in prov else None
+                                if (start_par_id and end_par_id):
+                                    for p_id in range(start_par_id, end_par_id+1):
+                                        gold_wiki_par_ids.add(gold_wiki_id + '_' + str(p_id))
                 
                 # For each retrieved document, get wiki and par id match
                 doc_retriever_results = []
@@ -200,7 +200,7 @@ def main(model, dataset):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Process input, gold, and output files")
-    parser.add_argument("model", help="retriever model name")
-    parser.add_argument("dataset", help='datasetname')
+    parser.add_argument("--model", help="retriever model name")
+    parser.add_argument("--dataset", help='datasetname')
     args = parser.parse_args()
     main(args.model, args.dataset)

@@ -3,11 +3,11 @@
 
 import csv
 import json
-from kilt.kilt_utils import load_data
+# from kilt.kilt_utils import load_data
 import argparse
 import os
 import pdb
-from file_utils import read_json, write_json
+from file_utils import read_json, write_json, load_data
 
 
 def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data):

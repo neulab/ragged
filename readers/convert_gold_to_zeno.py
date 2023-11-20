@@ -43,6 +43,7 @@ def convert_gold_to_zeno(gold_file):
             if "answer" not in answer or "provenance" not in answer:
                 continue
             for p in answer["provenance"]:
+                
                 if str(p["wikipedia_id"])+"_"+str(p["start_paragraph_id"]+1) not in par_id_to_text_map.keys():
                     print(qid)
                     pdb.set_trace()
