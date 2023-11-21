@@ -50,13 +50,15 @@ class LlamaReader:
         for prompt in prompts:
             question_tokenized = self.tokenizer(prompt["question"])
             remaining_length = total_tokens-len(context_prompt_tokenized)-len(question_tokenized)-10
+            context_tokenized_without_truncation = self.tokenizer(prompt["context"], add_special_tokens=False)
             context_tokenized = self.tokenizer(prompt["context"], max_length=remaining_length, truncation=True, add_special_tokens=False)
             context_after_truncation = self.tokenizer.decode(context_tokenized["input_ids"])
-            context_length_changes.append([len(prompt["context"]), len(context_after_truncation)])
+            context_length_changes.append([len(prompt["context"]), len(context_after_truncation), len(context_tokenized_without_truncation["input_ids"]), len(context_tokenized["input_ids"])])
 
             prompt_strs.append(create_prompt(question=prompt["question"], context=context_after_truncation))
 
         responses = asyncio.run(self.batch_generate(prompt_strs, max_new_tokens, truncate))
+        print(responses)
         return [r.generated_text for r in responses], context_length_changes
     
         # if not self.hosted_api_endpoint:

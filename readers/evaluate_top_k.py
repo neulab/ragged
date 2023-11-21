@@ -37,7 +37,7 @@ def do_eval_like_kilt(guess_answer, gold_candidate_answers):
 
 def evaluate_reader_results(reader_output, gold_data):
 
-    gold_data_id_map = {gd["id"]:gd for gd in gold_data}
+    gold_data_id_map = {str(gd["id"]):gd for gd in gold_data}
 
     print(len(gold_data))
     print(len(reader_output))
@@ -97,16 +97,36 @@ def evaluate_reader_results(reader_output, gold_data):
     return reader_output,method_metrics
 
 if __name__ == "__main__":
-    top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
+    
+    retriever = "colbert"
+    dataset = "hotpot"
+    # dataset = "nq"
+    # root_dir = "/data/user_data/afreens/kilt/flanT5/nq/colbert/"
+    root_dir = "/data/user_data/afreens/kilt/llama/hotpot/bm25/"
+
+    
+
+    retriever_path_map = {
+        "bm25": "/data/user_data/jhsia2/dbqa/retriever_results/predictions/bm25/",
+        "colbert": "/data/user_data/jhsia2/dbqa/retriever_results/predictions/colbert/"
+
+    }
+
+    dataset_map = {
+        "hotpot" : "/data/user_data/afreens/kilt/gold_data/hotpotqa-dev-kilt.jsonl",
+        "nq": "/data/user_data/afreens/kilt/gold_data/nq-dev-kilt.jsonl"
+    }
+    
+    gold_file = dataset_map[dataset]
+
+    top_ks= [ "baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
+    # top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
     metrics_map = {}
-    metrics_save_path = "/data/user_data/afreens/kilt/flanT5/nq/exp2/combined_metrics.json"
+    metrics_save_path = f"{root_dir}combined_metrics.json"
     for top_k in top_ks:
         print(top_k)
-        base_folder = f"/data/user_data/afreens/kilt/flanT5/nq/exp2/{top_k}/"
-        # gold_file = "/data/user_data/afreens/kilt/gold_data/hotpotqa-dev-kilt.jsonl"
-        gold_file = "/data/user_data/afreens/kilt/gold_data/nq-dev-kilt.jsonl"
+        base_folder = f"{root_dir}{top_k}/"
         evaluation_file_path = f"{base_folder}all_data_evaluated.jsonl"
-
         all_data = combine_all_files(base_folder, f"{base_folder}all_data.jsonl")
         gold_data = load_data(gold_file)
 

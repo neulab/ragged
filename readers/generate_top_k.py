@@ -92,7 +92,7 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
     print("Total reader_responses : ", len(reader_responses))
     print("Time taken: ", time_map["complete_generation"])
     store_data(output_file, reader_responses)
-    write_json(all_context_length_changes, f"{args.output_dir}reader_output_index_{args.start_offset}_to_{args.end_offset}_context_length_changes.json")
+    write_json(all_context_length_changes, f"/data/user_data/jhsia2/dbqa/reader_results/{args.model}/{args.dataset}/{args.retriever}/top{args.top_k}/reader_output_index_{args.start_offset}_to_{args.end_offset}_context_length_changes.json")
             
 
     
@@ -100,11 +100,11 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--hosted_api_path", type=str, default="babel-1-23:9426")
-    parser.add_argument("--output_dir", type=str, default="/data/user_data/afreens/kilt/flanT5/top3/")
     parser.add_argument("--start_offset", type=int, default=0)
     parser.add_argument("--end_offset", type=int, default=None)
     parser.add_argument("--top_k", type=int, default=1)
     parser.add_argument("--model", type=str)
+    parser.add_argument("--retriever", type=str)
     parser.add_argument("--dataset", type=str)
 
     args = parser.parse_args()
@@ -115,21 +115,31 @@ if __name__ == "__main__":
     args = get_args()
 
     model_class_dict = {
-        "llama2" : LlamaReader,
+        "llama" : LlamaReader,
         "flanT5" : FlanT5Reader
     }
 
+    retriever_path_map = {
+        "bm25": "/data/user_data/jhsia2/dbqa/retriever_results/predictions/bm25/",
+        "colbert": "/data/user_data/jhsia2/dbqa/retriever_results/predictions/colbert/"
+
+    }
+
     dataset_map = {
-        "hotpot" : "/data/user_data/jhsia2/dbqa/retriever_results/predictions/bm25/hotpotqa-dev-kilt.jsonl",
-        "nq": "/data/user_data/afreens/kilt/exp1/nq_dev_retrieval_output.jsonl"
+        "hotpotqa" : "hotpotqa-dev-kilt.jsonl",
+        "nq": "nq-dev-kilt.jsonl"
     }
     
-    reader=model_class_dict[args.model](hosted_api_path =f"http://{args.hosted_api_path}/")
-    # print("Test Run", reader.generate(["HI"]))
+    reader=model_class_dict[args.model](hosted_api_path =f"http://{args.hosted_api_path}:9426/")
     
-    retriever_data_path = dataset_map[args.dataset]
-    # retriever_data_path = "/data/user_data/jhsia2/dbqa/retriever_results/predictions/bm25/hotpotqa-dev-kilt.jsonl"
-    output_file = f'{args.output_dir}reader_output_index_{args.start_offset}_to_{args.end_offset}.jsonl'
+    retriever_data_path = f"{retriever_path_map[args.retriever]}{dataset_map[args.dataset]}"
+
+    # output_path = f"/data/user_data/afreens/kilt/{args.model}/{args.dataset}/{args.retriever}/top{args.top_k}/"
+    output_path = f"/data/user_data/jhsia2/dbqa/reader_results/{args.model}/{args.dataset}/{args.retriever}/top{args.top_k}/"
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    output_file = f'{output_path}reader_output_index_{args.start_offset}_to_{args.end_offset}.jsonl'
+    # output_file = f'{args.output_dir}reader_output_index_{args.start_offset}_to_{args.end_offset}.jsonl'
 
     
     generate_reader_outputs(retriever_data_path, reader, output_file=output_file, start_offset=args.start_offset, end_offset=args.end_offset, top_k=args.top_k, args=args)
