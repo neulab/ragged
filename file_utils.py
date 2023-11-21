@@ -10,6 +10,8 @@ def load_data(file_path, sort_by_id = True):
             data.append(json_obj)
     # print('list has', len(data), 'lines')
     if sort_by_id:
+        for d in data:
+            d["id"] = str(d["id"])
         return sorted(data, key=lambda x: x['id'])
     return data
 
