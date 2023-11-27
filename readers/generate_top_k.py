@@ -12,6 +12,7 @@ from readers.llama2.llama2_reader import LlamaReader
 
 time_map = {}
 
+
 def post_process_answers(answers):
     return [x.strip().split("\n")[0] for x in answers]
 
@@ -92,7 +93,7 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
     print("Total reader_responses : ", len(reader_responses))
     print("Time taken: ", time_map["complete_generation"])
     store_data(output_file, reader_responses)
-    write_json(all_context_length_changes, f"/data/user_data/jhsia2/dbqa/reader_results/{args.model}/{args.dataset}/{args.retriever}/top{args.top_k}/reader_output_index_{args.start_offset}_to_{args.end_offset}_context_length_changes.json")
+    write_json(all_context_length_changes, f"/data/user_data/jhsia2/dbqa/reader_results/{args.model}/{args.dataset}/{args.retriever}/{'baseline' if args.top_k==0 else 'top'+str(args.top_k)}/reader_output_index_{args.start_offset}_to_{args.end_offset}_context_length_changes.json")
             
 
     
@@ -135,7 +136,7 @@ if __name__ == "__main__":
     retriever_data_path = f"{retriever_path_map[args.retriever]}{dataset_map[args.dataset]}"
 
     # output_path = f"/data/user_data/afreens/kilt/{args.model}/{args.dataset}/{args.retriever}/top{args.top_k}/"
-    output_path = f"/data/user_data/jhsia2/dbqa/reader_results/{args.model}/{args.dataset}/{args.retriever}/top{args.top_k}/"
+    output_path = f"/data/user_data/jhsia2/dbqa/reader_results/{args.model}/{args.dataset}/{args.retriever}/{'baseline' if args.top_k==0 else 'top'+str(args.top_k) }/"
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     output_file = f'{output_path}reader_output_index_{args.start_offset}_to_{args.end_offset}.jsonl'
