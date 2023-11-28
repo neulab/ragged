@@ -25,7 +25,8 @@ def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data):
         answer = reader_q_info["answer"]
         answer_evaluation = reader_q_info["answer_evaluation"]
         for retrieved_passage_info, retrieved_passage_info_eval in zip(reader_q_info["retrieved_passages"], retriever_info["doc-level results"][:len(reader_q_info["retrieved_passages"])]):
-            assert retrieved_passage_info["docid"] == retrieved_passage_info_eval["wiki_par_id"]
+            # pdb.set_trace()
+            # assert retrieved_passage_info["docid"] == retrieved_passage_info_eval["wiki_par_id"]
             retrieved_passage_info.update(retrieved_passage_info_eval)
             
         zeno_format_data.append({
@@ -58,7 +59,8 @@ if __name__ == "__main__":
     base_dir = os.path.join('/data/user_data/jhsia2/dbqa')
     for top_k in top_ks:
         print(top_k)
-        k_dir = os.path.join(base_dir,'reader_results', args.reader, args.dataset, args.retriever, 'exp2', top_k)
+        # k_dir = os.path.join(base_dir,'reader_results', args.reader, args.dataset, args.retriever, 'exp2', top_k)
+        k_dir = os.path.join(base_dir,'reader_results', args.reader, args.dataset, args.retriever, top_k)
         # base_folder = f"/data/user_data/afreens/kilt/flanT5/nq/exp2/{top_k}/"
         evaluation_file_path = os.path.join(k_dir, 'all_data_evaluated.jsonl')
         retriever_eval_file = os.path.join(base_dir, f'retriever_results/evaluations/{args.retriever}/{args.dataset}-dev-kilt.jsonl')

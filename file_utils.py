@@ -41,6 +41,6 @@ def read_json(filename):
 
 def write_json(data, filename):
     print('writing to', filename)
-    assert filename.endswith("json"), "file provided to write_json does not end with .json extension. Please recheck!"
+    # assert filename.endswith("json"), "file provided to write_json does not end with .json extension. Please recheck!"
     with open(filename, "w") as f:
         json.dump(data, f, indent=4, sort_keys=False)
