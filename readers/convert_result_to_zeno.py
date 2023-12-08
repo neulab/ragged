@@ -6,6 +6,7 @@ import json
 # from kilt.kilt_utils import load_data
 import argparse
 import os
+import warnings
 import pdb
 from file_utils import read_json, write_json, load_data
 
@@ -15,6 +16,14 @@ def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data):
     reader_output_data = sorted(reader_output_data, key=lambda x: x["id"])
     retriever_eval_data = sorted(retriever_eval_data, key=lambda x: x["id"])
 
+    print(len(reader_output_data), len(retriever_eval_data))
+    assert len(reader_output_data) == len(retriever_eval_data)
+
+    for i in range(len(reader_output_data)):
+        if(reader_output_data[i]['id'] != retriever_eval_data[i]['id']):
+            print(reader_output_data[i]['id'], retriever_eval_data[i]['id'])
+
+       
     assert [d["id"] for d in reader_output_data] == [d["id"] for d in retriever_eval_data]
 
     zeno_format_data = []
@@ -53,6 +62,7 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", help='dataset')
     args = parser.parse_args()
     top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
+    # top_ks = ["top50"]
     # metrics_map = {}
     # metrics_save_path = "/data/user_data/afreens/kilt/llama/combined_metrics.json"
     # retriever_model = 'flan'
@@ -66,7 +76,13 @@ if __name__ == "__main__":
         retriever_eval_file = os.path.join(base_dir, f'retriever_results/evaluations/{args.retriever}/{args.dataset}-dev-kilt.jsonl')
 
         reader_output_data = load_data(evaluation_file_path)
+        if (len(reader_output_data) == 0):
+            warnings.warn("Warning: EMPTY file")
+            continue
         retriever_eval_data = load_data(retriever_eval_file)
+        if (len(retriever_eval_data) == 0):
+            warnings.warn("Warning: EMPTY file")
+            continue
         
         zeno_format_data = convert_reader_results_to_zeno(reader_output_data, retriever_eval_data)
         write_json(zeno_format_data, os.path.join(k_dir, "reader_results_zeno.json"))
