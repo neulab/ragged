@@ -117,7 +117,9 @@ if __name__ == "__main__":
 
     model_class_dict = {
         "llama" : LlamaReader,
-        "flanT5" : FlanT5Reader
+        "flanT5" : FlanT5Reader,
+        "flanUl2" : FlanT5Reader,
+        "llama_7b": LlamaReader
     }
 
     retriever_path_map = {

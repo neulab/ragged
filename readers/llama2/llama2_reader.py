@@ -46,9 +46,9 @@ class LlamaReader:
         total_tokens = 4000
         prompt_strs = []
         context_length_changes = []
-        context_prompt_tokenized = self.tokenizer(CONTEXT_PROMPT)
+        context_prompt_tokenized = self.tokenizer(CONTEXT_PROMPT)["input_ids"]
         for prompt in prompts:
-            question_tokenized = self.tokenizer(prompt["question"])
+            question_tokenized = self.tokenizer(prompt["question"])["input_ids"]
             remaining_length = total_tokens-len(context_prompt_tokenized)-len(question_tokenized)-10
             context_tokenized_without_truncation = self.tokenizer(prompt["context"], add_special_tokens=False)
             context_tokenized = self.tokenizer(prompt["context"], max_length=remaining_length, truncation=True, add_special_tokens=False)
