@@ -5,6 +5,8 @@ import numpy as np
 import pdb
 import argparse
 import matplotlib.pyplot as plt
+from file_utils import write_json
+
 def count_jsonl(filename):
     with open(filename, 'r') as f:
         count = sum(1 for _ in f)
@@ -61,6 +63,7 @@ def get_retriever_results(guess_file, gold_file):
                                 start_par_id = prov['start_paragraph_id'] if 'start_paragraph_id' in prov else None
                                 end_par_id = prov['end_paragraph_id'] if 'end_paragraph_id' in prov else None
                                 if (start_par_id and end_par_id):
+                                    # pdb.set_trace()
                                     for p_id in range(start_par_id, end_par_id+1):
                                         gold_wiki_par_ids.add(gold_wiki_id + '_' + str(p_id))
                 
@@ -71,7 +74,7 @@ def get_retriever_results(guess_file, gold_file):
                     
                     doc_retriever_result = {'wiki_id': guess_wiki_id,
                                         'wiki_id_match': guess_wiki_id in gold_wiki_ids}
-                    guess_wiki_par_id = guess_wiki_id + '_' + p['start_paragraph_id']
+                    guess_wiki_par_id = guess_wiki_id + '_' + str(p['start_paragraph_id'])
                     doc_retriever_result['wiki_par_id'] = guess_wiki_par_id
                     doc_retriever_result['wiki_par_id_match'] = guess_wiki_par_id in gold_wiki_par_ids
 
@@ -168,13 +171,13 @@ def main(model, dataset):
     par_retriever_results = get_retriever_results(reformat_file, gold_file)
 
     os.makedirs(evaluation_dir, exist_ok=True)
-
-    with open(os.path.join(evaluation_dir, dataset + '.jsonl'), 'w') as file:
-        for i, r in enumerate(par_retriever_results):
-            # if (i%100000==0):
-            #     print(i)
-            json.dump(r, file)
-            file.write('\n')
+    write_json(par_retriever_results, os.path.join(evaluation_dir, dataset + '.jsonl'))
+    # with open(os.path.join(evaluation_dir, dataset + '.jsonl'), 'w') as file:
+    #     for i, r in enumerate(par_retriever_results):
+    #         # if (i%100000==0):
+    #         #     print(i)
+    #         json.dump(r, file)
+    #         file.write('\n')
 
     ks = np.arange(1,101)
     # ks = [1,2,3, 10, 20, 50, 100]

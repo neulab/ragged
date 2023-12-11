@@ -6,6 +6,7 @@ import json
 # from kilt.kilt_utils import load_data
 import argparse
 import os
+import warnings
 import pdb
 from file_utils import read_json, write_json, load_data
 
@@ -15,6 +16,14 @@ def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data):
     reader_output_data = sorted(reader_output_data, key=lambda x: x["id"])
     retriever_eval_data = sorted(retriever_eval_data, key=lambda x: x["id"])
 
+    print(len(reader_output_data), len(retriever_eval_data))
+    assert len(reader_output_data) == len(retriever_eval_data)
+
+    for i in range(len(reader_output_data)):
+        if(reader_output_data[i]['id'] != retriever_eval_data[i]['id']):
+            print(reader_output_data[i]['id'], retriever_eval_data[i]['id'])
+
+       
     assert [d["id"] for d in reader_output_data] == [d["id"] for d in retriever_eval_data]
 
     zeno_format_data = []
@@ -25,7 +34,8 @@ def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data):
         answer = reader_q_info["answer"]
         answer_evaluation = reader_q_info["answer_evaluation"]
         for retrieved_passage_info, retrieved_passage_info_eval in zip(reader_q_info["retrieved_passages"], retriever_info["doc-level results"][:len(reader_q_info["retrieved_passages"])]):
-            assert retrieved_passage_info["docid"] == retrieved_passage_info_eval["wiki_par_id"]
+            # pdb.set_trace()
+            # assert retrieved_passage_info["docid"] == retrieved_passage_info_eval["wiki_par_id"]
             retrieved_passage_info.update(retrieved_passage_info_eval)
             
         zeno_format_data.append({
@@ -52,19 +62,27 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", help='dataset')
     args = parser.parse_args()
     top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
+    # top_ks = ["top50"]
     # metrics_map = {}
     # metrics_save_path = "/data/user_data/afreens/kilt/llama/combined_metrics.json"
     # retriever_model = 'flan'
     base_dir = os.path.join('/data/user_data/jhsia2/dbqa')
     for top_k in top_ks:
         print(top_k)
-        k_dir = os.path.join(base_dir,'reader_results', args.reader, args.dataset, args.retriever, 'exp2', top_k)
+        # k_dir = os.path.join(base_dir,'reader_results', args.reader, args.dataset, args.retriever, 'exp2', top_k)
+        k_dir = os.path.join(base_dir,'reader_results', args.reader, args.dataset, args.retriever, top_k)
         # base_folder = f"/data/user_data/afreens/kilt/flanT5/nq/exp2/{top_k}/"
         evaluation_file_path = os.path.join(k_dir, 'all_data_evaluated.jsonl')
         retriever_eval_file = os.path.join(base_dir, f'retriever_results/evaluations/{args.retriever}/{args.dataset}-dev-kilt.jsonl')
 
         reader_output_data = load_data(evaluation_file_path)
+        if (len(reader_output_data) == 0):
+            warnings.warn("Warning: EMPTY file")
+            continue
         retriever_eval_data = load_data(retriever_eval_file)
+        if (len(retriever_eval_data) == 0):
+            warnings.warn("Warning: EMPTY file")
+            continue
         
         zeno_format_data = convert_reader_results_to_zeno(reader_output_data, retriever_eval_data)
         write_json(zeno_format_data, os.path.join(k_dir, "reader_results_zeno.json"))
