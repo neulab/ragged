@@ -11,6 +11,8 @@ import pprint
 import re
 import string
 from rouge import Rouge
+from evaluate import load
+bertscore = load("bertscore")
 
 from collections import Counter
 
@@ -47,7 +49,11 @@ def _metric_max_over_ground_truths(metric_fn, prediction, ground_truths):
     for ground_truth in ground_truths:
         score = metric_fn(prediction, ground_truth)
         scores_for_ground_truths.append(score)
-    return max(scores_for_ground_truths)
+
+    if not isinstance(scores_for_ground_truths[0], dict):
+        return max(scores_for_ground_truths)
+    else:
+        return max(scores_for_ground_truths, key=lambda x:x["bertscore_f1"])
 
 
 # answer nomalization
@@ -69,6 +75,13 @@ def normalize_answer(s):
 
     return white_space_fix(remove_articles(remove_punc(lower(s))))
 
+def _bertscore(prediction, ground_truth):
+    results = bertscore.compute(predictions=[normalize_answer(prediction)], references=[normalize_answer(ground_truth)], lang="en")
+    return {
+        "bertscore_precision" : results["precision"][0],
+        "bertscore_recall" : results["recall"][0],
+        "bertscore_f1" : results["f1"][0]
+    }
 
 # F1 score definition
 def _f1_score(prediction, ground_truth):

@@ -15,7 +15,7 @@ time_map = {}
         
 class FlanT5Reader:
     def __init__(self, hosted_api_path=None):
-        self.tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-xxl")
+        self.tokenizer = T5Tokenizer.from_pretrained("google/flan-ul2")
         self.hosted_api_endpoint = hosted_api_path
         nest_asyncio.apply()
         self.async_client = tg.AsyncClient(self.hosted_api_endpoint)
@@ -31,15 +31,14 @@ class FlanT5Reader:
         total_tokens = 2000
         prompt_strs = []
         context_length_changes = []
-        context_prompt_tokenized = self.tokenizer(CONTEXT_PROMPT)
+        context_prompt_tokenized = self.tokenizer(CONTEXT_PROMPT)["input_ids"]
         for prompt in prompts:
             # print(prompt)
-            question_tokenized = self.tokenizer(prompt["question"])
+            question_tokenized = self.tokenizer(prompt["question"])["input_ids"]
             remaining_length = total_tokens-len(context_prompt_tokenized)-len(question_tokenized)-10
             context_tokenized_without_truncation = self.tokenizer(prompt["context"], add_special_tokens=False)
             context_tokenized = self.tokenizer(prompt["context"], max_length=remaining_length, truncation=True, add_special_tokens=False)
             context_after_truncation = self.tokenizer.decode(context_tokenized["input_ids"])
-
             context_length_changes.append([len(prompt["context"]), len(context_after_truncation), len(context_tokenized_without_truncation["input_ids"]), len(context_tokenized["input_ids"])])
 
             prompt_strs.append(create_prompt(question=prompt["question"], context=context_after_truncation))
