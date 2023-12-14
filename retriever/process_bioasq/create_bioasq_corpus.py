@@ -28,7 +28,7 @@ print(len(gold_dataset), len(train_dataset))
 combined_dataset = gold_dataset + train_dataset
 print(len(combined_dataset))
 
-prov_docs = []
+# prov_docs = []
 doc_ids = set()
 for q in combined_dataset:
     if 'exact_answer' not in q.keys():
@@ -60,8 +60,8 @@ for q in combined_dataset:
                         'section': beginSec}]})
         # sample_dict['output'].append({'provenance': [{'docid': docid, \
         #                 'section': beginSec}]})
-        prov_docs.append(sample_dict)
         doc_ids.add((int)(docid))
+    # prov_docs.append(sample_dict)
 
 def get_docs(pmid, strict = True):
     url = f'https://pubmed.ncbi.nlm.nih.gov/{pmid}/'
