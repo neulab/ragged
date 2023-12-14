@@ -8,9 +8,11 @@ export PYTHONPATH=$PYTHONPATH:/home/jhsia2/ragged
 
 # python -u create_bioasq_corpus.py
 
-python stitch_jsonl.py
+# python stitch_jsonl.py
 
-conda deactivate
+# python create_bioasq_prov.py
+
+# conda deactivate
 
 export PYTHONPATH=$PYTHONPATH:/home/jhsia2/KILT:/home/jhsia2/pyserini
 
@@ -26,6 +28,6 @@ python -m pyserini.index.lucene \
 
 conda deactivate
 
-conad activate py10
+conda activate py10
 python ../evaluate_retriever.py --retriever bm25 --dataset bioasq
 # sbatch --job-name=b-bioasq --gres=gpu:1 --time=1-00:00:00 --mem=50G --output=b-bioasq-out.log --error=b-bioasq-err.log create_bioasq_corpus.sh

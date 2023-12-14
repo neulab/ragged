@@ -6,9 +6,11 @@ conda activate py10
 
 export PYTHONPATH=$PYTHONPATH:/home/jhsia2/ragged
 
-python creat_medline_tsv.py
-python creat_bioasq_tsv.py
+# 3837 
+# 256337
 
+# python create_medline_tsv.py
+# python create_bioasq_tsv.py --dataset bioasq
 
 conda deactivate 
 
@@ -17,7 +19,7 @@ export FORCE_CUDA="1"
 conda activate colbert
 rm  -rf .cache/torch_extensions/
 
-PYTHONPATH=$PYTHONPATH:/home/jhsia2/KILT:/home/jhsia2/ColBERT python get_predictions.py --dataset bioasq
+PYTHONPATH=$PYTHONPATH:/home/jhsia2/KILT:/home/jhsia2/ColBERT python ../colbert/get_predictions.py --dataset bioasq
 
 conda deactivate
 

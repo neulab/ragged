@@ -29,10 +29,7 @@ combined_dataset = gold_dataset + train_dataset
 print(len(combined_dataset))
 
 prov_docs = []
-section_types = set()
-doc_par_ids = set()
 doc_ids = set()
-reformat_dict  = {}
 for q in combined_dataset:
     if 'exact_answer' not in q.keys():
         continue

@@ -24,7 +24,7 @@ def convert_gold_to_zeno(gold_file, corpus_file):
     #         par_id_to_text_map[row[0]] = row[1]
     #         # break
     # with open("/data/user_data/jhsia2/dbqa/data/kilt_knowledgesource.tsv", 'r') as file:
-    with open(corpus_file, 'r') as file:
+    with open(corpus_file, 'r', encoding = 'unicode_escape') as file:
         for i, line in enumerate(file):
             if (i%100_000 == 0 ):
                 print(i)     

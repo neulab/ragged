@@ -31,7 +31,10 @@ for c in corpus:
 
 prov_docs = []
 doc_par_ids = set()
-for q in combined_dataset:
+print(len(combined_dataset))
+for i, q in enumerate(combined_dataset):
+    # if (i%1000 == 0):
+    #     print('st', i)
     if 'exact_answer' not in q.keys():
         continue
     qid = q['id']
@@ -56,8 +59,8 @@ for q in combined_dataset:
         
         docid = s['document'].split('pubmed/')[1]
         beginSec = s['beginSection']
-        title = s['title']
-        title = id2title.get(title, None)
+        # title = s['title']
+        title = id2title.get(docid, None)
         if title:
             num_prov +=1 
             sample_dict['output'].append({'provenance': [{
@@ -66,9 +69,11 @@ for q in combined_dataset:
                             'title': title}]})
         # sample_dict['output'].append({'provenance': [{'docid': docid, \
         #                 'section': beginSec}]})
-        prov_docs.append(sample_dict)
-    if num_prov ==0:
-        print('qid missing provs', qid)
+    # if (i%1000 == 0):
+    #     print('end', i)
+    prov_docs.append(sample_dict)
+    # if num_prov == 0:
+    #     print('qid missing provs', qid)
         # doc_ids.add((int)(docid))
 print(len(prov_docs))
-save_jsonl('/data/user_data/jhsia2/dbqa/data/bioasq.jsonl', prov_docs)
+save_jsonl(prov_docs, '/data/user_data/jhsia2/dbqa/data/bioasq.jsonl')
