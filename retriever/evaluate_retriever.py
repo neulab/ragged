@@ -5,7 +5,7 @@ import numpy as np
 import pdb
 import argparse
 import matplotlib.pyplot as plt
-from file_utils import write_json
+from file_utils import save_json, save_jsonl
 
 def count_jsonl(filename):
     with open(filename, 'r') as f:
@@ -26,7 +26,20 @@ def load_jsonl(file_path, sort_by_id = True):
     return data
 
 
-def get_retriever_results(guess_file, gold_file):
+def get_retriever_results(guess_file, gold_file, is_bioasq = False):
+
+    if is_bioasq:
+        docid_key = 'pmid'
+        docid_name = 'pm'
+        section_key = 'section'
+        section_name = 'sec'
+    else:
+        docid_key = 'wikipedia_id'
+        docid_name = 'wiki'
+        section_key = 'start_paragraph'
+        section_name = 'par'
+        
+
     guessfile_len= count_jsonl(guess_file)
     goldfile_len = count_jsonl(gold_file)
     retriever_results = []
@@ -54,45 +67,83 @@ def get_retriever_results(guess_file, gold_file):
                 gold_wiki_ids = set()
                 gold_wiki_par_ids = set()
 
+                gold_pm_ids = set()
+                gold_pm_sec_ids = set()
+
                 for ev in gold['output']:
                     if 'provenance' in ev:
                         for prov in ev['provenance']:
-                            gold_wiki_id = prov['wikipedia_id'] if 'wikipedia_id' in prov else None
+                            gold_wiki_id = prov[docid_key] if docid_key in prov else None
                             if (gold_wiki_id):
                                 gold_wiki_ids.add(gold_wiki_id)
-                                start_par_id = prov['start_paragraph_id'] if 'start_paragraph_id' in prov else None
-                                end_par_id = prov['end_paragraph_id'] if 'end_paragraph_id' in prov else None
-                                if (start_par_id and end_par_id):
-                                    # pdb.set_trace()
-                                    for p_id in range(start_par_id, end_par_id+1):
-                                        gold_wiki_par_ids.add(gold_wiki_id + '_' + str(p_id))
+                                if is_bioasq:
+                                    p_id = prov[section_key] if section_key in prov else None
+                                    if p_id == 'abstract':
+                                        p_id = 1
+                                    elif p_id == 'title':
+                                        p_id = 0 
+                                    gold_wiki_par_ids.add(gold_wiki_id + '_' + str(p_id))
+                                else:
+                                    start_par_id = prov['start_paragraph_id'] if 'start_paragraph_id' in prov else None
+                                    end_par_id = prov['end_paragraph_id'] if 'end_paragraph_id' in prov else None
+                                    if (start_par_id and end_par_id):
+                                        for p_id in range(start_par_id, end_par_id+1):
+                                            gold_wiki_par_ids.add(gold_wiki_id + '_' + str(p_id))
                 
                 # For each retrieved document, get wiki and par id match
                 doc_retriever_results = []
+
+                # pdb.set_trace()
                 for p in guess['output'][0]['provenance']:
-                    guess_wiki_id = p['wikipedia_id']
+                    guess_wiki_id = p[docid_key]
                     
-                    doc_retriever_result = {'wiki_id': guess_wiki_id,
-                                        'wiki_id_match': guess_wiki_id in gold_wiki_ids}
-                    guess_wiki_par_id = guess_wiki_id + '_' + str(p['start_paragraph_id'])
-                    doc_retriever_result['wiki_par_id'] = guess_wiki_par_id
-                    doc_retriever_result['wiki_par_id_match'] = guess_wiki_par_id in gold_wiki_par_ids
+                    doc_retriever_result = {f'{docid_name}_id': guess_wiki_id,
+                                        f'{docid_name}_id_match': guess_wiki_id in gold_wiki_ids}
+                    
+                    guess_wiki_par_id = guess_wiki_id + '_' + str(p[section_key])
+                    doc_retriever_result[f'{docid_name}_{section_name}_id'] = guess_wiki_par_id
+                    doc_retriever_result[f'{docid_name}_{section_name}_id_match'] = guess_wiki_par_id in gold_wiki_par_ids
+
+
+                    # guess_wiki_id = p['wikipedia_id']
+                    
+                    # doc_retriever_result = {'wiki_id': guess_wiki_id,
+                    #                     'wiki_id_match': guess_wiki_id in gold_wiki_ids}
+                    # guess_wiki_par_id = guess_wiki_id + '_' + str(p['start_paragraph_id'])
+                    # doc_retriever_result['wiki_par_id'] = guess_wiki_par_id
+                    # doc_retriever_result['wiki_par_id_match'] = guess_wiki_par_id in gold_wiki_par_ids
 
 
                     doc_retriever_results.append(doc_retriever_result)
                 retriever_result = {'id': guess['id'],
-                                        'gold provenance metadata': {'num_wiki_ids': len(gold_wiki_ids)},
+                                        'gold provenance metadata': {f'num_{docid_name}_ids': len(gold_wiki_ids)},
                                             'doc-level results': doc_retriever_results}
-                retriever_result['gold provenance metadata']['num_wiki_par_ids'] = len(gold_wiki_par_ids)
+                retriever_result['gold provenance metadata'][f'num_{docid_name}_{section_name}_ids'] = len(gold_wiki_par_ids)
+
+
+                # retriever_result = {'id': guess['id'],
+                #                         'gold provenance metadata': {'num_wiki_ids': len(gold_wiki_ids)},
+                #                             'doc-level results': doc_retriever_results}
+                # retriever_result['gold provenance metadata']['num_wiki_par_ids'] = len(gold_wiki_par_ids)
                 retriever_results.append(retriever_result)
     return retriever_results
 
-def print_retriever_acc(retriever_results, ks, par = False):
+def print_retriever_acc(retriever_results, ks, par = False, is_bioasq = False):
     
     query_level_wiki_id_match = {}
     query_level_wiki_par_id_match = {}
     doc_level_wiki_id_match = {}
     doc_level_wiki_par_id_match = {}
+    if is_bioasq:
+        docid_key = 'pmid'
+        docid_name = 'pm'
+        section_key = 'section'
+        section_name = 'sec'
+    else:
+        docid_key = 'wikipedia_id'
+        docid_name = 'wiki'
+        section_name = 'par'
+        section_key = 'start_paragraph'
 
     for k in ks:
         query_level_wiki_id_match[k] = []
@@ -105,9 +156,9 @@ def print_retriever_acc(retriever_results, ks, par = False):
         d_wiki_par_match = []
 
         for d in s['doc-level results']:
-            d_wiki_match.append(d['wiki_id_match'])
+            d_wiki_match.append(d[f'{docid_name}_id_match'])
             if par:
-                d_wiki_par_match.append(d['wiki_par_id_match'])
+                d_wiki_par_match.append(d[f'{docid_name}_{section_name}_id_match'])
         for k in ks:
             query_level_wiki_id_match[k].append(any(d_wiki_match[:k]))
         
@@ -118,10 +169,10 @@ def print_retriever_acc(retriever_results, ks, par = False):
         
     results_by_k = {}
     for k in ks:
-        results_by_k[(int)(k)] = {'top-k wiki_id match accuracy': np.mean(query_level_wiki_id_match[k]), 
-                                'top-k wiki_par_id match accuracy': np.mean(query_level_wiki_par_id_match[k]),\
-                                'wiki_id match accuracy': np.mean(doc_level_wiki_id_match[k]), \
-                                'wiki_par_id match accuracy': np.mean(doc_level_wiki_par_id_match[k])}
+        results_by_k[(int)(k)] = {f'top-k {docid_name}_id match accuracy': np.mean(query_level_wiki_id_match[k]), 
+                                f'top-k {docid_name}_{section_name}_id match accuracy': np.mean(query_level_wiki_par_id_match[k]),\
+                                f'{docid_name}_id match accuracy': np.mean(doc_level_wiki_id_match[k]), \
+                                f'{docid_name}_{section_name}_id match accuracy': np.mean(doc_level_wiki_par_id_match[k])}
     
         # break
     # results_dict = {'query_level_wiki_id_match': query_level_wiki_id_match,
@@ -151,13 +202,23 @@ def reformat_guess_file(guess_file, reformat_file):
             # break
             outfile.write(json.dumps(data) + "\n")
             
-def results_by_key(ks, results_by_k):
+def results_by_key(ks, results_by_k, is_bioasq = False):
+    if is_bioasq:
+        docid_key = 'pmid'
+        docid_name = 'pm'
+        section_key = 'section'
+        section_name = 'sec'
+    else:
+        docid_key = 'wikipedia_id'
+        docid_name = 'wiki'
+        section_name = 'par'
+        section_key = 'start_paragraph'
     # ks = results_by_k.keys()
     wiki_id_match = []
     wiki_par_id_match = []
     for k in ks:
-        wiki_id_match.append(results_by_k[k]['top-k wiki_id match accuracy'])
-        wiki_par_id_match.append(results_by_k[k]['top-k wiki_par_id match accuracy'])
+        wiki_id_match.append(results_by_k[k][f'top-k {docid_name}_id match accuracy'])
+        wiki_par_id_match.append(results_by_k[k][f'top-k {docid_name}_{section_name}_id match accuracy'])
     return wiki_id_match, wiki_par_id_match
     
 
@@ -168,10 +229,12 @@ def main(model, dataset):
     reformat_file = guess_file
     gold_file = os.path.join(result_dir, 'data', dataset + '.jsonl')
     evaluation_dir = os.path.join(result_dir, 'retriever_results/evaluations', model)
-    par_retriever_results = get_retriever_results(reformat_file, gold_file)
+    is_bioasq = True if dataset == 'bioasq' else False
+    par_retriever_results = get_retriever_results(reformat_file, gold_file, is_bioasq = is_bioasq)
 
     os.makedirs(evaluation_dir, exist_ok=True)
-    write_json(par_retriever_results, os.path.join(evaluation_dir, dataset + '.jsonl'))
+    save_jsonl(par_retriever_results, os.path.join(evaluation_dir, dataset + '.jsonl'))
+    # save_json(par_retriever_results, os.path.join(evaluation_dir, dataset + '.jsonl'))
     # with open(os.path.join(evaluation_dir, dataset + '.jsonl'), 'w') as file:
     #     for i, r in enumerate(par_retriever_results):
     #         # if (i%100000==0):
@@ -184,11 +247,11 @@ def main(model, dataset):
     # ks = [50]
     # query_level_wiki_id_match, query_level_wiki_par_id_match, doc_level_wiki_id_match, doc_level_wiki_par_id_match =  print_retriever_acc(par_retriever_results, ks, par = True)
     
-    results_by_k =  print_retriever_acc(par_retriever_results, ks, par = True)
+    results_by_k =  print_retriever_acc(par_retriever_results, ks, par = True, is_bioasq = is_bioasq)
     with open (os.path.join(evaluation_dir, dataset+ '_results_by_k.json'), 'w') as f:
         json.dump(results_by_k, f, indent = 4)
 
-    wiki_id_match, wiki_par_id_match = results_by_key(ks, results_by_k)
+    wiki_id_match, wiki_par_id_match = results_by_key(ks, results_by_k, is_bioasq = is_bioasq)
     plt.title(f'retriever = {model}, dataset = {dataset}')
     plt.ylabel('top-k accuracy')
     plt.plot(ks, wiki_id_match,'b--', label = 'wiki_id')
@@ -197,13 +260,10 @@ def main(model, dataset):
     plt.legend()
     plt.savefig(os.path.join(evaluation_dir, dataset+ '_results_by_k.jpg'))
     plt.show()
-    
-
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Process input, gold, and output files")
-    parser.add_argument("--model", help="retriever model name")
+    parser.add_argument("--retriever", help="retriever model name")
     parser.add_argument("--dataset", help='datasetname')
     args = parser.parse_args()
-    main(args.model, args.dataset)
+    main(args.retriever, args.dataset)

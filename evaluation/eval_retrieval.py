@@ -10,7 +10,7 @@ import argparse
 import pprint
 from collections import defaultdict, OrderedDict
 
-import file_utils
+from file_utils import load_jsonl
 from evaluation import eval_downstream
 
 
@@ -409,8 +409,8 @@ def filter_answers(guess):
 def evaluate(gold, guess, ks, rank_keys):
     pp = pprint.PrettyPrinter(indent=4)
 
-    gold_dataset = file_utils.load_data(gold)
-    guess_dataset = file_utils.load_data(guess)
+    gold_dataset = load_jsonl(gold)
+    guess_dataset = load_jsonl(guess)
 
     # 0. validate input
     gold_dataset, guess_dataset = eval_downstream.validate_input(

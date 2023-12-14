@@ -1,6 +1,6 @@
 from readers.utils import combine_all_files
 from evaluation.eval_downstream import _exact_match_score, _f1_score, _metric_max_over_ground_truths, _rougel_score, get_gold_answers, normalize_answer
-from file_utils import load_data, store_data, write_json
+from file_utils import load_jsonl, save_jsonl, save_json
 
 def do_eval_like_kilt(guess_answer, gold_candidate_answers):
     # 0. accuracy = strict exact match
@@ -128,12 +128,12 @@ if __name__ == "__main__":
         base_folder = f"{root_dir}{top_k}/"
         evaluation_file_path = f"{base_folder}all_data_evaluated.jsonl"
         all_data = combine_all_files(base_folder, f"{base_folder}all_data.jsonl")
-        gold_data = load_data(gold_file)
+        gold_data = load_jsonl(gold_file)
 
         all_data, metrics = evaluate_reader_results(all_data, gold_data)
         metrics_map[top_k] = metrics
-        write_json(metrics_map, metrics_save_path)
-        store_data(evaluation_file_path, all_data)
+        save_json(metrics_map, metrics_save_path)
+        save_jsonl(all_data, evaluation_file_path)
 
     import pandas as pd
     df = pd.DataFrame(metrics_map)
