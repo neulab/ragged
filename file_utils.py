@@ -27,7 +27,12 @@ def save_json(data, filename):
     with open(filename, "w") as f:
         json.dump(data, f, indent=4, sort_keys=False)
 
-def load_json(filename):
+def load_json(filename, sort_by_id = False):
     print('reading from', filename)
     assert filename.endswith("json"), "file provided to load_json does not end with .json extension. Please recheck!"
-    return json.load(open(filename))
+    data = json.load(open(filename))
+    if sort_by_id:
+        for d in data:
+            d["id"] = str(d["id"])
+        return sorted(data, key=lambda x: x['id'])
+    return data

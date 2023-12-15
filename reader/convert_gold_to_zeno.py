@@ -9,6 +9,7 @@ from file_utils import load_json, save_json, load_jsonl
 import pdb
 
 
+
 def convert_gold_to_zeno(gold_file, corpus_file):
     # wiki_par_ids_data = load_json("/data/user_data/jhsia2/dbqa/data/gold-nq-dev-kilt.json")
     gold_data = load_jsonl(gold_file)
