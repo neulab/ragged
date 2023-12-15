@@ -73,17 +73,12 @@ def convert_gold_to_zeno(input_file, output_file, is_bioasq = False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process input, gold, and output files")
     parser.add_argument("--dataset", help='dataset')
-    parser.add_argument("--corpus")
     args = parser.parse_args()
     data_dir = os.path.join('/data/user_data/jhsia2/dbqa/data')
-    # gold_file  = os.path.join(data_dir, f'{args.dataset}.jsonl')
-    # corpus_file  = os.path.join(data_dir, f'{args.corpus}.tsv')
-        # import json
     is_bioasq = (args.dataset == 'bioasq')
     input_file = os.path.join(data_dir, f"{args.dataset}.jsonl")
     dataset = args.dataset.split('_')[0]
     output_file = os.path.join(data_dir, f"gold-{dataset}.json")
-    # gold_file  = os.path.join(data_dir, f'{args.dataset}-dev-kilt.jsonl')
     zeno_format_data = convert_gold_to_zeno(input_file, output_file, is_bioasq)
     dataset = args.dataset.split('_')[0]
     save_json(zeno_format_data, os.path.join(data_dir, f'gold_{dataset}_zeno_file.json'))
