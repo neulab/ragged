@@ -24,6 +24,7 @@ PYTHONPATH=$PYTHONPATH:/home/jhsia2/KILT:/home/jhsia2/ColBERT python ../colbert/
 conda deactivate
 
 conda activate py10
+python ../zeno/convert_gold_to_zeno.py --dataset bioasq
 python ../evaluate_retriever.py --retriever colbert --dataset bioasq
 
 
