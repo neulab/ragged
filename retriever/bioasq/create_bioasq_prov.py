@@ -19,14 +19,15 @@ print(len(gold_dataset), len(train_dataset))
 combined_dataset = gold_dataset + train_dataset
 print(len(combined_dataset))
 
-corpus = load_jsonl('/data/user_data/jhsia2/dbqa/data/bioasq/gold_medline_corpus.jsonl')
+id2title = load_json('/data/user_data/jhsia2/dbqa/data/bioasq/id2title.json')
+# corpus = load_jsonl('/data/user_data/jhsia2/dbqa/data/bioasq/complete_medline_corpus_jsonl/complete_medline_corpus.jsonl')
 
-id2title = {}
-for c in corpus:
-    docid, sec = c['id'].split('_')
-    if (int)(sec) == 0:
-        title = c['contents']
-        id2title[docid] = title
+# id2title = {}
+# for c in corpus:
+#     docid, sec = c['id'].split('_')
+#     if (int)(sec) == 0:
+#         title = c['contents']
+#         id2title[docid] = title
 
 
 prov_docs = []

@@ -1,8 +1,8 @@
 import json
 import csv
 import pdb
-input_file = "/data/user_data/jhsia2/dbqa/data/medline_corpus_jsonl/medline_corpus.jsonl"
-output_file = "/data/user_data/jhsia2/dbqa/data/medline_corpus.tsv"
+input_file = "/data/user_data/jhsia2/dbqa/data/bioasq/complete_medline_corpus_jsonl/complete_medline_corpus.jsonl"
+output_file = "/data/user_data/jhsia2/dbqa/data/bioasq/complete_medline_corpus.tsv"
 
 print('creating medline wiki tsv in ', output_file)
 # print('total num documents = 5903530')

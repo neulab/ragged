@@ -9,7 +9,8 @@ from file_utils import load_json, save_json, load_jsonl
 import pdb
 
 
-def convert_gold_to_zeno(input_file, output_file, is_bioasq = False):
+# def convert_gold_to_zeno(input_file, output_file, is_bioasq = False):
+def convert_gold_to_zeno(input_file, is_bioasq = False):
     if is_bioasq:
         docid_key = 'pmid'
         docid_name = 'pm'
@@ -24,7 +25,8 @@ def convert_gold_to_zeno(input_file, output_file, is_bioasq = False):
     # print('total num documents = 5903530')
     num_par_docs = 0
     gold_data_list = []
-    with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
+    # with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
+    with open(input_file, 'r') as infile:
         for l_id, line in enumerate(infile):
             if (l_id%1000==0):
                 print(l_id)
@@ -51,7 +53,8 @@ def convert_gold_to_zeno(input_file, output_file, is_bioasq = False):
                             # end_par_id = prov.get('end_paragraph_id', None) 
                             end_par_id = start_par_id
                         else:
-                            start_par_id = (int)(prov.get(f'{section_key}_id', None))
+                            # pdb.set_trace()
+                            start_par_id = (int)(prov.get(f'{section_key}', None))
                             end_par_id = start_par_id
                         end_par_id = (int)(start_par_id)
                         title = prov.get('title', None)
@@ -78,7 +81,7 @@ if __name__ == "__main__":
     is_bioasq = (args.dataset == 'bioasq')
     input_file = os.path.join(data_dir, f"{args.dataset}.jsonl")
     dataset = args.dataset.split('_')[0]
-    output_file = os.path.join(data_dir, f"gold-{dataset}.json")
-    zeno_format_data = convert_gold_to_zeno(input_file, output_file, is_bioasq)
-    dataset = args.dataset.split('_')[0]
+    # output_file = os.path.join(data_dir, f"gold-{dataset}.json")
+    zeno_format_data = convert_gold_to_zeno(input_file, is_bioasq)
+    dataset = args.dataset.split('-')[0]
     save_json(zeno_format_data, os.path.join(data_dir, f'gold_{dataset}_zeno_file.json'))

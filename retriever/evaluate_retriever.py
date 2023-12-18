@@ -22,7 +22,7 @@ def get_recall(guess_wiki_id_set, gold_wiki_id_set):
     recall = np.mean([[s in guess_wiki_id_set] for s in gold_wiki_id_set]) if len(gold_wiki_id_set) > 0 else 0.0
     return recall
 
-def get_retriever_results(guess_file, gold_file, gold_data, is_bioasq = False):
+def get_retriever_results(guess_data, gold_data, is_bioasq = False):
 
     if is_bioasq:
         docid_key = 'pmid'
@@ -35,11 +35,11 @@ def get_retriever_results(guess_file, gold_file, gold_data, is_bioasq = False):
         section_key = 'start_paragraph_id'
         section_name = 'par'
         
-    guess_data = load_jsonl(guess_file, sort_by_id = True)
+    # guess_data = load_jsonl(guess_file, sort_by_id = True)
     retriever_results = []
 
     if (len(guess_data) != len(gold_data)):  
-        warnings.warn(f"{guess_file} has {len(guess_data)} lines while {gold_file} has {len(gold_data)} lines.")
+        warnings.warn(f"Guess has {len(guess_data)} lines while gold has {len(gold_data)} lines.")
     else: 
             for sample_id, (guess, gold) in enumerate(zip(guess_data, gold_data)):
                 guess_sample_id = str(guess['id'])
@@ -138,7 +138,7 @@ def results_by_key(ks, results_by_k, is_bioasq = False):
         docid_key = 'wikipedia_id'
         docid_name = 'wiki'
         section_name = 'par'
-        section_key = 'start_paragraph'
+        section_key = 'start_paragraph_id'
     # ks = results_by_k.keys()
     wiki_id_match = []
     wiki_par_id_match = []
@@ -146,7 +146,6 @@ def results_by_key(ks, results_by_k, is_bioasq = False):
         wiki_id_match.append(results_by_k[k][f'top-k {docid_name}_id accuracy'])
         wiki_par_id_match.append(results_by_k[k][f'top-k {docid_name}_{section_name}_id accuracy'])
     return wiki_id_match, wiki_par_id_match
-    
 
 def main(model, dataset):
     result_dir = "/data/user_data/jhsia2/dbqa"
@@ -155,10 +154,13 @@ def main(model, dataset):
     # reformat_file = guess_file
     # gold_file = os.path.join(result_dir, 'data', dataset + '.jsonl')
     evaluation_dir = os.path.join(result_dir, 'retriever_results/evaluations', model)
-    is_bioasq = True if dataset == 'bioasq' else False
+    is_bioasq = True if 'bioasq' in dataset else False
 
     guess_data = load_jsonl(guess_file, sort_by_id = True)
-    gold_data = load_json(os.path.join(result_dir, 'data', f"gold-{dataset}.json"), sort_by_id = True)
+    if 'bioasq' in dataset:
+        gold_data = load_json(os.path.join(result_dir, 'data', f"gold_bioasq_zeno_file.json"), sort_by_id = True)
+    else:
+        gold_data = load_json(os.path.join(result_dir, 'data', f"gold_{dataset.split('-')[0]}_zeno_file.json"), sort_by_id = True)
 
     par_retriever_results = get_retriever_results(guess_data, gold_data, is_bioasq = is_bioasq)
 

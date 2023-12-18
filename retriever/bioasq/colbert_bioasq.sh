@@ -24,8 +24,8 @@ PYTHONPATH=$PYTHONPATH:/home/jhsia2/KILT:/home/jhsia2/ColBERT python ../colbert/
 conda deactivate
 
 conda activate py10
-python ../zeno/convert_gold_to_zeno.py --dataset bioasq
-python ../evaluate_retriever.py --retriever colbert --dataset bioasq
+# python ../zeno/convert_gold_to_zeno.py --dataset bioasq
+# python ../evaluate_retriever.py --retriever colbert --dataset bioasq
 
 
-# sbatch --job-name=c-bioasq --gres=gpu:4 --time=1-00:00:00 --mem=200G --output=c-bioasq-out.log --error=bioasq-err.log get_colbert_bioasq.sh
+# sbatch --job-name=c2-bioasq --gres=gpu:4 --time=2-00:00:00 --mem=500G --output=c2-bioasq-out.log --error=c2-bioasq-err.log colbert_bioasq.sh

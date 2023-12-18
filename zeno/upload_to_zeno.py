@@ -14,7 +14,7 @@ with open('/data/user_data/jhsia2/dbqa/data/id2title.json', 'r') as file:
     # Use json.dump to write the list of dictionaries to the file
     id2title = json.load(file)
 
-dataset = 'hotpotqa'
+dataset = 'nq'
 
 project = client.create_project(
     name=f"Document QA - {dataset}",
@@ -69,7 +69,7 @@ project = client.create_project(
 # datasets = ['nq', 'hotpotqa']
 gold_data = []
 # for dataset in datasets:
-with open(os.path.join(root_dir, 'data', f"gold-{dataset}-dev-kilt.json"), "r") as f:
+with open(os.path.join(root_dir, 'data', f"gold_{dataset}_zeno_file.json"), "r") as f:
     data = json.load(f)
 for d in data:
     d['dataset'] = dataset
@@ -223,9 +223,9 @@ def combine_truncated_stats(combined_data, truncated_reader_stats):
         c['truncated_num_docs'] = t['num_docs']
     return combined_data
 
-reader_models = ['flanT5', 'llama_70b', 'flanUl2', 'llama_7b']
-# reader_models = ['flanUl2']
-retriever_models = ['bm25', 'colbert']
+# reader_models = ['flanT5', 'llama_70b', 'flanUl2', 'llama_7b']
+reader_models = ['llama_7b']
+retriever_models = ['colbert']
 # retriever_models = ['colbert', 'bm25']
 top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
 # top_ks = ['baseline']
@@ -239,8 +239,8 @@ for retriever_model in retriever_models:
             print(top_k)
             # data = []
             # for dataset in datasets:
-            if (retriever_model == 'bm25' and reader_model == 'llama_7b' and top_k == 'top50'):
-                continue
+            # if (retriever_model == 'bm25' and reader_model == 'llama_7b' and top_k == 'top50'):
+            #     continue
             with open(os.path.join(results_dir, reader_model, dataset, retriever_model, f"{top_k}/reader_results_zeno.json"), "r") as f:
                 data = json.load(f)
                     
