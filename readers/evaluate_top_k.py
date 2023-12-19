@@ -116,7 +116,9 @@ def evaluate_reader_results(reader_output, gold_data):
 
 if __name__ == "__main__":
     
-    root_dirs = ["/data/user_data/jhsia2/dbqa/reader_results/llama_7b", "/data/user_data/jhsia2/dbqa/reader_results/flanUl2"]
+    # root_dirs = ["/data/user_data/jhsia2/dbqa/reader_results/llama_70b", "/data/user_data/jhsia2/dbqa/reader_results/flanT5"]
+    # root_dirs = ["/data/user_data/jhsia2/dbqa/reader_results/llama_7b", "/data/user_data/jhsia2/dbqa/reader_results/flanUl2"]
+    root_dirs = ["/data/user_data/jhsia2/dbqa/reader_results/llama_7b"]
     retriever_path_map = {
         "bm25": "/data/user_data/jhsia2/dbqa/retriever_results/predictions/bm25/",
         "colbert": "/data/user_data/jhsia2/dbqa/retriever_results/predictions/colbert/"
@@ -128,8 +130,8 @@ if __name__ == "__main__":
         "nq": "/data/user_data/afreens/kilt/gold_data/nq-dev-kilt.jsonl"
     }
     for basedir in root_dirs:
-        for retriever in ["bm25", "colbert"]:
-            for dataset in ["hotpotqa", "nq"]:
+        for retriever in ["bm25"]:
+            for dataset in ["hotpotqa"]:
                 root_dir = f"{basedir}/{dataset}/{retriever}/"
     
                 gold_file = dataset_map[dataset]

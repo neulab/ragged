@@ -18,7 +18,9 @@ def combine_all_files(base_path, output_path=None):
     all_data = []
     all_data_unique = []
     if os.path.exists(f"/{base_path.strip('/')}/all_data.jsonl"):
-        return load_data(f"/{base_path.strip('/')}/all_data.jsonl")
+        data = load_data(f"/{base_path.strip('/')}/all_data.jsonl")
+        if len(data) > 0:
+            return data
     for file in glob.glob(f"/{base_path.strip('/')}/*"):
         if not file.endswith(".jsonl") or "error" in file:
             continue
