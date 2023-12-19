@@ -7,7 +7,7 @@ import time
 import traceback
 
 from tqdm import tqdm
-from file_utils import store_data, load_data, write_json
+from file_utils import save_jsonl, load_jsonl, save_json
 from readers.llama2.llama2_reader import LlamaReader
 
 time_map = {}
@@ -18,12 +18,12 @@ def post_process_answers(answers):
 
 def generate_reader_outputs(input_path, reader_object, output_file=None, start_offset=0, end_offset=None, top_k=1, args=None):
     
-    retriever_data = load_data(input_path)
-    reader_responses = load_data(output_file) if os.path.exists(output_file) else []
+    retriever_data = load_jsonl(input_path)
+    reader_responses = load_jsonl(output_file) if os.path.exists(output_file) else []
     print(f"no.of. questions in range {start_offset} to {end_offset} for which response is already generated = {len(reader_responses)}")
 
     error_file_path = output_file[:-6]+"_errors.jsonl"
-    error_logs = load_data(error_file_path, sort_by_id=False) if os.path.exists(error_file_path) else []
+    error_logs = load_jsonl(error_file_path, sort_by_id=False) if os.path.exists(error_file_path) else []
 
     reader_ques_ids_already_generated = [x['id'] for x in reader_responses] #can modify this to combined_jsonl file
 
@@ -85,15 +85,15 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
                     "error": traceback.format_exc()
                 }
             )
-            store_data(error_file_path, error_logs)
-        store_data(output_file, reader_responses)
+            save_jsonl(error_logs, error_file_path)
+        save_jsonl(reader_responses, output_file)
 
     time2 = time.time()
     time_map["complete_generation"] = time2-time1
     print("Total reader_responses : ", len(reader_responses))
     print("Time taken: ", time_map["complete_generation"])
-    store_data(output_file, reader_responses)
-    write_json(all_context_length_changes, f"/data/user_data/jhsia2/dbqa/reader_results/{args.model}/{args.dataset}/{args.retriever}/{'baseline' if args.top_k==0 else 'top'+str(args.top_k)}/reader_output_index_{args.start_offset}_to_{args.end_offset}_context_length_changes.json")
+    save_jsonl(reader_responses, output_file)
+    save_json(all_context_length_changes, f"/data/user_data/jhsia2/dbqa/reader_results/{args.model}/{args.dataset}/{args.retriever}/{'baseline' if args.top_k==0 else 'top'+str(args.top_k)}/reader_output_index_{args.start_offset}_to_{args.end_offset}_context_length_changes.json")
             
 
     

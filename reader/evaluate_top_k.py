@@ -1,7 +1,6 @@
 from readers.utils import combine_all_files
-from evaluation.eval_downstream import _bertscore, _exact_match_score, _f1_score, _metric_max_over_ground_truths, _rougel_score, get_gold_answers, normalize_answer
-from file_utils import load_data, store_data, write_json
-import pandas as pd
+from evaluation.eval_downstream import _exact_match_score, _f1_score, _metric_max_over_ground_truths, _rougel_score, get_gold_answers, normalize_answer
+from file_utils import load_jsonl, save_jsonl, save_json
 
 def do_eval_like_kilt(guess_answer, gold_candidate_answers):
     # 0. accuracy = strict exact match
@@ -32,13 +31,9 @@ def do_eval_like_kilt(guess_answer, gold_candidate_answers):
     local_rougel = _metric_max_over_ground_truths(
         _rougel_score, guess_answer, gold_candidate_answers
     )
-
-    local_bertscore = _metric_max_over_ground_truths(
-        _bertscore, guess_answer, gold_candidate_answers
-    )
     
 
-    return local_accuracy, local_em, substring_match, local_f1, local_rougel, local_bertscore
+    return local_accuracy, local_em, substring_match, local_f1, local_rougel
 
 def evaluate_reader_results(reader_output, gold_data):
 
@@ -55,9 +50,6 @@ def evaluate_reader_results(reader_output, gold_data):
     normalized_substring_match = 0
     normalized_f1 = 0
     rougel = 0
-    bertscore_f1=0
-    bertscore_p=0
-    bertscore_r=0
 
     for reader_output_info in reader_output:
         total_count+=1
@@ -68,24 +60,20 @@ def evaluate_reader_results(reader_output, gold_data):
         gold_candidate_answers = [x["answer"] for x in gold_data_point["output"] if "answer" in x] #considering only the short answers
         reader_output_info["gold_answers"] = gold_candidate_answers
         
-        local_accuracy, local_em, substring_match, local_f1, local_rougel, local_bertscore = do_eval_like_kilt(guess_answer, gold_candidate_answers)
+        local_accuracy, local_em, substring_match, local_f1, local_rougel = do_eval_like_kilt(guess_answer, gold_candidate_answers)
 
         accuracy+=local_accuracy
         normalized_em+=local_em
         normalized_substring_match+=substring_match
         normalized_f1+=local_f1
         rougel+=local_f1
-        bertscore_f1+=local_bertscore["bertscore_f1"]
-        bertscore_p+=local_bertscore["bertscore_precision"]
-        bertscore_r+=local_bertscore["bertscore_recall"]
 
         reader_output_info["answer_evaluation"] = {
                 "accuracy":local_accuracy,
                 "exact_match": local_em,
                 "substring_match":substring_match,
                 "f1":local_f1,
-                "rougel":local_rougel,
-                "bertscore": local_bertscore
+                "rougel":local_rougel
             }
         
     if total_count > 0:
@@ -94,9 +82,6 @@ def evaluate_reader_results(reader_output, gold_data):
         normalized_substring_match /= total_count
         normalized_f1 /= total_count
         rougel /= total_count
-        bertscore_f1 /= total_count
-        bertscore_p /= total_count
-        bertscore_r /= total_count
 
     method_metrics = {
         "accuracy": round(accuracy, 4),
@@ -104,9 +89,6 @@ def evaluate_reader_results(reader_output, gold_data):
         "substring_match":round(normalized_substring_match, 4),
         "f1": round(normalized_f1, 4),
         "rougel": round(rougel, 4),
-        "bertscore_f1": round(bertscore_f1, 4),
-        "bertscore_p": round(bertscore_p, 4),
-        "bertscore_r": round(bertscore_r, 4)
     }
 
     print(f"total questions - dev: {total_count}/2837")
@@ -116,9 +98,20 @@ def evaluate_reader_results(reader_output, gold_data):
 
 if __name__ == "__main__":
     
+<<<<<<< HEAD:readers/evaluate_top_k.py
     # root_dirs = ["/data/user_data/jhsia2/dbqa/reader_results/llama_70b", "/data/user_data/jhsia2/dbqa/reader_results/flanT5"]
     # root_dirs = ["/data/user_data/jhsia2/dbqa/reader_results/llama_7b", "/data/user_data/jhsia2/dbqa/reader_results/flanUl2"]
     root_dirs = ["/data/user_data/jhsia2/dbqa/reader_results/llama_7b"]
+=======
+    retriever = "colbert"
+    dataset = "hotpot"
+    # dataset = "nq"
+    # root_dir = "/data/user_data/afreens/kilt/flanT5/nq/colbert/"
+    root_dir = "/data/user_data/afreens/kilt/llama/hotpot/bm25/"
+
+    
+
+>>>>>>> b30debc561eef6e48127b0428173626ef17e9908:reader/evaluate_top_k.py
     retriever_path_map = {
         "bm25": "/data/user_data/jhsia2/dbqa/retriever_results/predictions/bm25/",
         "colbert": "/data/user_data/jhsia2/dbqa/retriever_results/predictions/colbert/"
@@ -126,35 +119,39 @@ if __name__ == "__main__":
     }
 
     dataset_map = {
-        "hotpotqa" : "/data/user_data/afreens/kilt/gold_data/hotpotqa-dev-kilt.jsonl",
+        "hotpot" : "/data/user_data/afreens/kilt/gold_data/hotpotqa-dev-kilt.jsonl",
         "nq": "/data/user_data/afreens/kilt/gold_data/nq-dev-kilt.jsonl"
     }
+<<<<<<< HEAD:readers/evaluate_top_k.py
     for basedir in root_dirs:
         for retriever in ["bm25"]:
             for dataset in ["hotpotqa"]:
                 root_dir = f"{basedir}/{dataset}/{retriever}/"
+=======
+>>>>>>> b30debc561eef6e48127b0428173626ef17e9908:reader/evaluate_top_k.py
     
-                gold_file = dataset_map[dataset]
+    gold_file = dataset_map[dataset]
 
-                top_ks= [ "baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
-                # top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
-                metrics_map = {}
-                metrics_save_path = f"{root_dir}combined_metrics.json"
-                for top_k in top_ks:
-                    print(top_k)
-                    base_folder = f"{root_dir}{top_k}/"
-                    evaluation_file_path = f"{base_folder}all_data_evaluated.jsonl"
-                    all_data = combine_all_files(base_folder, f"{base_folder}all_data.jsonl")
-                    gold_data = load_data(gold_file)
+    top_ks= [ "baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
+    # top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
+    metrics_map = {}
+    metrics_save_path = f"{root_dir}combined_metrics.json"
+    for top_k in top_ks:
+        print(top_k)
+        base_folder = f"{root_dir}{top_k}/"
+        evaluation_file_path = f"{base_folder}all_data_evaluated.jsonl"
+        all_data = combine_all_files(base_folder, f"{base_folder}all_data.jsonl")
+        gold_data = load_jsonl(gold_file)
 
-                    all_data, metrics = evaluate_reader_results(all_data, gold_data)
-                    metrics_map[top_k] = metrics
-                    write_json(metrics_map, metrics_save_path)
-                    store_data(evaluation_file_path, all_data)
+        all_data, metrics = evaluate_reader_results(all_data, gold_data)
+        metrics_map[top_k] = metrics
+        save_json(metrics_map, metrics_save_path)
+        save_jsonl(all_data, evaluation_file_path)
 
-                df = pd.DataFrame(metrics_map)
-                df.T.to_csv(metrics_save_path[:-4]+"csv")
-                print(df.T)
+    import pandas as pd
+    df = pd.DataFrame(metrics_map)
+    df.T.to_csv(metrics_save_path[:-4]+"csv")
+    print(df.T)
 
 
 

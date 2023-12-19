@@ -3,18 +3,17 @@
 
 import csv
 import json
-# from kilt.kilt_utils import load_data
 import argparse
 import os
 import warnings
 import pdb
-from file_utils import read_json, write_json, load_data
+from file_utils import load_json, save_json, load_jsonl
 
 
 def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data):
     # pdb.set_trace()
-    reader_output_data = sorted(reader_output_data, key=lambda x: x["id"])
-    retriever_eval_data = sorted(retriever_eval_data, key=lambda x: x["id"])
+    # reader_output_data = sorted(reader_output_data, key=lambda x: x["id"])
+    # retriever_eval_data = sorted(retriever_eval_data, key=lambda x: x["id"])
 
     print(len(reader_output_data), len(retriever_eval_data))
     assert len(reader_output_data) == len(retriever_eval_data)
@@ -75,14 +74,14 @@ if __name__ == "__main__":
         evaluation_file_path = os.path.join(k_dir, 'all_data_evaluated.jsonl')
         retriever_eval_file = os.path.join(base_dir, f'retriever_results/evaluations/{args.retriever}/{args.dataset}-dev-kilt.jsonl')
 
-        reader_output_data = load_data(evaluation_file_path)
+        reader_output_data = load_jsonl(evaluation_file_path, sort_by_id = True)
         if (len(reader_output_data) == 0):
             warnings.warn("Warning: EMPTY file")
             continue
-        retriever_eval_data = load_data(retriever_eval_file)
+        retriever_eval_data = load_jsonl(retriever_eval_file, sort_by_id = True)
         if (len(retriever_eval_data) == 0):
             warnings.warn("Warning: EMPTY file")
             continue
         
         zeno_format_data = convert_reader_results_to_zeno(reader_output_data, retriever_eval_data)
-        write_json(zeno_format_data, os.path.join(k_dir, "reader_results_zeno.json"))
+        save_json(zeno_format_data, os.path.join(k_dir, "reader_results_zeno.json"))

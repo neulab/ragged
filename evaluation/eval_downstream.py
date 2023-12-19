@@ -17,7 +17,7 @@ bertscore = load("bertscore")
 from collections import Counter
 
 import evaluation.eval_retrieval as retrieval_metrics
-import file_utils
+from file_utils import load_jsonl
 
 # utility to get gold answers
 def get_gold_answers(gold):
@@ -258,8 +258,8 @@ def validate_input(gold_records, guess_records):
 def evaluate(gold, guess):
     pp = pprint.PrettyPrinter(indent=4)
 
-    gold_records = file_utils.load_data(gold)
-    guess_records = file_utils.load_data(guess)
+    gold_records = load_jsonl(gold)
+    guess_records = load_jsonl(guess)
 
     # 0. validate input
     gold_records, guess_records = validate_input(gold_records, guess_records)
