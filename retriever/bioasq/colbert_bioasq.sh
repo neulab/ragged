@@ -28,4 +28,4 @@ conda activate py10
 # python ../evaluate_retriever.py --retriever colbert --dataset bioasq
 
 
-# sbatch --job-name=c2-bioasq --gres=gpu:4 --time=2-00:00:00 --mem=500G --output=c2-bioasq-out.log --error=c2-bioasq-err.log colbert_bioasq.sh
+# sbatch --job-name=c3-bioasq --gres=gpu:4 --time=2-00:00:00 --mem=500G --output=c3-bioasq-out.log --error=c3-bioasq-err.log colbert_bioasq.sh

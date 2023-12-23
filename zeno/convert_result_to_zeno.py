@@ -60,12 +60,14 @@ if __name__ == "__main__":
     parser.add_argument("--reader", help='reader')
     parser.add_argument("--dataset", help='dataset')
     args = parser.parse_args()
+    
     top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
-    # top_ks = ["top50"]
+    top_ks = ["top50"]
     # metrics_map = {}
     # metrics_save_path = "/data/user_data/afreens/kilt/llama/combined_metrics.json"
     # retriever_model = 'flan'
-    base_dir = os.path.join('/data/user_data/jhsia2/dbqa')
+    # base_dir ='/data/user_data/jhsia2/dbqa'
+    base_dir = '/data/tir/projects/tir6/general/afreens/dbqa'
     for top_k in top_ks:
         print(top_k)
         # k_dir = os.path.join(base_dir,'reader_results', args.reader, args.dataset, args.retriever, 'exp2', top_k)
