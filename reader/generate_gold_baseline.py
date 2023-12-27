@@ -74,7 +74,7 @@ def get_args():
     return args
 
 if __name__ == "__main__":
-    base_folder = "/data/user_data/jhsia2/dbqa/data/"
+    base_folder = "/data/tir/projects/tir6/general/afreens/dbqa/data/"
     args = get_args()
 
     model_class_dict = {
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     reader=model_class_dict[args.model](hosted_api_path =f"http://{args.hosted_api_path}:9426/")
 
     # output_path = f"/data/user_data/afreens/kilt/{args.model}/{args.dataset}/{args.retriever}/top{args.top_k}/"
-    output_path = f"/data/user_data/jhsia2/dbqa/reader_results/{args.model}/{args.dataset}/"
+    output_path = f"/data/tir/projects/tir6/general/afreens/dbqa/reader_results/{args.model}/{args.dataset}/"
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     output_file = f'{output_path}gold_baseline_answers.jsonl'

@@ -8,19 +8,20 @@ import os
 import numpy as np
 
 # np.save()
+root_dir = '/data/tir/projects/tir6/general/afreens/dbqa/data'
 gold_dataset = []
 for i in range(1,5):
     # gold_dataset = 
-    gold_dataset += load_json(f'/data/user_data/jhsia2/dbqa/data/bioasq/Task11BGoldenEnriched/11B{i}_golden.json')['questions']
-train_dataset = load_json('/data/user_data/jhsia2/dbqa/data/bioasq/BioASQ-training11b/training11b.json')
+    gold_dataset += load_json(os.path.join(root_dir, f'bioasq/Task11BGoldenEnriched/11B{i}_golden.json'))['questions']
+train_dataset = load_json(os.path.join(root_dir, 'bioasq/BioASQ-training11b/training11b.json'))
 train_dataset = train_dataset['questions']
 print(len(gold_dataset), len(train_dataset))
 
 combined_dataset = gold_dataset + train_dataset
 print(len(combined_dataset))
 
-id2title = load_json('/data/user_data/jhsia2/dbqa/data/bioasq/id2title.json')
-# corpus = load_jsonl('/data/user_data/jhsia2/dbqa/data/bioasq/complete_medline_corpus_jsonl/complete_medline_corpus.jsonl')
+id2title = load_json(os.path.join(root_dir, 'bioasq/id2title.json'))
+# corpus = load_jsonl('/data/tir/projects/tir6/general/afreens/dbqa/data/bioasq/complete_medline_corpus_jsonl/complete_medline_corpus.jsonl')
 
 # id2title = {}
 # for c in corpus:
@@ -47,8 +48,11 @@ for i, q in enumerate(combined_dataset):
     answer_set = set()
     if type(q['exact_answer']) == list:
         for a_set in q['exact_answer']:
-            for a in a_set:
-                answer_set.add(a)
+            if (type(a_set) == list):
+                for a in a_set:
+                    answer_set.add(a)
+            else:
+                answer_set.add(a_set)
     else:
         answer_set.add(q['exact_answer'])
         
@@ -77,4 +81,4 @@ for i, q in enumerate(combined_dataset):
     #     print('qid missing provs', qid)
         # doc_ids.add((int)(docid))
 print(len(prov_docs))
-save_jsonl(prov_docs, '/data/user_data/jhsia2/dbqa/data/bioasq.jsonl')
+save_jsonl(prov_docs, os.path.join(root_dir, 'bioasq.jsonl'))

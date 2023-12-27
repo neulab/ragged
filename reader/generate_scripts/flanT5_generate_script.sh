@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #SBATCH --job-name=kilt_flanT5_generation
-#SBATCH --output="/data/user_data/jhsia2/dbqa/reader_results/flanT5/hotpotqa/slurm-%A_%a.out"
+#SBATCH --output="/data/tir/projects/tir6/general/afreens/dbqa/reader_results/flanT5/hotpotqa/slurm-%A_%a.out"
 #SBATCH --time=800
 
 

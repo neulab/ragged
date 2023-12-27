@@ -77,7 +77,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process input, gold, and output files")
     parser.add_argument("--dataset", help='dataset')
     args = parser.parse_args()
-    data_dir = os.path.join('/data/user_data/jhsia2/dbqa/data')
+    data_dir = os.path.join('/data/tir/projects/tir6/general/afreens/dbqa/data')
     is_bioasq = (args.dataset == 'bioasq')
     input_file = os.path.join(data_dir, f"{args.dataset}.jsonl")
     dataset = args.dataset.split('_')[0]

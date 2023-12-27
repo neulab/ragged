@@ -4,7 +4,7 @@ import argparse
 import os
 
 def main(dataset):
-    data_dir = "/data/user_data/jhsia2/dbqa/data/"
+    data_dir = "/data/tir/projects/tir6/general/afreens/dbqa/data/"
     input_file = os.path.join(data_dir, dataset + '.jsonl')
     output_file = os.path.join(data_dir, dataset + '-queries.tsv')
     print('creating data tsv in ', output_file)

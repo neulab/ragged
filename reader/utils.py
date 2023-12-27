@@ -118,8 +118,8 @@ def find_tokenization_limits_based_on_contexts(retriever_output_file, write_file
 
 if __name__ == "__main__":
     retriever_path_map = {
-        "bm25": "/data/user_data/jhsia2/dbqa/retriever_results/predictions/bm25/",
-        "colbert": "/data/user_data/jhsia2/dbqa/retriever_results/predictions/colbert/"
+        "bm25": "/data/tir/projects/tir6/general/afreens/dbqa/retriever_results/predictions/bm25/",
+        "colbert": "/data/tir/projects/tir6/general/afreens/dbqa/retriever_results/predictions/colbert/"
 
     }
 

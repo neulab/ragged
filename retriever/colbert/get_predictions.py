@@ -11,7 +11,7 @@ import argparse
 
 def main(dataset):
     exp_name = 'colbert'
-    # root_dir = "/data/user_data/jhsia2/dbqa"
+    # root_dir = "/data/tir/projects/tir6/general/afreens/dbqa"
     root_dir = '/data/tir/projects/tir6/general/jhsia2'
     with Run().context(RunConfig(nranks=1, experiment=exp_name)):
 

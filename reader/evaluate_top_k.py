@@ -116,8 +116,8 @@ def evaluate_reader_results(reader_output, gold_data):
 
 if __name__ == "__main__":
     
-    # root_dirs = ["/data/user_data/jhsia2/dbqa/reader_results/llama_70b", "/data/user_data/jhsia2/dbqa/reader_results/flanT5"]
-    # root_dirs = ["/data/user_data/jhsia2/dbqa/reader_results/llama_7b", "/data/user_data/jhsia2/dbqa/reader_results/flanUl2"]
+    # root_dirs = ["/data/tir/projects/tir6/general/afreens/dbqa/reader_results/llama_70b", "/data/tir/projects/tir6/general/afreens/dbqa/reader_results/flanT5"]
+    # root_dirs = ["/data/tir/projects/tir6/general/afreens/dbqa/reader_results/llama_7b", "/data/tir/projects/tir6/general/afreens/dbqa/reader_results/flanUl2"]
     root_dirs = [f"{READER_BASE_FOLDER}/llama_7b"]
     retriever_path_map = {
         "bm25": f"{BASE_FOLDER}/retriever_results/predictions/bm25/",

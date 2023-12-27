@@ -148,7 +148,7 @@ def results_by_key(ks, results_by_k, is_bioasq = False):
     return wiki_id_match, wiki_par_id_match
 
 def main(model, dataset):
-    # result_dir = "/data/user_data/jhsia2/dbqa"
+    # result_dir = "/data/tir/projects/tir6/general/afreens/dbqa"
     result_dir = '/data/tir/projects/tir6/general/afreens/dbqa'
     guess_file = os.path.join(result_dir, 'retriever_results/predictions', model, dataset + '.jsonl')
     # reformat_file = os.path.join(result_dir, 'retriever_results/predictions', model, 'reformatted-' + dataset + '.jsonl')

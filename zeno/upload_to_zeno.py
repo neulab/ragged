@@ -214,13 +214,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
     load_dotenv(override=True)
 
-    # root_dir = '/data/user_data/jhsia2/dbqa'
+    # root_dir = '/data/tir/projects/tir6/general/afreens/dbqa'
     root_dir = '/data/tir/projects/tir6/general/afreens/dbqa'
     results_dir = os.path.join(root_dir, 'reader_results')
     client = ZenoClient('zen_EZ7LuqItWgObcQmIvNZVytvhtTh8JMs2HrSzzfXsiIg')
 
     id2title = load_json(os.path.join(root_dir, 'data/id2title.json'))
-    # with open('/data/user_data/jhsia2/dbqa/data/id2title.json', 'r') as file:
+    # with open('/data/tir/projects/tir6/general/afreens/dbqa/data/id2title.json', 'r') as file:
     #     # Use json.dump to write the list of dictionaries to the file
     #     id2title = json.load(file)
 

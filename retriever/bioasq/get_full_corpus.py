@@ -4,6 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 from xml.etree import ElementTree as ET
 from file_utils import save_jsonl, save_json
+import os
+
 
 base_name = "pubmed23n"
 file_names = [f"{base_name}{str(i).zfill(4)}.xml.gz" for i in range(1, 1167)]
@@ -19,10 +21,14 @@ file_names = [f"{base_name}{str(i).zfill(4)}.xml.gz" for i in range(1, 1167)]
 articles_info = []
 id2title = {}
 
+root_dir = '/data/tir/projects/tir6/general/afreens/dbqa/data'
+
 for file_name in file_names:
     file_name = file_name.split('.gz')[0]
+
     
-    file_path = f'/data/user_data/jhsia2/dbqa/data/bioasq/annual_zips/{file_name}'
+    
+    file_path = os.path.join(root_dir, f'bioasq/annual_zips/{file_name}')
 
     # Now let's parse the XML file
     tree = ET.parse(file_path)
@@ -55,5 +61,5 @@ for file_name in file_names:
             # break
     # break
 
-save_json(id2title, '/data/user_data/jhsia2/dbqa/data/bioasq/id2title.json')
-save_jsonl(articles_info, '/data/user_data/jhsia2/dbqa/data/bioasq/complete_medline_corpus.jsonl')
+save_json(id2title, os.path.join(root_dir,'bioasq/id2title.json'))
+save_jsonl(articles_info, os.path.join('bioasq/complete_medline_corpus.jsonl'))

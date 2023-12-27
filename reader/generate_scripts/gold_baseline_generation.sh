@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #SBATCH --job-name=gold_baseline
-#SBATCH --output="/data/user_data/jhsia2/dbqa/reader_results/slurm-%A_%a.out"
+#SBATCH --output="/data/tir/projects/tir6/general/afreens/dbqa/reader_results/slurm-%A_%a.out"
 #SBATCH --time=800
 
 

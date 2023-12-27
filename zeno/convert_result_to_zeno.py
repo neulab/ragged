@@ -66,7 +66,7 @@ if __name__ == "__main__":
     # metrics_map = {}
     # metrics_save_path = "/data/user_data/afreens/kilt/llama/combined_metrics.json"
     # retriever_model = 'flan'
-    # base_dir ='/data/user_data/jhsia2/dbqa'
+    # base_dir ='/data/tir/projects/tir6/general/afreens/dbqa'
     base_dir = '/data/tir/projects/tir6/general/afreens/dbqa'
     for top_k in top_ks:
         print(top_k)
