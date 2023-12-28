@@ -51,11 +51,11 @@ def convert_gold_to_zeno(input_file, is_bioasq = False):
                         if is_bioasq:
                             start_par_id = 0 if prov.get(f'{section_key}', None)== 'title' else 1
                             # end_par_id = prov.get('end_paragraph_id', None) 
-                            end_par_id = start_par_id
+                            # end_par_id = start_par_id
                         else:
                             # pdb.set_trace()
-                            start_par_id = (int)(prov.get(f'{section_key}', None))
-                            end_par_id = start_par_id
+                            start_par_id = (int)(prov.get(f'{section_key}', None)) + 1
+                            # end_par_id = start_par_id + 1
                         end_par_id = (int)(start_par_id)
                         title = prov.get('title', None)
                         if(wiki_id):
@@ -84,4 +84,4 @@ if __name__ == "__main__":
     # output_file = os.path.join(data_dir, f"gold-{dataset}.json")
     zeno_format_data = convert_gold_to_zeno(input_file, is_bioasq)
     dataset = args.dataset.split('-')[0]
-    save_json(zeno_format_data, os.path.join(data_dir, f'gold_{dataset}_zeno_file.json'))
+    save_json(zeno_format_data, os.path.join(data_dir, 'gold_zeno_files', f'gold_{dataset}_zeno_file.json'))

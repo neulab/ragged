@@ -219,7 +219,7 @@ if __name__ == "__main__":
     results_dir = os.path.join(root_dir, 'reader_results')
     client = ZenoClient('zen_EZ7LuqItWgObcQmIvNZVytvhtTh8JMs2HrSzzfXsiIg')
 
-    id2title = load_json(os.path.join(root_dir, 'data/id2title.json'))
+    id2title = load_json(os.path.join(root_dir, 'data/corpus_files/wiki_par_id2title.json'))
     # with open('/data/tir/projects/tir6/general/afreens/dbqa/data/id2title.json', 'r') as file:
     #     # Use json.dump to write the list of dictionaries to the file
     #     id2title = json.load(file)
@@ -231,7 +231,7 @@ if __name__ == "__main__":
     # for dataset in datasets:
     # with open(os.path.join(root_dir, 'data', f"gold_{dataset}_zeno_file.json"), "r") as f:
     #     data = json.load(f)
-    gold_data = load_json(os.path.join(root_dir, 'data', f"gold_{dataset}_zeno_file.json"), sort_by_id = True)
+    gold_data = load_json(os.path.join(root_dir, 'data/gold_zeno_files', f"gold_{dataset}_zeno_file.json"), sort_by_id = True)
     for d in gold_data:
         d['dataset'] = dataset
     # print(len(gold_data))
@@ -247,7 +247,7 @@ if __name__ == "__main__":
     # get_hist_info(wiki_par_id_set_size, unit = 'paragraph')
     # get_hist_info(wiki_id_set_size, unit = 'page')
     
-    questions_categorized = load_json(os.path.join(root_dir, f'data/{dataset}_questions_categorized.json'))
+    questions_categorized = load_json(os.path.join(root_dir, f'data/questions_categorized/{dataset}_questions_categorized.json'))
     if args.create_project:
         data_df = pd.DataFrame({"question": [d["input"] for d in gold_data], 'id': [d['id'] for d in gold_data]})
         project.upload_dataset(data_df, id_column="id", data_column="question")

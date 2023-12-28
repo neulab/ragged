@@ -35,21 +35,26 @@ def convert_gold_to_zeno(gold_info, corpus_file, is_bioasq):
     #         par_id_to_text_map[row[0]] = row[1]
     #         # break
     # with open("/data/tir/projects/tir6/general/afreens/dbqa/data/kilt_knowledgesource.tsv", 'r') as file:
-    if 'wiki' in corpus_file:
-        encoding = 'UTF-8'
-    else:
-        encoding = 'unicode_escape'
-
-    with open(corpus_file, 'r', encoding = encoding) as file:
+    # if 'wiki' in corpus_file:
+    #     encoding = 'UTF-8'
+    # else:
+    #     encoding = 'unicode_escape'
+    print('loading from corpus file', corpus_file)
+    ids = []
+    with open(corpus_file, 'r', encoding = 'UTF-8') as file:
         for i, line in enumerate(file):
             if (i%100_000 == 0 ):
                 print(i, flush = True)     
             line = line.strip()
+            if is_bioasq:
+                line = line.encode().decode('unicode_escape')
             split_out = line.split('\t')
             id = split_out[0]
+            # pdb.set_trace()
             text = '\t'.join(split_out[1:])
             par_id_to_text_map[id] = text
-
+            ids.append(id)
+    # print(len(ids))
     print(len(par_id_to_text_map))
 
     # zeno_format_data = []
@@ -57,7 +62,9 @@ def convert_gold_to_zeno(gold_info, corpus_file, is_bioasq):
     
     retriever_format_data = []
 
-    for ques_info in gold_info:
+    for i, ques_info in enumerate(gold_info):
+        if (i%1000 == 0):
+            print(i)
         qid = ques_info["id"]
         question = ques_info["input"]
         doc_par_id_set = ques_info["output"][f'{docid_name}_{section_name}_id_set']
@@ -71,7 +78,7 @@ def convert_gold_to_zeno(gold_info, corpus_file, is_bioasq):
             else:
                 output_dict[f'start_{section_key}'] = par_id
                 output_dict[f'end_{section_key}'] = par_id
-            output_dict['text'] = par_id_to_text_map[doc_par_id]
+            output_dict['text'] = par_id_to_text_map.get(doc_par_id, None)
             output_dict['score'] = None
             # if "answer" not in answer or "provenance" not in answer:
             #     continue
@@ -82,8 +89,8 @@ def convert_gold_to_zeno(gold_info, corpus_file, is_bioasq):
                     # pdb.set_trace()
                 # p["text"] = par_id_to_text_map[str(p["wikipedia_id"])+"_"+str(p["start_paragraph_id"]+1)]
 
-
-            provenance_set.append(output_dict)
+            if (output_dict['text']):
+                provenance_set.append(output_dict)
             
         retriever_format_data.append({
             "id": qid,
