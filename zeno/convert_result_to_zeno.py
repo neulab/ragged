@@ -62,7 +62,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
-    top_ks = ["top50"]
+    # top_ks = ["top50"]
     # metrics_map = {}
     # metrics_save_path = "/data/user_data/afreens/kilt/llama/combined_metrics.json"
     # retriever_model = 'flan'

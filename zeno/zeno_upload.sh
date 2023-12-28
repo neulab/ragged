@@ -12,5 +12,5 @@ python zeno_upload.py --dataset $dataset
 
 # sbatch --job-name=zeno --gres=gpu:1 --time=0-10:00:00 --mem=100G --output=zeno-out.log --error=zeno-err.log zeno_upload.sh
 
-# sbatch --job-name=zeno-$dataset --gres=gpu:1 --time=0-1:00:00 --mem=100G --output=$dataset-zeno-out.log --error=$dataset-zeno-err.log zeno_upload.sh
-# sbatch --job-name=zeno-hp --gres=gpu:1 --time=0-10:00:00 --mem=100G --output=hp-zeno-out.log --error=hp-zeno-err.log zeno_upload.sh
+# sbatch --job-name=zeno-$dataset --gres=gpu:1 --time=0-2:00:00 --mem=100G --output=$dataset-zeno-out.log --error=$dataset-zeno-err.log zeno_upload.sh
+# sbatch --job-name=zeno-hp --gres=gpu:1 --time=0-2:00:00 --mem=100G --output=hp-zeno-out.log --error=hp-zeno-err.log zeno_upload.sh
