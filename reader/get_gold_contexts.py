@@ -43,7 +43,7 @@ def convert_gold_to_zeno(gold_info, corpus_file, is_bioasq):
     with open(corpus_file, 'r', encoding = encoding) as file:
         for i, line in enumerate(file):
             if (i%100_000 == 0 ):
-                print(i)     
+                print(i, flush = True)     
             line = line.strip()
             split_out = line.split('\t')
             id = split_out[0]
@@ -90,7 +90,7 @@ def convert_gold_to_zeno(gold_info, corpus_file, is_bioasq):
             "input": question,
             "output": [{'provenance': provenance_set}]
         })
-        break
+        # break
     return retriever_format_data
     
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     root_dir = '/data/tir/projects/tir6/general/afreens/dbqa'
     data_dir = os.path.join(root_dir, 'data')
-    dataset = args.dataset.strip('-')[0]
+    dataset = args.dataset.split('-')[0]
     gold_info = load_json(os.path.join(data_dir, 'gold_zeno_files', f'gold_{dataset}_zeno_file.json'))
     
     is_bioasq = 'bioasq' in args.dataset
@@ -112,6 +112,6 @@ if __name__ == "__main__":
     retriever_format_data = convert_gold_to_zeno(gold_info, corpus_file, is_bioasq)
     # dataset = args.dataset.split('_')[0]
 
-    gold_dir = os.path.join(root_dir, 'retriever_results/predictions/gold')
+    gold_dir = os.path.join('/data/user_data/jhsia2/dbqa', 'retriever_results/predictions/gold')
     os.makedirs(gold_dir, exist_ok = True)
     save_jsonl(retriever_format_data, os.path.join(gold_dir, f'{args.dataset}.jsonl'))
