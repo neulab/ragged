@@ -7,8 +7,8 @@ export PYTHONPATH=$PYTHONPATH:/home/jhsia2/ragged
 # rm zeno-err.log zeno-out.log
 
 # python upload_to_zeno.py 
-python upload_to_zeno.py --dataset $dataset 
-# python upload_to_zeno.py --dataset hotpotqa 
+python zeno_upload.py --dataset $dataset 
+# python upload_to_zeno.py --dataset hotpotqa --create_project
 
 # sbatch --job-name=zeno --gres=gpu:1 --time=0-10:00:00 --mem=100G --output=zeno-out.log --error=zeno-err.log zeno_upload.sh
 
