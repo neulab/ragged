@@ -3,7 +3,7 @@ import time
 from transformers import T5Tokenizer
 from pprint import pprint
 import asyncio
-from readers.utils import CONTEXT_PROMPT, create_prompt
+from reader.utils import CONTEXT_PROMPT, create_prompt
 import nest_asyncio
 import text_generation as tg
 

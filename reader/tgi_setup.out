@@ -1,0 +1,58 @@
+WARNING: overwriting environment variables set in the machine
+overwriting variable ['PATH']
+90664
+google/flan-t5-xxl
+2023-12-28T14:06:03.838232Z  INFO text_generation_launcher: Args { model_id: "google/flan-t5-xxl", revision: None, validation_workers: 2, sharded: None, num_shard: None, quantize: None, dtype: None, trust_remote_code: false, max_concurrent_requests: 128, max_best_of: 2, max_stop_sequences: 4, max_input_length: 2000, max_total_tokens: 2048, waiting_served_ratio: 1.2, max_batch_prefill_tokens: 4096, max_batch_total_tokens: None, max_waiting_tokens: 20, hostname: "babel-0-27", port: 9426, shard_uds_path: "/scratch/jhsia2/tgi-uds-socket-1", master_addr: "localhost", master_port: 23456, huggingface_hub_cache: Some("/data/tir/projects/tir2/models/tgi_cache/hub"), weights_cache_override: None, disable_custom_kernels: false, cuda_memory_fraction: 1.0, json_output: false, otlp_endpoint: None, cors_allow_origin: [], watermark_gamma: None, watermark_delta: None, ngrok: false, ngrok_authtoken: None, ngrok_edge: None, central_address: None, env: false }
+2023-12-28T14:06:03.838415Z  INFO download: text_generation_launcher: Starting download process.
+2023-12-28T14:06:16.142523Z  INFO text_generation_launcher: Files are already present on the host. Skipping download.
+
+2023-12-28T14:06:16.715324Z  INFO download: text_generation_launcher: Successfully downloaded weights.
+2023-12-28T14:06:16.715400Z  WARN text_generation_launcher: invalid hostname passed! will use system's hostname...
+final hostname: babel-0-27
+2023-12-28T14:06:16.716808Z  INFO shard-manager: text_generation_launcher: Starting shard rank=0
+2023-12-28T14:06:26.618298Z  WARN text_generation_launcher: We're not using custom kernels.
+
+2023-12-28T14:06:26.724869Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:06:36.732670Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:06:46.742078Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:06:56.749586Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:07:06.757596Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:07:16.765068Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:07:26.772523Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:07:36.779979Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:07:46.788239Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:07:56.795978Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:08:06.803118Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:08:16.810129Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:08:26.817463Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:08:36.824892Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:08:46.832064Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:08:56.839124Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:09:06.846171Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:09:16.853399Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:09:26.860312Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:09:36.867018Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:09:46.874151Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:09:56.880963Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:10:06.887475Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:10:16.897389Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:10:26.904142Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:10:36.911149Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:10:46.917804Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:10:56.924680Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:11:06.934885Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:11:16.941647Z  INFO shard-manager: text_generation_launcher: Waiting for shard to be ready... rank=0
+2023-12-28T14:11:25.712701Z  INFO text_generation_launcher: Server started at unix:///scratch/jhsia2/tgi-uds-socket-1-0
+
+2023-12-28T14:11:25.747797Z  INFO shard-manager: text_generation_launcher: Shard ready in 309.030143714s rank=0
+2023-12-28T14:11:25.829060Z  INFO text_generation_launcher: Starting Webserver
+Attempting to register in Central at babel-3-36:8765
+Successfully registered on central server
+2023-12-28T14:11:26.344431Z  WARN text_generation_router: router/src/main.rs:345: `--revision` is not set
+2023-12-28T14:11:26.344452Z  WARN text_generation_router: router/src/main.rs:346: We strongly advise to set it to a known supported commit.
+2023-12-28T14:11:26.733318Z  INFO text_generation_router: router/src/main.rs:367: Serving revision ae7c9136adc7555eeccc78cdd960dfd60fb346ce of model google/flan-t5-xxl
+2023-12-28T14:11:26.765851Z  INFO text_generation_router: router/src/main.rs:210: Warming up model
+2023-12-28T14:11:33.308431Z  WARN text_generation_router: router/src/main.rs:221: Model does not support automatic max batch total tokens
+2023-12-28T14:11:33.308449Z  INFO text_generation_router: router/src/main.rs:243: Setting max batch total tokens to 16000
+2023-12-28T14:11:33.308453Z  INFO text_generation_router: router/src/main.rs:244: Connected
+2023-12-28T14:11:33.308456Z  WARN text_generation_router: router/src/main.rs:249: Invalid hostname, defaulting to 0.0.0.0
