@@ -10,7 +10,8 @@ conda activate py10
 # Define arrays for retrievers, readers, and datasets
 retrievers=("bm25" "colbert")
 readers=("llama_70b" "llama_7b" "flanT5" "flanUl2")
-datasets=("nq" "hotpotqa")
+# datasets=("nq" "hotpotqa")
+datasets=("bioasq" "complete_bioasq")
 
 # Loop through each retriever
 for retriever in "${retrievers[@]}"; do
