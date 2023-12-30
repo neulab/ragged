@@ -17,14 +17,14 @@ def create_prompt(question, context):
 def combine_all_files(base_path, output_path=None):
     all_data = []
     all_data_unique = []
-    if os.path.exists(f"/{base_path.strip('/')}/all_data.jsonl"):
-        data = load_jsonl(f"/{base_path.strip('/')}/all_data.jsonl")
+    if os.path.exists(os.path.join(base_path, "all_data.jsonl")):
+        data = load_jsonl(os.path.join(base_path, "all_data.jsonl"))
         if len(data) > 0:
             return data
-    for file in glob.glob(f"/{base_path.strip('/')}/*"):
+    for file in glob.glob(os.path.join(base_path, "*")):
         if not file.endswith(".jsonl") or "error" in file:
             continue
-        all_data.extend(load_data(file))
+        all_data.extend(load_jsonl(file))
 
     qids = set()
     for x in all_data:

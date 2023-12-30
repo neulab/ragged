@@ -48,6 +48,9 @@ def create_project(dataset):
             # ZenoMetric(name="avg retrieved score", type="mean", columns=["avg_score"]),
             ZenoMetric(name="exact_match", type="mean", columns=["exact_match"]),
             ZenoMetric(name="f1", type="mean", columns=["f1"]),
+            ZenoMetric(name="bertscore_precision", type="mean", columns=["bertscore_precision"]),
+            ZenoMetric(name="bertscore_recall", type="mean", columns=["bertscore_recall"]),
+            ZenoMetric(name="bertscore_f1", type="mean", columns=["bertscore_f1"]),
             ZenoMetric(name="gold wiki_par_id set size", type="mean", columns=["gold wiki_par_id set size"]),
             ZenoMetric(name="substring_match", type="mean", columns=["substring_match"]),
             # ZenoMetric(name="any wiki_id_match", type="mean", columns=["any wiki_id_match"]),
@@ -140,6 +143,15 @@ def get_reader_df(top_k, combined_data):
             # ],
             "f1": [
                 d["output"]["answer_evaluation"]["f1"] for d in combined_data
+            ],
+            "bertscore_precision": [
+                d["output"]["answer_evaluation"]["bertscore"]["bertscore_precision"] for d in combined_data
+            ],
+            "bertscore_recall": [
+                d["output"]["answer_evaluation"]["bertscore"]["bertscore_recall"] for d in combined_data
+            ],
+            "bertscore_f1": [
+                d["output"]["answer_evaluation"]["bertscore"]["bertscore_f1"] for d in combined_data
             ],
             "exact_match": [
                 d["output"]["answer_evaluation"]["exact_match"] for d in combined_data
@@ -252,10 +264,10 @@ if __name__ == "__main__":
         data_df = pd.DataFrame({"question": [d["input"] for d in gold_data], 'id': [d['id'] for d in gold_data]})
         project.upload_dataset(data_df, id_column="id", data_column="question")
 
-    reader_models = ['llama_70b','llama_7b', 'flanT5', 'flanUl2']
-    reader_models = ['llama_7b']
-    retriever_models = ['bm25']
-    # retriever_models = ['bm25', 'colbert']
+    reader_models = ['flanUl2', 'llama_70b', 'flanT5', 'llama_7b']
+    # reader_models = ['llama_7b']
+    # retriever_models = ['bm25']
+    retriever_models = ['colbert', 'bm25']
     top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
     # top_ks = ['top50']
     for retriever_model in retriever_models:

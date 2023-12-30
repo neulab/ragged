@@ -12,6 +12,7 @@ import re
 import string
 from rouge import Rouge
 from evaluate import load
+import pdb
 bertscore = load("bertscore")
 
 from collections import Counter
@@ -45,6 +46,7 @@ def get_gold_titles(gold):
 
 # utility to get max
 def _metric_max_over_ground_truths(metric_fn, prediction, ground_truths):
+    # pdb.set_trace()
     scores_for_ground_truths = []
     for ground_truth in ground_truths:
         score = metric_fn(prediction, ground_truth)
