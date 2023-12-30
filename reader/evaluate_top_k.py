@@ -194,13 +194,14 @@ if __name__ == "__main__":
     # os.makedirs(results_dir, exist_ok= True)
     jen_results_dir = os.path.join('/data/user_data/jhsia2/dbqa', "reader_results", args.reader, args.dataset.split('-')[0], args.retriever)
     os.makedirs(jen_results_dir, exist_ok= True)
-    metrics_save_path = os.path.join(jen_results_dir,"combined_metrics2.json")
+    jen_results_dir = results_dir
+    metrics_save_path = os.path.join(jen_results_dir,"combined_metrics.json")
     # metrics_save_path = os.path.join(results_dir,"combined_metrics2.json")
     for top_k in top_ks:
         print(top_k)
         # base_folder = os.path.join(results_dir, top_k)
         os.makedirs(os.path.join(jen_results_dir, top_k), exist_ok= True)
-        evaluation_file_path = os.path.join(jen_results_dir, top_k, "all_data_evaluated2.jsonl")
+        evaluation_file_path = os.path.join(jen_results_dir, top_k, "all_data_evaluated.jsonl")
         all_data = combine_all_files(os.path.join(results_dir, top_k), "all_data.jsonl")
         gold_data = load_jsonl(os.path.join(root_dir, 'data', f'{args.dataset}.jsonl'))
 
