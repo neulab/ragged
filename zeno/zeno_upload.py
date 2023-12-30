@@ -66,7 +66,6 @@ def create_project(dataset):
 
 def get_hist_info(size_set, unit):
     print('avg', np.mean(size_set), 'std', np.std(size_set), 'min', np.min(size_set), 'max', np.max(size_set))
-        # gold_wiki_size = [len(s) for s in gold_wiki_par_id_set]
 
     plt.hist(size_set, bins=np.arange(min(size_set)-0.5, max(size_set)+1.5, 1), edgecolor='black')
 
@@ -85,8 +84,6 @@ def get_precision(guess_wiki_id_set, gold_wiki_id_set):
     precision = np.mean([[s in gold_wiki_id_set] for s in guess_wiki_id_set])
     return precision
 def get_recall(guess_wiki_id_set, gold_wiki_id_set):
-    # print(guess_wiki_id_set)
-    # print(gold_wiki_id_set)
     recall = np.mean([[s in guess_wiki_id_set] for s in gold_wiki_id_set]) if len(gold_wiki_id_set) > 0 else 0.0
     return recall
 
@@ -183,13 +180,9 @@ def get_reader_df(top_k, combined_data):
 def combine_gold_and_compiled(output_data, gold_data, questions_categorized):
     
     for i, (od, gd) in enumerate(zip(output_data, gold_data)):
-        # print(i)
-        # print('output', od)
-        # print('gold', gd)
         if(od['id'] != gd['id']):
             print(od, gd)
             break
-        # od['gold_title_set'] = gd['output']['answer_set']
         od['dataset'] = gd['dataset']
         od['question_category'] = questions_categorized[od['id']]
         od['gold_answer_set'] = gd['output']['answer_set']
@@ -217,9 +210,6 @@ if __name__ == "__main__":
     client = ZenoClient('zen_EZ7LuqItWgObcQmIvNZVytvhtTh8JMs2HrSzzfXsiIg')
 
     id2title = load_json(os.path.join(root_dir, 'data/corpus_files/wiki_par_id2title.json'))
-    # with open('/data/tir/projects/tir6/general/afreens/dbqa/data/id2title.json', 'r') as file:
-    #     # Use json.dump to write the list of dictionaries to the file
-    #     id2title = json.load(file)
 
     dataset = args.dataset
     project = create_project(dataset)
@@ -242,11 +232,8 @@ if __name__ == "__main__":
         project.upload_dataset(data_df, id_column="id", data_column="question")
 
     reader_models = ['flanUl2', 'llama_70b', 'flanT5', 'llama_7b']
-    # reader_models = ['llama_7b']
-    # retriever_models = ['bm25']
     retriever_models = ['colbert', 'bm25']
     top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
-    # top_ks = ['top50']
     for retriever_model in retriever_models:
         for reader_model in reader_models:
         
