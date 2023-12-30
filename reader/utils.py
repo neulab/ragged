@@ -36,7 +36,7 @@ def combine_all_files(base_path, output_path=None):
     # assert len(all_data_unique) == 2837
     
     if output_path:    
-        save_jsonl(output_path, all_data_unique)
+        save_jsonl(all_data_unique, output_path)
     return all_data_unique
 
 def find_tokenization_limits(retriever_output_file, write_file):
@@ -81,7 +81,7 @@ def find_tokenization_limits(retriever_output_file, write_file):
         llama_truncated_passages_count_per_k[top_k] = (llama_truncated_passages_count, float(llama_truncated_passages_count/len(retriever_data)))
         t5_truncated_passages_count_per_k[top_k] = (t5_truncated_passages_count, float(t5_truncated_passages_count/len(retriever_data)))
     
-        save_jsonl(write_file, retriever_data)
+        save_jsonl(retriever_data, write_file)
         print(retriever_output_file)
         print("LLAMA: ", llama_truncated_passages_count_per_k)
         print("T5: ", t5_truncated_passages_count_per_k)
@@ -114,7 +114,7 @@ def find_tokenization_limits_based_on_contexts(retriever_output_file, write_file
         r_dp["llama_truncation"] = get_contexts_truncation_index(llama_tokenizer, question, contexts, 4000, llama_context_prompt_tokenized)
         r_dp["t5_truncation"] = get_contexts_truncation_index(t5_tokenizer, question, contexts, 2000, t5_context_prompt_tokenized)
 
-    save_jsonl(write_file, retriever_data)
+    save_jsonl(retriever_data, write_file)
 
 if __name__ == "__main__":
     retriever_path_map = {

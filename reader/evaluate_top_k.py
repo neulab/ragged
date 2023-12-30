@@ -120,6 +120,8 @@ def evaluate_reader_results(reader_output, gold_data):
 
     for i, reader_output_info in enumerate(reader_output):
         # print(i, reader_output_info['id'])
+        if (i%1000 == 0):
+            print(i)
         
         total_count+=1
 
@@ -187,13 +189,19 @@ if __name__ == "__main__":
 
     top_ks= [ "baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
     metrics_map = {}
+    
     results_dir = os.path.join(root_dir, "reader_results", args.reader, args.dataset.split('-')[0], args.retriever)
-    metrics_save_path = os.path.join(results_dir,"combined_metrics.json")
+    # os.makedirs(results_dir, exist_ok= True)
+    jen_results_dir = os.path.join('/data/user_data/jhsia2/dbqa', "reader_results", args.reader, args.dataset.split('-')[0], args.retriever)
+    os.makedirs(jen_results_dir, exist_ok= True)
+    metrics_save_path = os.path.join(jen_results_dir,"combined_metrics2.json")
+    # metrics_save_path = os.path.join(results_dir,"combined_metrics2.json")
     for top_k in top_ks:
         print(top_k)
-        base_folder = os.path.join(results_dir, top_k)
-        evaluation_file_path = os.path.join(base_folder, "all_data_evaluated.jsonl")
-        all_data = combine_all_files(base_folder, os.path.join("all_data.jsonl"))
+        # base_folder = os.path.join(results_dir, top_k)
+        os.makedirs(os.path.join(jen_results_dir, top_k), exist_ok= True)
+        evaluation_file_path = os.path.join(jen_results_dir, top_k, "all_data_evaluated2.jsonl")
+        all_data = combine_all_files(os.path.join(results_dir, top_k), "all_data.jsonl")
         gold_data = load_jsonl(os.path.join(root_dir, 'data', f'{args.dataset}.jsonl'))
 
         all_data, metrics = evaluate_reader_results(all_data, gold_data)
