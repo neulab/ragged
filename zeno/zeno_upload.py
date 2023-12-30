@@ -198,25 +198,10 @@ def combine_gold_and_compiled(output_data, gold_data, questions_categorized):
         od['gold_title_set'] = gd['output']['title_set']
     return output_data
 
-
-
-# def combine_gold_and_question_categories(questions_categorized, gold_data):
-    
-#     for i, gd in enumerate(gold_data):
-#         gd['question_category'] = questions_categorized[gd['id']]
-#     return gold_data
-
-# combine_gold_and_question_categories(questions_categorized, gold_data)
-
 def combine_truncated_stats(combined_data, truncated_reader_stats):
     for (c,t) in zip(combined_data, truncated_reader_stats):
         c['truncated_num_docs'] = t['num_docs']
     return combined_data
-
-# def upload_systems(retriever_models, reader_models, top_ks, gold_data, questions_categorized, project):
-
-    # if (top_k == 'top1'):
-    #     break
 
 
 if __name__ == "__main__":
@@ -238,18 +223,10 @@ if __name__ == "__main__":
 
     dataset = args.dataset
     project = create_project(dataset)
-    # datasets = ['nq', 'hotpotqa']
-    # gold_data = []
-    # for dataset in datasets:
-    # with open(os.path.join(root_dir, 'data', f"gold_{dataset}_zeno_file.json"), "r") as f:
-    #     data = json.load(f)
+
     gold_data = load_json(os.path.join(root_dir, 'data/gold_zeno_files', f"gold_{dataset}_zeno_file.json"), sort_by_id = True)
     for d in gold_data:
         d['dataset'] = dataset
-    # print(len(gold_data))
-    
-    # gold_data = sorted(data, key=lambda x: x["id"])
-    # gold_answer_set, gold_wiki_par_id_set, gold_wiki_par_text_set, gold_title_set = get_gold_sets(gold_data)
 
     # wiki_par_id_set_size = []
     # wiki_id_set_size = []
@@ -277,20 +254,10 @@ if __name__ == "__main__":
             print('reader', reader_model)
             for top_k in top_ks:
                 print(top_k)
-                # data = []
-                # for dataset in datasets:
-                # if (retriever_model == 'bm25' and reader_model == 'llama_7b' and top_k == 'top50'):
-                #     continue
-                # with open(os.path.join(results_dir, reader_model, dataset, retriever_model, f"{top_k}/reader_results_zeno.json"), "r") as f:
-                #     data = json.load(f)
                 data = load_json(os.path.join(results_dir, reader_model, dataset, retriever_model, f"{top_k}/reader_results_zeno.json"))
                         
                 combined_data = combine_gold_and_compiled(data, gold_data, questions_categorized)
-                # if (top_k != 'baseline'):
                 output_df = get_reader_df(top_k, combined_data)
-                # else:
-                #     output_df = get_baseline_df(combined_data)
-                # break
                 if top_k == 'baseline':
                     project.upload_system(
                     output_df, name= (reader_model + ' ' + top_k), id_column="id", output_column="output"
@@ -299,4 +266,3 @@ if __name__ == "__main__":
                     project.upload_system(
                         output_df, name= (retriever_model + ' ' + reader_model + ' ' + top_k), id_column="id", output_column="output"
                     )
-    # top_k = 'baseline'
