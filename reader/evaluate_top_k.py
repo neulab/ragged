@@ -64,8 +64,8 @@ def convert_textual_numbers_to_numeric(sentence):
 
 def do_eval_like_kilt(guess_answer, gold_candidate_answers):
     # 0. accuracy = strict exact match
-    guess_answer = convert_textual_numbers_to_numeric(guess_answer)
-    gold_candidate_answers = [convert_textual_numbers_to_numeric(ans) for ans in gold_candidate_answers]
+    # guess_answer = convert_textual_numbers_to_numeric(guess_answer)
+    # gold_candidate_answers = [convert_textual_numbers_to_numeric(ans) for ans in gold_candidate_answers]
     local_accuracy = 0
     if guess_answer in gold_candidate_answers:
         local_accuracy = 1
@@ -194,15 +194,15 @@ if __name__ == "__main__":
     # os.makedirs(results_dir, exist_ok= True)
     jen_results_dir = os.path.join('/data/user_data/jhsia2/dbqa', "reader_results", args.reader, args.dataset.split('-')[0], args.retriever)
     os.makedirs(jen_results_dir, exist_ok= True)
-    jen_results_dir = results_dir
-    metrics_save_path = os.path.join(jen_results_dir,"combined_metrics.json")
+    # jen_results_dir = results_dir
+    metrics_save_path = os.path.join(jen_results_dir,"combined_metrics2.json")
     # metrics_save_path = os.path.join(results_dir,"combined_metrics2.json")
     for top_k in top_ks:
         print(top_k)
         # base_folder = os.path.join(results_dir, top_k)
         os.makedirs(os.path.join(jen_results_dir, top_k), exist_ok= True)
-        evaluation_file_path = os.path.join(jen_results_dir, top_k, "all_data_evaluated.jsonl")
-        all_data = combine_all_files(os.path.join(results_dir, top_k), "all_data.jsonl")
+        evaluation_file_path = os.path.join(jen_results_dir, top_k, "all_data_evaluated2.jsonl")
+        all_data = combine_all_files(os.path.join(results_dir, top_k), "all_data2.jsonl")
         gold_data = load_jsonl(os.path.join(root_dir, 'data', f'{args.dataset}.jsonl'))
 
         all_data, metrics = evaluate_reader_results(all_data, gold_data)

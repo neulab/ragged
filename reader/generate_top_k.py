@@ -1,6 +1,6 @@
 #file to generate the results of the QA taking retrival file as input
 
-from readers.flanT5.flanT5_reader import FlanT5Reader
+from reader.flanT5.flanT5_reader import FlanT5Reader
 import argparse
 import os
 import time
@@ -8,7 +8,7 @@ import traceback
 
 from tqdm import tqdm
 from file_utils import BASE_FOLDER, READER_BASE_FOLDER, save_jsonl, load_jsonl, save_json
-from readers.llama2.llama2_reader import LlamaReader
+from reader.llama2.llama2_reader import LlamaReader
 
 time_map = {}
 
