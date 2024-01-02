@@ -62,13 +62,25 @@ def convert_textual_numbers_to_numeric(sentence):
 
     return ' '.join(converted_words)
 
-def do_eval_like_kilt(guess_answer, gold_candidate_answers):
-    # 0. accuracy = strict exact match
-    # guess_answer = convert_textual_numbers_to_numeric(guess_answer)
-    # gold_candidate_answers = [convert_textual_numbers_to_numeric(ans) for ans in gold_candidate_answers]
-    local_accuracy = 0
-    if guess_answer in gold_candidate_answers:
-        local_accuracy = 1
+def do_eval_like_kilt(guess_answer, gold_candidate_answers, eval_info, WITH_BERT):
+    if not eval_info:
+        eval_info = {}
+
+    # reader_output_info["answer_evaluation"] = {
+    #             "accuracy":local_accuracy,
+    #             "exact_match": local_em,
+    #             "substring_match":substring_match,
+    #             "f1":local_f1,
+    #             "rougel":local_rougel
+    #         }
+
+    if "accuracy" not in eval_info:
+        # 0. accuracy = strict exact match
+        local_accuracy = 0
+        if guess_answer in gold_candidate_answers:
+            local_accuracy = 1
+    else:
+        local_accuracy = eval_info["accuracy"]
 
     if "exact_match" not in eval_info:
         # 1. normalized exact match
@@ -137,11 +149,7 @@ def evaluate_reader_results(reader_output, gold_data, WITH_BERT):
         bertscore_p=0
         bertscore_r=0
 
-    for i, reader_output_info in enumerate(reader_output):
-        # print(i, reader_output_info['id'])
-        if (i%1000 == 0):
-            print(i)
-        
+    for reader_output_info in reader_output:
         total_count+=1
 
         guess_answer = reader_output_info["answer"]
@@ -234,8 +242,8 @@ def gold_baseline_evaluation():
 def generations_evaluation():
     # # root_dirs = ["/data/user_data/jhsia2/dbqa/reader_results/llama_70b", "/data/user_data/jhsia2/dbqa/reader_results/flanT5"]
     # # root_dirs = ["/data/user_data/jhsia2/dbqa/reader_results/llama_7b", "/data/user_data/jhsia2/dbqa/reader_results/flanUl2"]
-    # # root_dirs = [f"{READER_BASE_FOLDER}/llama_70b"]
-    root_dirs = [f"{READER_BASE_FOLDER}/flanT5", f"{READER_BASE_FOLDER}/flanUl2", f"{READER_BASE_FOLDER}/llama_70b"]
+    root_dirs = [f"{READER_BASE_FOLDER}/llama_70b"]
+    # root_dirs = [f"{READER_BASE_FOLDER}/flanT5", f"{READER_BASE_FOLDER}/flanUl2", f"{READER_BASE_FOLDER}/llama_70b"]
     retriever_path_map = {
         "bm25": f"{BASE_FOLDER}/retriever_results/predictions/bm25/",
         "colbert": f"{BASE_FOLDER}/retriever_results/predictions/colbert/"
@@ -250,15 +258,15 @@ def generations_evaluation():
         "complete_bioasq": "complete_bioasq.jsonl"
     }
     for basedir in root_dirs:
-        for retriever in ["bm25"]:
-            for dataset in ["complete_bioasq"]:
+        for retriever in ["colbert"]:
+            for dataset in ["bioasq"]:
                 root_dir = f"{basedir}/{dataset}/{retriever}/"
     
                 gold_file = f"{BASE_FOLDER}/data/{dataset_map[dataset]}"
                 print(gold_file)
 
-                top_ks= [ "baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
-                # top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
+                top_ks= ["top30", "top50"]
+                # top_ks= [ "baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
                 metrics_map = {}
                 metrics_save_path = f"{root_dir}combined_metrics.json"
                 for top_k in top_ks:
@@ -270,13 +278,13 @@ def generations_evaluation():
 
                     all_data, metrics = evaluate_reader_results(all_data, gold_data,WITH_BERT)
                     metrics_map[top_k] = metrics
-                    save_json(metrics_map, metrics_save_path)
+                    # save_json(metrics_map, metrics_save_path)
                     save_jsonl(all_data, evaluation_file_path)
 
-                import pandas as pd
-                df = pd.DataFrame(metrics_map)
-                df.T.to_csv(metrics_save_path[:-4]+"csv")
-                print(df.T)
+                # import pandas as pd
+                # df = pd.DataFrame(metrics_map)
+                # df.T.to_csv(metrics_save_path[:-4]+"csv")
+                # print(df.T)
 
 
 
