@@ -3,7 +3,7 @@ import time
 from transformers import T5Tokenizer
 from pprint import pprint
 import asyncio
-from readers.utils import CONTEXT_PROMPT, create_prompt
+from reader.utils import CONTEXT_PROMPT, create_prompt
 import nest_asyncio
 import text_generation as tg
 
@@ -35,7 +35,7 @@ class FlanT5Reader:
         for prompt in prompts:
             # print(prompt)
             question_tokenized = self.tokenizer(prompt["question"])["input_ids"]
-            remaining_length = total_tokens-len(context_prompt_tokenized)-len(question_tokenized)-10
+            remaining_length = total_tokens-len(context_prompt_tokenized)-len(question_tokenized)-max_new_tokens-5
             context_tokenized_without_truncation = self.tokenizer(prompt["context"], add_special_tokens=False)
             context_tokenized = self.tokenizer(prompt["context"], max_length=remaining_length, truncation=True, add_special_tokens=False)
             context_after_truncation = self.tokenizer.decode(context_tokenized["input_ids"])

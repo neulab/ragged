@@ -1,14 +1,14 @@
 #file to generate the results of the QA taking retrival file as input
 
-from readers.flanT5.flanT5_reader import FlanT5Reader
+from reader.flanT5.flanT5_reader import FlanT5Reader
 import argparse
 import os
 import time
 import traceback
 
 from tqdm import tqdm
-from file_utils import read_json, store_data, load_data, write_json
-from readers.llama2.llama2_reader import LlamaReader
+from file_utils import BASE_FOLDER, READER_BASE_FOLDER, load_jsonl, save_jsonl
+from reader.llama2.llama2_reader import LlamaReader
 
 time_map = {}
 
@@ -16,10 +16,10 @@ time_map = {}
 def post_process_answers(answers):
     return [x.strip().split("\n")[0] for x in answers]
 
-def generate_reader_outputs(input_path, reader_object, output_file=None, start_offset=0, end_offset=None):
+def generate_reader_outputs(input_path, reader_object, output_file=None, start_offset=0, end_offset=None, args=None):
     
-    retriever_data = read_json(input_path)
-    reader_responses = load_data(output_file) if os.path.exists(output_file) else []
+    retriever_data = load_jsonl(input_path)
+    reader_responses = load_jsonl(output_file) if os.path.exists(output_file) else []
     print(f"no.of. questions in range {start_offset} to {end_offset} for which response is already generated = {len(reader_responses)}")
 
 
@@ -29,41 +29,56 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
         end_offset = len(retriever_data)
     end_offset = min(end_offset, len(retriever_data))
 
-    
+    all_prompts = []
     prompt_indices = []
     time1 = time.time()
     for i, ques_info in tqdm(enumerate(retriever_data[start_offset:end_offset])):
-        print("index : ", start_offset+i)
-        all_prompts = []
+        # print("index : ", start_offset+i)
 
         if ques_info["id"] in reader_ques_ids_already_generated:
             continue
 
-        question = ques_info["input"]+"?"
+        question = ques_info["input"].strip("?")+"?"
+
+        evidence_spans = []
+        for o in ques_info["output"][0]['provenance']:
+            evidence_spans.append(o["text"])
+        # assert len(evidence_spans)>0
+        evidence_span = "\n".join(evidence_spans)
+        ques_info["evidence_span"] = evidence_span
+        prompt = {"id": ques_info["id"], "question" : question, "context": evidence_span}
+        all_prompts.append(prompt)
+        prompt_indices.append(i)
         
-        for context_info in ques_info["output"]:
-            prompt = {"id": ques_info["id"], "question" : question, "context": context_info["retrieved"][0]["text"]}
-            all_prompts.append(prompt)
-            prompt_indices.append(i)
-        answers, context_length_changes = reader_object.generate(all_prompts)
-        for p, a in zip(all_prompts, answers):
-            p["generated_answer"] = a
-        reader_responses.append({
-            "id" : ques_info["id"],
-            "input" : ques_info["input"],
-            "retrieved_passages" : all_prompts,
-            "all_answers" : answers
-
-        })
-
-    store_data(output_file, reader_responses)
+    chunks = [list(zip(prompt_indices, all_prompts))[x:x+100] for x in range(0, len(all_prompts), 100)]
+    all_answers = []
+    all_context_length_changes = []
+    for chunkid, chunk in enumerate(chunks):
+        chunk_prompts = [prompt for _, prompt in chunk]
+        answers, context_length_changes = reader_object.generate(chunk_prompts, max_new_tokens=10)
+        all_context_length_changes.extend(context_length_changes)
+        print(answers)
+        answers = post_process_answers(answers)
+        all_answers.extend(answers)
+        chunk_prompt_indices = [x[0] for x in chunk]
+        for q_index, answer in zip(chunk_prompt_indices, answers):
+            ques_info = retriever_data[start_offset:end_offset][q_index]
+            reader_responses.append({
+                "id" : ques_info["id"],
+        "input" : ques_info["input"],
+        "evidence_span": ques_info["evidence_span"],
+        "answer": answer
+            })
+        save_jsonl(reader_responses, output_file)
+    save_jsonl(reader_responses, output_file)
             
 
     
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--hosted_api_path", type=str, default="babel-1-23:9426")
+    parser.add_argument("--hosted_api_path", type=str, default="babel-1-23")
+    parser.add_argument("--hosted_api_port", type=str, default="9426")
     parser.add_argument("--start_offset", type=int, default=0)
     parser.add_argument("--end_offset", type=int, default=None)
     parser.add_argument("--model", type=str)
@@ -74,29 +89,31 @@ def get_args():
     return args
 
 if __name__ == "__main__":
-    base_folder = "/data/user_data/jhsia2/dbqa/data/"
     args = get_args()
 
     model_class_dict = {
-        "llama" : LlamaReader,
-        "flanT5" : FlanT5Reader
+        "llama_70b" : LlamaReader,
+        "flanT5" : FlanT5Reader,
+        "flanUl2" : FlanT5Reader,
+        "llama_7b": LlamaReader
     }
 
     dataset_map = {
-        "hotpotqa" : "gold_hotpotqa_zeno_file.json",
-        "nq": "gold_nq_zeno_file.json"
+        "hotpotqa" : "hotpotqa-dev-kilt.jsonl",
+        "nq": "nq-dev-kilt.jsonl",
+        "bioasq": "bioasq.jsonl",
+        "complete_bioasq": "complete_bioasq.jsonl"
     }
     
-    reader=model_class_dict[args.model](hosted_api_path =f"http://{args.hosted_api_path}:9426/")
+    reader=model_class_dict[args.model](hosted_api_path =f"http://{args.hosted_api_path}:{args.hosted_api_port}/")
 
     # output_path = f"/data/user_data/afreens/kilt/{args.model}/{args.dataset}/{args.retriever}/top{args.top_k}/"
-    output_path = f"/data/user_data/jhsia2/dbqa/reader_results/{args.model}/{args.dataset}/"
+    output_path = f"{READER_BASE_FOLDER}/{args.model}/{args.dataset}/"
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     output_file = f'{output_path}gold_baseline_answers.jsonl'
-    # output_file = f'{args.output_dir}reader_output_index_{args.start_offset}_to_{args.end_offset}.jsonl'
-    base_file = f"{base_folder}{dataset_map[args.dataset]}"
+    gold_file = f"{BASE_FOLDER}/retriever_results/predictions/gold/{dataset_map[args.dataset]}"
     
-    generate_reader_outputs(base_file, reader, output_file=output_file, start_offset=args.start_offset, end_offset=args.end_offset)
+    generate_reader_outputs(gold_file, reader, output_file=output_file, start_offset=args.start_offset, end_offset=args.end_offset, args=args)
 
     print("DONE!")

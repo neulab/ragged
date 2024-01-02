@@ -3,7 +3,7 @@ import time
 from transformers import LlamaTokenizer, AutoModelForCausalLM
 from pprint import pprint
 import asyncio
-from readers.utils import CONTEXT_PROMPT, create_prompt
+from reader.utils import CONTEXT_PROMPT, create_prompt
 import nest_asyncio
 import text_generation as tg
 
@@ -41,7 +41,7 @@ class LlamaReader:
         return await asyncio.gather(*[self.async_client.generate(text, max_new_tokens=max_new_tokens, truncate=truncate) for text in texts])
 
 
-    def generate(self, prompts, max_new_tokens=20, truncate=4000):
+    def generate(self, prompts, max_new_tokens=10, truncate=4000):
 
         total_tokens = 4000
         prompt_strs = []
@@ -49,11 +49,10 @@ class LlamaReader:
         context_prompt_tokenized = self.tokenizer(CONTEXT_PROMPT)["input_ids"]
         for prompt in prompts:
             question_tokenized = self.tokenizer(prompt["question"])["input_ids"]
-            remaining_length = total_tokens-len(context_prompt_tokenized)-len(question_tokenized)-10
-            context_tokenized_without_truncation = self.tokenizer(prompt["context"], add_special_tokens=False)
+            remaining_length = total_tokens-len(context_prompt_tokenized)-len(question_tokenized)-max_new_tokens-5
             context_tokenized = self.tokenizer(prompt["context"], max_length=remaining_length, truncation=True, add_special_tokens=False)
             context_after_truncation = self.tokenizer.decode(context_tokenized["input_ids"])
-            context_length_changes.append([len(prompt["context"]), len(context_after_truncation), len(context_tokenized_without_truncation["input_ids"]), len(context_tokenized["input_ids"])])
+            context_length_changes.append([len(prompt["context"]), len(context_after_truncation)])
 
             prompt_strs.append(create_prompt(question=prompt["question"], context=context_after_truncation))
 

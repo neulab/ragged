@@ -1,6 +1,6 @@
 #file to generate the results of the QA taking retrival file as input
 
-from readers.flanT5.flanT5_reader import FlanT5Reader
+from reader.flanT5.flanT5_reader import FlanT5Reader
 import argparse
 import os
 import time
@@ -8,7 +8,7 @@ import traceback
 
 from tqdm import tqdm
 from file_utils import BASE_FOLDER, READER_BASE_FOLDER, save_jsonl, load_jsonl, save_json
-from readers.llama2.llama2_reader import LlamaReader
+from reader.llama2.llama2_reader import LlamaReader
 
 time_map = {}
 
@@ -59,7 +59,7 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
     for chunkid, chunk in enumerate(chunks):
         chunk_prompts = [prompt for _, prompt in chunk]
         try:
-            answers, context_length_changes = reader_object.generate(chunk_prompts, max_new_tokens=10)
+            answers, context_length_changes = reader_object.generate(chunk_prompts, max_new_tokens=args.max_new_tokens)
             all_context_length_changes.extend(context_length_changes)
             print(answers)
             answers = post_process_answers(answers)
@@ -100,13 +100,15 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--hosted_api_path", type=str, default="babel-1-23:9426")
+    parser.add_argument("--hosted_api_path", type=str, default="babel-1-23")
+    parser.add_argument("--hosted_api_port", type=str, default="9426")
     parser.add_argument("--start_offset", type=int, default=0)
     parser.add_argument("--end_offset", type=int, default=None)
     parser.add_argument("--top_k", type=int, default=1)
     parser.add_argument("--model", type=str)
     parser.add_argument("--retriever", type=str)
     parser.add_argument("--dataset", type=str)
+    parser.add_argument("--max_new_tokens", type=int)
 
     args = parser.parse_args()
     print(f"args: {vars(args)}")
@@ -116,10 +118,11 @@ if __name__ == "__main__":
     args = get_args()
 
     model_class_dict = {
-        "llama" : LlamaReader,
+        "llama_70b" : LlamaReader,
         "flanT5" : FlanT5Reader,
         "flanUl2" : FlanT5Reader,
-        "llama_7b": LlamaReader
+        "llama_7b": LlamaReader,
+        "llama_70b_256_tokens": LlamaReader
     }
 
     retriever_path_map = {
@@ -135,7 +138,7 @@ if __name__ == "__main__":
         "complete_bioasq": "complete_bioasq.jsonl"
     }
     
-    reader=model_class_dict[args.model](hosted_api_path =f"http://{args.hosted_api_path}:9426/")
+    reader=model_class_dict[args.model](hosted_api_path =f"http://{args.hosted_api_path}:{args.hosted_api_port}/")
     
     retriever_data_path = f"{retriever_path_map[args.retriever]}{dataset_map[args.dataset]}"
 
