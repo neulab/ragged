@@ -3,18 +3,72 @@ from evaluation.eval_downstream import _bertscore, _exact_match_score, _f1_score
 from file_utils import BASE_FOLDER, READER_BASE_FOLDER, load_jsonl, save_json, save_jsonl
 import pandas as pd
 
-def do_eval_like_kilt(guess_answer, gold_candidate_answers, eval_info, WITH_BERT):
+from word2number import w2n
+import re
+import argparse
+import pdb
+import os
 
-    if not eval_info:
-        eval_info = {}
+def is_potential_number(word):
+    """
+    Check if a word is a potential part of a number in textual form.
+    """
+    number_parts = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+                    "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", 
+                    "eighteen", "nineteen", "twenty", "thirty", "forty", "fifty", "sixty", 
+                    "seventy", "eighty", "ninety", "hundred", "thousand", "million", "billion", "trillion"]
+    return word.lower() in number_parts
 
-    if "accuracy" not in eval_info:
-        # 0. accuracy = strict exact match
-        local_accuracy = 0
-        if guess_answer in gold_candidate_answers:
-            local_accuracy = 1
-    else:
-        local_accuracy = eval_info["accuracy"]
+def convert_textual_numbers_to_numeric(sentence):
+    # print()
+    # print(sentence)
+    """
+    Convert textual numbers within a sentence to numeric form, handling compound numbers.
+    Args:
+    - sentence (str): The sentence to process.
+    
+    Returns:
+    - str: The sentence with numbers converted to numeric form.
+    """
+    words = sentence.split()
+    converted_words = []
+    current_number_phrase = []
+
+    for word in words:
+        if is_potential_number(word):
+            current_number_phrase.append(word)
+        else:
+            if current_number_phrase:
+                # Convert the current number phrase to a number
+                number_string = " ".join(current_number_phrase)
+                try:
+                    numeric_value = w2n.word_to_num(number_string)
+                    converted_words.append(str(numeric_value))
+                except ValueError:
+                    # If conversion fails, keep the original phrase
+                    converted_words.extend(current_number_phrase)
+                current_number_phrase = []
+            
+            converted_words.append(word)
+
+    # Handle any remaining number phrase at the end
+    if current_number_phrase:
+        try:
+            number_string = " ".join(current_number_phrase)
+            numeric_value = w2n.word_to_num(number_string)
+            converted_words.append(str(numeric_value))
+        except ValueError:
+            converted_words.extend(current_number_phrase)
+
+    return ' '.join(converted_words)
+
+def do_eval_like_kilt(guess_answer, gold_candidate_answers):
+    # 0. accuracy = strict exact match
+    # guess_answer = convert_textual_numbers_to_numeric(guess_answer)
+    # gold_candidate_answers = [convert_textual_numbers_to_numeric(ans) for ans in gold_candidate_answers]
+    local_accuracy = 0
+    if guess_answer in gold_candidate_answers:
+        local_accuracy = 1
 
     if "exact_match" not in eval_info:
         # 1. normalized exact match
@@ -83,7 +137,11 @@ def evaluate_reader_results(reader_output, gold_data, WITH_BERT):
         bertscore_p=0
         bertscore_r=0
 
-    for reader_output_info in reader_output:
+    for i, reader_output_info in enumerate(reader_output):
+        # print(i, reader_output_info['id'])
+        if (i%1000 == 0):
+            print(i)
+        
         total_count+=1
 
         guess_answer = reader_output_info["answer"]

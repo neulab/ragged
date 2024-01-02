@@ -20,13 +20,13 @@ conda activate kilt
 
 python -m pyserini.index.lucene \
   --collection JsonCollection \
-  --input /data/user_data/jhsia2/dbqa/data/bioasq/complete_medline_corpus_jsonl \
-  --index /data/user_data/jhsia2/dbqa/indexes/complete_medline_corpus_jsonl \
+  --input /data/tir/projects/tir6/general/afreens/dbqa/data/bioasq/complete_medline_corpus_jsonl \
+  --index /data/tir/projects/tir6/general/afreens/dbqa/indexes/complete_medline_corpus_jsonl \
   --generator DefaultLuceneDocumentGenerator \
   --threads 4 \
   --storePositions --storeDocvectors --storeRaw --storeContents
 
-python /home/jhsia2/KILT/scripts/execute_retrieval.py -m bm25 -o /data/user_data/jhsia2/dbqa/retriever_results/predictions/bm25 --test_config /home/jhsia2/KILT/kilt/configs/bioasq.json
+python /home/jhsia2/KILT/scripts/execute_retrieval.py -m bm25 -o /data/tir/projects/tir6/general/afreens/dbqa/retriever_results/predictions/bm25 --test_config /home/jhsia2/KILT/kilt/configs/bioasq.json
 
 conda deactivate
 

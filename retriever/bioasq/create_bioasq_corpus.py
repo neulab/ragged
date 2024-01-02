@@ -20,8 +20,8 @@ medline_corpus = np.load('medline_indices.npy')
 gold_dataset = []
 for i in range(1,5):
     # gold_dataset = 
-    gold_dataset += load_json(f'/data/user_data/jhsia2/dbqa/data/bioasq/Task11BGoldenEnriched/11B{i}_golden.json')['questions']
-train_dataset = load_json('/data/user_data/jhsia2/dbqa/data/bioasq/BioASQ-training11b/training11b.json')
+    gold_dataset += load_json(f'/data/tir/projects/tir6/general/afreens/dbqa/data/bioasq/Task11BGoldenEnriched/11B{i}_golden.json')['questions']
+train_dataset = load_json('/data/tir/projects/tir6/general/afreens/dbqa/data/bioasq/BioASQ-training11b/training11b.json')
 train_dataset = train_dataset['questions']
 print(len(gold_dataset), len(train_dataset))
 
@@ -83,12 +83,12 @@ def get_docs(pmid, strict = True):
             return None, None
     return title, abstract
 
-# os.makedirs('/data/user_data/jhsia2/dbqa/data/medline_corpus', exist_ok= True)
+# os.makedirs('/data/tir/projects/tir6/general/afreens/dbqa/data/medline_corpus', exist_ok= True)
 
 # num_added = 0 
 missing_title = []
 missing_abstract = []
-with open('/data/user_data/jhsia2/dbqa/data/bioasq/gold_medline_corpus.jsonl', 'w') as outfile:
+with open('/data/tir/projects/tir6/general/afreens/dbqa/data/bioasq/gold_medline_corpus.jsonl', 'w') as outfile:
     print('adding prov docs')
     for i, pmid in enumerate(doc_ids):
         if (i%100 == 0):
@@ -103,10 +103,10 @@ with open('/data/user_data/jhsia2/dbqa/data/bioasq/gold_medline_corpus.jsonl', '
         else:
             missing_abstract.append(pmid)
 
-save_json({'missing title': missing_title, 'missing abstract': missing_abstract}, '/data/user_data/jhsia2/dbqa/data/bioasq/gold_corrupt.json')
+save_json({'missing title': missing_title, 'missing abstract': missing_abstract}, '/data/tir/projects/tir6/general/afreens/dbqa/data/bioasq/gold_corrupt.json')
 
 num_added = 0 
-with open('/data/user_data/jhsia2/dbqa/data/medline_corpus/sampled_medline_corpus.jsonl', 'w') as outfile:
+with open('/data/tir/projects/tir6/general/afreens/dbqa/data/medline_corpus/sampled_medline_corpus.jsonl', 'w') as outfile:
     print('adding sampled docs')
     for i, pmid in enumerate(medline_corpus):
         if pmid in doc_ids:

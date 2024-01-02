@@ -148,7 +148,8 @@ def results_by_key(ks, results_by_k, is_bioasq = False):
     return wiki_id_match, wiki_par_id_match
 
 def main(model, dataset):
-    result_dir = "/data/user_data/jhsia2/dbqa"
+    # result_dir = "/data/tir/projects/tir6/general/afreens/dbqa"
+    result_dir = '/data/tir/projects/tir6/general/afreens/dbqa'
     guess_file = os.path.join(result_dir, 'retriever_results/predictions', model, dataset + '.jsonl')
     # reformat_file = os.path.join(result_dir, 'retriever_results/predictions', model, 'reformatted-' + dataset + '.jsonl')
     # reformat_file = guess_file
@@ -158,9 +159,9 @@ def main(model, dataset):
 
     guess_data = load_jsonl(guess_file, sort_by_id = True)
     if 'bioasq' in dataset:
-        gold_data = load_json(os.path.join(result_dir, 'data', f"gold_bioasq_zeno_file.json"), sort_by_id = True)
+        gold_data = load_json(os.path.join(result_dir, 'data/gold_zeno_files', f"gold_bioasq_zeno_file.json"), sort_by_id = True)
     else:
-        gold_data = load_json(os.path.join(result_dir, 'data', f"gold_{dataset.split('-')[0]}_zeno_file.json"), sort_by_id = True)
+        gold_data = load_json(os.path.join(result_dir, 'data/gold_zeno_files', f"gold_{dataset.split('-')[0]}_zeno_file.json"), sort_by_id = True)
 
     par_retriever_results = get_retriever_results(guess_data, gold_data, is_bioasq = is_bioasq)
 

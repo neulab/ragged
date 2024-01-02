@@ -1,8 +1,8 @@
 import json
 import csv
 import pdb
-input_file = "/data/user_data/jhsia2/dbqa/data/kilt_knowledgesource.json"
-output_file = "/data/user_data/jhsia2/dbqa/data/kilt_knowledgesource.tsv"
+input_file = "/data/tir/projects/tir6/general/afreens/dbqa/data/kilt_knowledgesource.json"
+output_file = "/data/tir/projects/tir6/general/afreens/dbqa/data/kilt_knowledgesource.tsv"
 
 print('creating kilt wiki tsv in ', output_file)
 print('total num documents = 5903530')

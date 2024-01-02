@@ -11,7 +11,8 @@ import argparse
 
 def main(dataset):
     exp_name = 'colbert'
-    root_dir = "/data/user_data/jhsia2/dbqa"
+    # root_dir = "/data/tir/projects/tir6/general/afreens/dbqa"
+    root_dir = '/data/tir/projects/tir6/general/jhsia2'
     with Run().context(RunConfig(nranks=1, experiment=exp_name)):
 
         config = ColBERTConfig(
@@ -20,7 +21,8 @@ def main(dataset):
         )
         print('STARTING INDEXING')
         indexer = Indexer(checkpoint=os.path.join(root_dir, 'models/colbertv2.0/'), config=config)
-        indexer.index(name="complete_medline_corpus", collection=os.path.join(root_dir, "data/bioasq/complete_medline_corpus.tsv"), overwrite = 'resume')
+        indexer.index(name="complete_medline_corpus", collection=os.path.join(root_dir, "data/complete_medline_corpus.tsv"), overwrite = 'reuse')
+        # indexer.index(name="complete_medline_corpus", collection=os.path.join(root_dir, "data/bioasq/complete_medline_corpus.tsv"), overwrite = 'resume')
         # indexer.index(name="msmarco.nbits=2", collection=os.path.join(root_dir, "data/kilt_knowledgesource.tsv"), overwrite = True)
         print('DONE INDEXING')
 
