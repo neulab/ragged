@@ -66,6 +66,9 @@ def do_eval_like_kilt(guess_answer, gold_candidate_answers, eval_info, WITH_BERT
     if not eval_info:
         eval_info = {}
 
+    guess_answer = convert_textual_numbers_to_numeric(guess_answer)
+    gold_candidate_answers = [convert_textual_numbers_to_numeric(ans) for ans in gold_candidate_answers]
+
     # reader_output_info["answer_evaluation"] = {
     #             "accuracy":local_accuracy,
     #             "exact_match": local_em,
