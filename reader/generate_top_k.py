@@ -53,7 +53,7 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
         prompt_indices.append(i)
             
     
-    chunks = [list(zip(prompt_indices, all_prompts))[x:x+100] for x in range(0, len(all_prompts), 100)]
+    chunks = [list(zip(prompt_indices, all_prompts))[x:x+50] for x in range(0, len(all_prompts), 50)]
     all_answers = []
     all_context_length_changes = []
     for chunkid, chunk in enumerate(chunks):
