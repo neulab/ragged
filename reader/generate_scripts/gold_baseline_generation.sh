@@ -6,8 +6,8 @@
 
 
 export PYTHONPATH=/home/afreens/ragged
-python /home/afreens/ragged/reader/generate_gold_baseline.py --model flanUl2 --dataset nq --start_offset 0 --end_offset 6000 --hosted_api_path babel-4-36 --hosted_api_port 8101
-python /home/afreens/ragged/reader/generate_gold_baseline.py --model flanUl2 --dataset hotpotqa --start_offset 0 --end_offset 6000 --hosted_api_path babel-4-36 --hosted_api_port 8101
-python /home/afreens/ragged/reader/generate_gold_baseline.py --model flanUl2 --dataset bioasq --start_offset 0 --end_offset 6000 --hosted_api_path babel-4-36 --hosted_api_port 8101
+python /home/afreens/ragged/reader/generate_gold_baseline.py --model flanT5 --dataset nq --start_offset 0 --end_offset 6000 --hosted_api_path babel-4-36 --hosted_api_port 8101
+python /home/afreens/ragged/reader/generate_gold_baseline.py --model flanT5 --dataset hotpotqa --start_offset 0 --end_offset 6000 --hosted_api_path babel-4-36 --hosted_api_port 8101
+python /home/afreens/ragged/reader/generate_gold_baseline.py --model flanT5 --dataset bioasq --start_offset 0 --end_offset 6000 --hosted_api_path babel-4-36 --hosted_api_port 8101
 
 

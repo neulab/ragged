@@ -11,7 +11,6 @@
 
 retrievers=()
 datasets=()
-port=9429
 max_new_tokens=10
 
 
@@ -27,7 +26,7 @@ for retriever in "${retrievers[@]}"; do
     for dataset in "${datasets[@]}"; do
         # Loop through each topk
         for topk in "${top_ks[@]}"; do
-            python  "/home/afreens/ragged/reader/generate_top_k.py --model $reader --retriever $retriever --dataset $dataset --start_offset 0 --end_offset 6000 --hosted_api_path $1 --top_k $topk --hosted_api_port $port --max_new_tokens $max_new_tokens"
+            python /home/afreens/ragged/reader/generate_top_k.py --model $reader --retriever $retriever --dataset $dataset --start_offset 0 --end_offset 6000 --hosted_api_path $1 --top_k $topk --hosted_api_port $2 --max_new_tokens $max_new_tokens
         done
     done
 done
