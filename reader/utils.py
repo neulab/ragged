@@ -1,6 +1,6 @@
 import glob
 import os
-from file_utils import load_jsonl, save_jsonl
+from file_utils import READER_BASE_FOLDER, load_jsonl, save_jsonl
 from tqdm import tqdm
 from transformers import T5Tokenizer
 from transformers import LlamaTokenizer
@@ -116,6 +116,18 @@ def find_tokenization_limits_based_on_contexts(retriever_output_file, write_file
 
     save_jsonl(retriever_data, write_file)
 
+def convert_gold_files():
+    models = "flanT5 flanUl2 llama_70b llama_7b".split(" ")
+    datasets = "nq hotpotqa bioasq".split(" ")
+    for model in models:
+        for dataset in datasets:
+            input_file = f"{READER_BASE_FOLDER}/{model}/{dataset}/gold/all_data_evaluated.jsonl"
+            # output_file = f"{READER_BASE_FOLDER}/{model}/{dataset}/gold/all_data_evaluated_new.jsonl"
+            data = load_jsonl(input_file)
+            for dp in data:
+                dp["retrieved_passages"] = [{"text":dp["evidence_span"]}]
+            save_jsonl(data, input_file)
+
 if __name__ == "__main__":
     retriever_path_map = {
         "bm25": "/data/tir/projects/tir6/general/afreens/dbqa/retriever_results/predictions/bm25/",
@@ -141,3 +153,4 @@ if __name__ == "__main__":
     # find_tokenization_limits(f"{retriever_path_map['bm25']}{dataset_map['nq']}", f"{retriever_path_map['bm25']}{save_map['nq']}")
     # find_tokenization_limits(f"{retriever_path_map['colbert']}{dataset_map['hotpotqa']}", f"{retriever_path_map['colbert']}{save_map['hotpotqa']}")
     # find_tokenization_limits(f"{retriever_path_map['colbert']}{dataset_map['nq']}", f"{retriever_path_map['colbert']}{save_map['nq']}")
+    # convert_gold_files()
