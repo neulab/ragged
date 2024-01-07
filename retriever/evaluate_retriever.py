@@ -61,6 +61,7 @@ def get_retriever_results(guess_data, gold_data, is_bioasq = False):
                                         f'{docid_name}_id_match': guess_wiki_id in gold_wiki_ids}
                     
                     guess_wiki_par_id = guess_wiki_id + '_' + str(p[section_key])
+                    doc_retriever_result['answer_in_context'] = any([ans in p['text'] for ans in gold['output']['answer_set']])
                     doc_retriever_result[f'{docid_name}_{section_name}_id'] = guess_wiki_par_id
                     doc_retriever_result[f'{docid_name}_{section_name}_id_match'] = guess_wiki_par_id in gold_wiki_par_ids
                     doc_retriever_results.append(doc_retriever_result)
@@ -88,17 +89,21 @@ def print_retriever_acc(retriever_results, gold_data, ks, is_bioasq = False):
     
     wiki_id_per_r = []
     wiki_par_id_per_r = []
+    answer_in_context_per_r = []
 
     for r in retriever_results:
         wiki_ids = []
         wiki_par_ids = []
+        answer_in_context = []
         
         for d in r['doc-level results']:
             wiki_ids.append(d[f'{docid_name}_id'])
             wiki_par_ids.append(d[f'{docid_name}_{section_name}_id'])
+            answer_in_context.append(d['answer_in_context'])
 
         wiki_id_per_r.append(wiki_ids)
         wiki_par_id_per_r.append(wiki_par_ids)
+        answer_in_context_per_r.append(answer_in_context)
 
     
     results_by_k = {}
@@ -110,7 +115,8 @@ def print_retriever_acc(retriever_results, gold_data, ks, is_bioasq = False):
             f"precision@k {docid_name}_id": 0,\
             f"precision@k {docid_name}_{section_name}_id": 0,\
             f"recall@k {docid_name}_id": 0,\
-            f"recall@k {docid_name}_{section_name}_id": 0
+            f"recall@k {docid_name}_{section_name}_id": 0,\
+            'answer_in_context@k': 0
         }
         for r in range(len(retriever_results)):
             gold_wiki_id_set = gold_data[r]['output'][f'{docid_name}_id_set']
@@ -123,6 +129,7 @@ def print_retriever_acc(retriever_results, gold_data, ks, is_bioasq = False):
             results_by_k[(int)(k)][f"precision@k {docid_name}_{section_name}_id"] += get_precision(guess_wiki_par_id_set, gold_wiki_par_id_set)
             results_by_k[(int)(k)][f"recall@k {docid_name}_id"] += get_recall(guess_wiki_id_set, gold_wiki_id_set)
             results_by_k[(int)(k)][f"recall@k {docid_name}_{section_name}_id"] += get_recall(guess_wiki_par_id_set, gold_wiki_par_id_set)
+            results_by_k[(int)(k)]["answer_in_context@k"] += any(answer_in_context_per_r[r][:k])
 
         for key,val in results_by_k[(int)(k)].items():
             results_by_k[(int)(k)][key] = val/len(retriever_results)
@@ -148,12 +155,8 @@ def results_by_key(ks, results_by_k, is_bioasq = False):
     return wiki_id_match, wiki_par_id_match
 
 def main(model, dataset):
-    # result_dir = "/data/tir/projects/tir6/general/afreens/dbqa"
     result_dir = '/data/tir/projects/tir6/general/afreens/dbqa'
     guess_file = os.path.join(result_dir, 'retriever_results/predictions', model, dataset + '.jsonl')
-    # reformat_file = os.path.join(result_dir, 'retriever_results/predictions', model, 'reformatted-' + dataset + '.jsonl')
-    # reformat_file = guess_file
-    # gold_file = os.path.join(result_dir, 'data', dataset + '.jsonl')
     evaluation_dir = os.path.join(result_dir, 'retriever_results/evaluations', model)
     is_bioasq = True if 'bioasq' in dataset else False
 
@@ -168,6 +171,7 @@ def main(model, dataset):
     os.makedirs(evaluation_dir, exist_ok=True)
     save_jsonl(par_retriever_results, os.path.join(evaluation_dir, dataset + '.jsonl'))
 
+    # if (args.retriever != 'gold'):
     ks = np.arange(1,101)
     # ks = [1,2,3, 10, 20, 50, 100]
     # ks = [50]

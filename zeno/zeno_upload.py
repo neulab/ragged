@@ -7,8 +7,20 @@ from dotenv import load_dotenv
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
+import pdb
 
 def create_project(dataset):
+    if 'bioasq' in dataset:
+        docid_key = 'pmid'
+        docid_name = 'pm'
+        section_key = 'section'
+        section_name = 'sec'
+    else:
+        docid_key = 'wikipedia_id'
+        docid_name = 'wiki'
+        section_key = 'start_paragraph_id'
+        section_name = 'par'
+
     project = client.create_project(
         name=f"Document QA - {dataset}",
         view={
@@ -20,7 +32,7 @@ def create_project(dataset):
                 "type": "vstack",
                 "keys": {
                     "gold answer set": {"type": "text", "label": "gold answer set: "},
-                    "gold title set": {"type": "text", "label": "gold title set: "},
+                    # "gold title set": {"type": "text", "label": "gold title set: "},
                     # "gold context set": {"type": "text", "label": "gold text set: "},
                     "answer": {"type": "text", "label": "reader answer: "},
                     "retrieved context": {
@@ -28,11 +40,12 @@ def create_project(dataset):
                         "elements": {
                             "type": "vstack",
                             "keys": {
-                                "score": {"type": "text", "label": "score: "},
-                                "wiki_id": {"type": "markdown"},
+                                # "score": {"type": "text", "label": "score: "},
+                                f"{docid_name}_id": {"type": "markdown"},
                                 "text": {"type": "text", "label": "text: "},
-                                "wiki_id_match": {"type": "text", "label": "wiki_id match: "},
-                                "wiki_par_id_match": {"type": "text", "label": "wiki_par_id match: "}
+                                f"answer_in_context": {"type": "text", "label": f"answer_in_context: "},
+                                f"{docid_name}_id_match": {"type": "text", "label": f"{docid_name}_id match: "},
+                                f"{docid_name}_{section_name}_id_match": {"type": "text", "label": f"{docid_name}_{section_name}_id match: "}
                             },
                         },
                         "collapsible": "bottom",
@@ -48,17 +61,18 @@ def create_project(dataset):
             # ZenoMetric(name="avg retrieved score", type="mean", columns=["avg_score"]),
             ZenoMetric(name="exact_match", type="mean", columns=["exact_match"]),
             ZenoMetric(name="f1", type="mean", columns=["f1"]),
-            ZenoMetric(name="bertscore_precision", type="mean", columns=["bertscore_precision"]),
-            ZenoMetric(name="bertscore_recall", type="mean", columns=["bertscore_recall"]),
-            ZenoMetric(name="bertscore_f1", type="mean", columns=["bertscore_f1"]),
-            ZenoMetric(name="gold wiki_par_id set size", type="mean", columns=["gold wiki_par_id set size"]),
+            ZenoMetric(name="answer_in_context", type="mean", columns=["answer_in_context"]),
+            # ZenoMetric(name="bertscore_precision", type="mean", columns=["bertscore_precision"]),
+            # ZenoMetric(name="bertscore_recall", type="mean", columns=["bertscore_recall"]),
+            # ZenoMetric(name="bertscore_f1", type="mean", columns=["bertscore_f1"]),
+            # ZenoMetric(name=f"gold {docid_name}_{section_name}_id set size", type="mean", columns=[f"gold {docid_name}_{section_name}_id set size"]),
             ZenoMetric(name="substring_match", type="mean", columns=["substring_match"]),
-            # ZenoMetric(name="any wiki_id_match", type="mean", columns=["any wiki_id_match"]),
-            # ZenoMetric(name="any wiki_par_id_match", type="mean", columns=["any wiki_par_id_match"]),
-            ZenoMetric(name="precision - wiki_id_match", type="mean", columns=["precision wiki_id_match"]),
-            ZenoMetric(name="precision - wiki_par_id_match", type="mean", columns=["precision wiki_par_id_match"]),
-            ZenoMetric(name="recall - wiki_id_match", type="mean", columns=["recall wiki_id_match"]),
-            ZenoMetric(name="recall - wiki_par_id_match", type="mean", columns=["recall wiki_par_id_match"]),
+            # ZenoMetric(name="any {docid_name}_id_match", type="mean", columns=["any {docid_name}_id_match"]),
+            # ZenoMetric(name="any {docid_name}_{section_name}_id_match", type="mean", columns=["any {docid_name}_{section_name}_id_match"]),
+            ZenoMetric(name=f"precision - {docid_name}_id_match", type="mean", columns=[f"precision {docid_name}_id_match"]),
+            ZenoMetric(name=f"precision - {docid_name}_{section_name}_id_match", type="mean", columns=[f"precision {docid_name}_{section_name}_id_match"]),
+            ZenoMetric(name=f"recall - {docid_name}_id_match", type="mean", columns=[f"recall {docid_name}_id_match"]),
+            ZenoMetric(name=f"recall - {docid_name}_{section_name}_id_match", type="mean", columns=[f"recall {docid_name}_{section_name}_id_match"]),
         ],
     )
     return project
@@ -80,14 +94,24 @@ def get_hist_info(size_set, unit):
     # Display the plot
     plt.show()
 
-def get_precision(guess_wiki_id_set, gold_wiki_id_set):
-    precision = np.mean([[s in gold_wiki_id_set] for s in guess_wiki_id_set])
+def get_precision(guess_id_set, gold_id_set):
+    precision = np.mean([[s in gold_id_set] for s in guess_id_set])
     return precision
-def get_recall(guess_wiki_id_set, gold_wiki_id_set):
-    recall = np.mean([[s in guess_wiki_id_set] for s in gold_wiki_id_set]) if len(gold_wiki_id_set) > 0 else 0.0
+def get_recall(guess_id_set, gold_id_set):
+    recall = np.mean([[s in guess_id_set] for s in gold_id_set]) if len(gold_id_set) > 0 else 0.0
     return recall
 
-def get_reader_df(top_k, combined_data):
+def get_reader_df(top_k, combined_data, is_bioasq = False):
+    if is_bioasq:
+        docid_key = 'pmid'
+        docid_name = 'pm'
+        section_key = 'section'
+        section_name = 'sec'
+    else:
+        docid_key = 'wikipedia_id'
+        docid_name = 'wiki'
+        section_key = 'start_paragraph_id'
+        section_name = 'par'
     return pd.DataFrame(
         {
             "question": [d['input'] for d in combined_data],
@@ -98,30 +122,32 @@ def get_reader_df(top_k, combined_data):
                 json.dumps(
                     {   
                         "gold answer set": ', '.join(d['gold_answer_set']),
-                        "gold title set": ', '.join(d['gold_title_set']),
+                        # "gold title set": ', '.join(d['gold_title_set']),
                         # "gold context set": '\n'.join(d['gold_text_set']),
                         # "gold context": d['gold_context'],
                         "answer": d["output"]["answer"],
                         "retrieved context": [
                             {
-                                # "wiki_id": None,
+                                # "{docid_name}_id": None,
                                 # "text": None,
                                 # "score": None,
-                                # "wiki_id_match": None,
-                                # "wiki_par_id_match": None
+                                # "{docid_name}_id_match": None,
+                                # "{docid_name}_{section_name}_id_match": None
                             }
                         ] if top_k == 'baseline' else [
                             {
-                                "wiki_id": "[{idx}]({url})".format(
-                                    idx=id2title[r["wiki_id"]],
-                                    url="https://en.wikipedia.org/?curid="
-                                    + r["wiki_id"],
+                                f"{docid_name}_id": "[{idx}]({url})".format(
+                                    idx=id2title.get(r[f"{docid_name}_id"], 'Title not available.'),
+                                    url="https://pubmed.ncbi.nlm.nih.gov/"
+                                    + r[f"{docid_name}_id"],
                                 ),
                                 "text": r["text"],
-                                "score": r["score"],
-                                "wiki_id_match": r["wiki_id_match"],
-                                "wiki_par_id_match": r["wiki_par_id_match"]
+                                # "score": r.get('score', None),
+                                f"{docid_name}_id_match": r[f"{docid_name}_id_match"],
+                                f"{docid_name}_{section_name}_id_match": r[f"{docid_name}_{section_name}_id_match"],
+                                "answer_in_context": r["answer_in_context"]
                             }
+                            if len(r['text'])!=0 else {}
                         for r in d["output"]["retrieved"]
                         ],
                     }
@@ -129,8 +155,8 @@ def get_reader_df(top_k, combined_data):
                 for d in combined_data
             ],
             
-            "gold wiki_par_id set size": [
-                len(d["gold_wiki_par_id_set"]) for d in combined_data
+            f"gold {docid_name}_{section_name}_id set size": [
+                len(d[f"gold_{docid_name}_{section_name}_id_set"]) for d in combined_data
             ],
             # "max_score": [0 for d in combined_data] if top_k == 'baseline' else [
             #     d["output"]["retrieved"][0]["score"] for d in combined_data
@@ -141,53 +167,66 @@ def get_reader_df(top_k, combined_data):
             "f1": [
                 d["output"]["answer_evaluation"]["f1"] for d in combined_data
             ],
-            "bertscore_precision": [
-                d["output"]["answer_evaluation"]["bertscore"]["bertscore_precision"] for d in combined_data
-            ],
-            "bertscore_recall": [
-                d["output"]["answer_evaluation"]["bertscore"]["bertscore_recall"] for d in combined_data
-            ],
-            "bertscore_f1": [
-                d["output"]["answer_evaluation"]["bertscore"]["bertscore_f1"] for d in combined_data
-            ],
+            # "bertscore_precision": [
+            #     d["output"]["answer_evaluation"]["bertscore"]["bertscore_precision"] for d in combined_data
+            # ],
+            # "bertscore_recall": [
+            #     d["output"]["answer_evaluation"]["bertscore"]["bertscore_recall"] for d in combined_data
+            # ],
+            # "bertscore_f1": [
+            #     d["output"]["answer_evaluation"]["bertscore"]["bertscore_f1"] for d in combined_data
+            # ],
             "exact_match": [
                 d["output"]["answer_evaluation"]["exact_match"] for d in combined_data
             ],
             "substring_match": [
                 d["output"]["answer_evaluation"]["substring_match"] for d in combined_data
             ],
-            "any wiki_id_match": [False for d in combined_data] if top_k == 'baseline' else [
-                d["output"]["summary context evaluation"]["wiki_id_match"] for d in combined_data
+            "answer_in_context": [
+                d["output"]["summary context evaluation"]["answer_in_context"] for d in combined_data
             ],
-            "any wiki_par_id_match": [False for d in combined_data] if top_k == 'baseline' else [
-                d["output"]["summary context evaluation"]["wiki_par_id_match"] for d in combined_data
+            # f"any {docid_name}_id_match": [False for d in combined_data] if top_k == 'baseline' else [
+            #     d["output"]["summary context evaluation"][f"{docid_name}_id_match"] for d in combined_data
+            # ],
+            # f"any {docid_name}_{section_name}_id_match": [False for d in combined_data] if top_k == 'baseline' else [
+            #     d["output"]["summary context evaluation"][f"{docid_name}_{section_name}_id_match"] for d in combined_data
+            # ],
+            f"precision {docid_name}_id_match": [0 for d in combined_data] if top_k == 'baseline' else [
+                get_precision(set([r.get(f"{docid_name}_id", None) for r in d["output"]["retrieved"]]), d[f'gold_{docid_name}_id_set']) for d in combined_data
             ],
-            "precision wiki_id_match": [0 for d in combined_data] if top_k == 'baseline' else [
-                get_precision(set([r["wiki_id"] for r in d["output"]["retrieved"]]), d['gold_wiki_id_set']) for d in combined_data
+            f"precision {docid_name}_{section_name}_id_match": [0 for d in combined_data] if top_k == 'baseline' else [
+                get_precision(set([r.get(f"{docid_name}_{section_name}_id", None) for r in d["output"]["retrieved"]]), d[f'gold_{docid_name}_{section_name}_id_set']) for d in combined_data
             ],
-            "precision wiki_par_id_match": [0 for d in combined_data] if top_k == 'baseline' else [
-                get_precision(set([r["wiki_par_id"] for r in d["output"]["retrieved"]]), d['gold_wiki_par_id_set']) for d in combined_data
+            f"recall {docid_name}_id_match": [0 for d in combined_data] if top_k == 'baseline' else [
+                get_recall(set([r.get(f"{docid_name}_id", None) for r in d["output"]["retrieved"]]), d[f'gold_{docid_name}_id_set']) for d in combined_data
             ],
-            "recall wiki_id_match": [0 for d in combined_data] if top_k == 'baseline' else [
-                get_recall(set([r["wiki_id"] for r in d["output"]["retrieved"]]), d['gold_wiki_id_set']) for d in combined_data
-            ],
-            "recall wiki_par_id_match": [0 for d in combined_data] if top_k == 'baseline' else [
-                get_recall(set([r["wiki_par_id"] for r in d["output"]["retrieved"]]), d['gold_wiki_par_id_set']) for d in combined_data
+            f"recall {docid_name}_{section_name}_id_match": [0 for d in combined_data] if top_k == 'baseline' else [
+                get_recall(set([r.get(f"{docid_name}_{section_name}_id", None) for r in d["output"]["retrieved"]]), d[f'gold_{docid_name}_{section_name}_id_set']) for d in combined_data
             ],
         }
     )
 
-def combine_gold_and_compiled(output_data, gold_data, questions_categorized):
+def combine_gold_and_compiled(output_data, gold_data, questions_categorized, is_bioasq = False):
+    if is_bioasq:
+        docid_key = 'pmid'
+        docid_name = 'pm'
+        section_key = 'section'
+        section_name = 'sec'
+    else:
+        docid_key = 'wikipedia_id'
+        docid_name = 'wiki'
+        section_key = 'start_paragraph_id'
+        section_name = 'par'
     
     for i, (od, gd) in enumerate(zip(output_data, gold_data)):
         if(od['id'] != gd['id']):
             print(od, gd)
             break
-        od['dataset'] = gd['dataset']
+        # od['dataset'] = gd['dataset']
         od['question_category'] = questions_categorized[od['id']]
         od['gold_answer_set'] = gd['output']['answer_set']
-        od['gold_wiki_id_set'] = gd['output']['wiki_id_set']
-        od['gold_wiki_par_id_set'] = gd['output']['wiki_par_id_set']
+        od[f'gold_{docid_name}_id_set'] = gd['output'][f'{docid_name}_id_set']
+        od[f'gold_{docid_name}_{section_name}_id_set'] = gd['output'][f'{docid_name}_{section_name}_id_set']
         od['gold_title_set'] = gd['output']['title_set']
     return output_data
 
@@ -208,48 +247,80 @@ if __name__ == "__main__":
     root_dir = '/data/tir/projects/tir6/general/afreens/dbqa'
     results_dir = os.path.join(root_dir, 'reader_results')
     client = ZenoClient('zen_EZ7LuqItWgObcQmIvNZVytvhtTh8JMs2HrSzzfXsiIg')
-
-    id2title = load_json(os.path.join(root_dir, 'data/corpus_files/wiki_par_id2title.json'))
+    # print('hi')
+    if 'bioasq' in args.dataset:
+        docid_key = 'pmid'
+        docid_name = 'pm'
+        section_key = 'section'
+        section_name = 'sec'
+    else:
+        docid_key = 'wikipedia_id'
+        docid_name = 'wiki'
+        section_key = 'start_paragraph_id'
+        section_name = 'par'
+    
+    
+    id2title = load_json(os.path.join(root_dir, f'data/corpus_files/{docid_name}_{section_name}_id2title.json'))
+    # pdb.set_trace()
 
     dataset = args.dataset
     project = create_project(dataset)
 
-    gold_data = load_json(os.path.join(root_dir, 'data/gold_zeno_files', f"gold_{dataset}_zeno_file.json"), sort_by_id = True)
-    for d in gold_data:
-        d['dataset'] = dataset
+    gold_data = load_json(os.path.join(root_dir, 'data/gold_zeno_files', f"gold_{dataset.split('complete_')[-1]}_zeno_file.json"), sort_by_id = True)
 
-    # wiki_par_id_set_size = []
-    # wiki_id_set_size = []
     # for d in gold_data:
-    #     wiki_par_id_set_size.append(len(d['output']['wiki_par_id_set']))
-    #     wiki_id_set_size.append(len(d['output']['wiki_id_set']))
-    # get_hist_info(wiki_par_id_set_size, unit = 'paragraph')
-    # get_hist_info(wiki_id_set_size, unit = 'page')
+    #     d['dataset'] = dataset
+
+    # {docid_name}_{section_name}_id_set_size = []
+    # {docid_name}_id_set_size = []
+    # for d in gold_data:
+    #     {docid_name}_{section_name}_id_set_size.append(len(d['output']['{docid_name}_{section_name}_id_set']))
+    #     {docid_name}_id_set_size.append(len(d['output']['{docid_name}_id_set']))
+    # get_hist_info({docid_name}_{section_name}_id_set_size, unit = 'paragraph')
+    # get_hist_info({docid_name}_id_set_size, unit = 'page')
     
     questions_categorized = load_json(os.path.join(root_dir, f'data/questions_categorized/{dataset}_questions_categorized.json'))
+
     if args.create_project:
         data_df = pd.DataFrame({"question": [d["input"] for d in gold_data], 'id': [d['id'] for d in gold_data]})
         project.upload_dataset(data_df, id_column="id", data_column="question")
 
-    reader_models = ['flanUl2', 'llama_70b', 'flanT5', 'llama_7b']
-    retriever_models = ['colbert', 'bm25']
+    reader_models = ['flanUl2', 'llama_70b', 'flanT5', 'llama_7b', 'llama_70b_256_tokens']
+    # reader_models = ['llama_70b_256_tokens']
+    # retriever_models = ['gold','colbert', 'bm25']
+    retriever_models = ['colbert', 'bm25', 'gold']
+    # retriever_models = ['gold']
     top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
+    # top_ks =["top30", "top50"]
+    print(retriever_models)
+    print(reader_models)
+    print(top_ks)
     for retriever_model in retriever_models:
         for reader_model in reader_models:
         
             print('retriever', retriever_model)
             print('reader', reader_model)
-            for top_k in top_ks:
-                print(top_k)
-                data = load_json(os.path.join(results_dir, reader_model, dataset, retriever_model, f"{top_k}/reader_results_zeno.json"))
+            if retriever_model == 'gold':
+
+                data = load_json(os.path.join(results_dir, reader_model, 'bioasq' if 'bioasq' in dataset else dataset, 'gold', "reader_results_zeno.json"))
                         
-                combined_data = combine_gold_and_compiled(data, gold_data, questions_categorized)
-                output_df = get_reader_df(top_k, combined_data)
-                if top_k == 'baseline':
-                    project.upload_system(
-                    output_df, name= (reader_model + ' ' + top_k), id_column="id", output_column="output"
+                combined_data = combine_gold_and_compiled(data, gold_data, questions_categorized,'bioasq' in args.dataset)
+                output_df = get_reader_df('gold', combined_data, 'bioasq' in args.dataset)
+                project.upload_system(
+                    output_df, name= (reader_model + ' gold'), id_column="id", output_column="output"
                 )
-                else:
-                    project.upload_system(
-                        output_df, name= (retriever_model + ' ' + reader_model + ' ' + top_k), id_column="id", output_column="output"
+            else:
+                for top_k in top_ks:
+                    print(top_k)
+                    data = load_json(os.path.join(results_dir, reader_model, dataset, retriever_model, f"{top_k}/reader_results_zeno.json"))
+                            
+                    combined_data = combine_gold_and_compiled(data, gold_data, questions_categorized,'bioasq' in args.dataset)
+                    output_df = get_reader_df(top_k, combined_data, 'bioasq' in args.dataset)
+                    if top_k == 'baseline':
+                        project.upload_system(
+                        output_df, name= (reader_model + ' ' + top_k), id_column="id", output_column="output"
                     )
+                    else:
+                        project.upload_system(
+                            output_df, name= (retriever_model + ' ' + reader_model + ' ' + top_k), id_column="id", output_column="output"
+                        )

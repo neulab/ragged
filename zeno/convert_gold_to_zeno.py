@@ -44,6 +44,8 @@ def convert_gold_to_zeno(input_file, is_bioasq = False):
                 ans = output.get('answer', None)
                 if (ans):
                     new_data['output']['answer_set'].add(ans)
+                # if data['id'] == '5a3e8683966455904c000007':
+                    # pdb.set_trace()
                 provs = output.get('provenance', None)
                 if provs:
                     for prov in provs:

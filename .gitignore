@@ -2,3 +2,8 @@ __pycache__/
 *legacy*
 *.png
 *log
+*err
+*out
+*pdf
+*png
+*jpg

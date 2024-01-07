@@ -10,7 +10,7 @@ import pdb
 from file_utils import load_json, save_json, load_jsonl
 
 
-def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data, is_bioasq = False):
+def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data, is_baseline, is_bioasq = False):
 
     if is_bioasq:
         docid_key = 'pmid'
@@ -45,10 +45,9 @@ def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data, is_b
         answer = reader_q_info["answer"]
         answer_evaluation = reader_q_info["answer_evaluation"]
         for retrieved_passage_info, retrieved_passage_info_eval in zip(reader_q_info["retrieved_passages"], retriever_info["doc-level results"][:len(reader_q_info["retrieved_passages"])]):
-            # pdb.set_trace()
             # assert retrieved_passage_info["docid"] == retrieved_passage_info_eval["wiki_par_id"]
             retrieved_passage_info.update(retrieved_passage_info_eval)
-            
+
         zeno_format_data.append({
             "id": qid,
             "input": question,
@@ -56,9 +55,16 @@ def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data, is_b
                 "answer" : answer,
                 "answer_evaluation": answer_evaluation,
                 "retrieved" : reader_q_info["retrieved_passages"], 
-                "summary context evaluation": {
-                f"{docid_name}_id_match": any([r[f"{docid_name}_id_match"] for r in reader_q_info["retrieved_passages"]]),
-                f"{docid_name}_{section_name}_id_match": any([r[f"{docid_name}_{section_name}_id_match"] for r in reader_q_info["retrieved_passages"]])
+                "summary context evaluation": 
+                {
+                f"{docid_name}_id_match": False ,
+                f"{docid_name}_{section_name}_id_match": False,
+                f"answer_in_context": False
+                }
+                if is_baseline else {
+                f"{docid_name}_id_match": False if reader_q_info['retrieved_passages'][0].get(f"{docid_name}_id_match", None) is None else any([r[f"{docid_name}_id_match"] for r in reader_q_info["retrieved_passages"]]),
+                f"{docid_name}_{section_name}_id_match": False if reader_q_info['retrieved_passages'][0].get(f"{docid_name}_{section_name}_id_match", None) is None else any([r[f"{docid_name}_{section_name}_id_match"] for r in reader_q_info["retrieved_passages"]]),
+                f"answer_in_context": False if reader_q_info['retrieved_passages'][0].get(f"answer_in_context", None) is None else any([r[f"answer_in_context"] for r in reader_q_info["retrieved_passages"]]),
             }
             },
             "gold_answers": reader_q_info["gold_answers"],
@@ -73,8 +79,10 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", help='dataset; nq-dev-kilt or hotpotqa-dev-kilt or bioasq')
     args = parser.parse_args()
     
-    top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
-    # top_ks = ["top50"]
+    top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50", "gold"]
+    # top_ks = ['gold']
+
+    # top_ks = ["gold"]
     # metrics_map = {}
     # metrics_save_path = "/data/user_data/afreens/kilt/llama/combined_metrics.json"
     # retriever_model = 'flan'
@@ -83,10 +91,19 @@ if __name__ == "__main__":
     for top_k in top_ks:
         print(top_k)
         # k_dir = os.path.join(base_dir,'reader_results', args.reader, args.dataset, args.retriever, 'exp2', top_k)
-        k_dir = os.path.join(base_dir,'reader_results', args.reader, args.dataset.split('-')[0], args.retriever, top_k)
+        
+        if top_k == 'gold':
+            k_dir = os.path.join(base_dir,'reader_results', args.reader, args.dataset.split('-')[0], 'gold')
+            retriever_eval_file = os.path.join(base_dir, f'retriever_results/evaluations/gold/{args.dataset}.jsonl')
+            
+        else:
+            k_dir = os.path.join(base_dir,'reader_results', args.reader, args.dataset.split('-')[0], args.retriever, top_k)
+            retriever_eval_file = os.path.join(base_dir, f'retriever_results/evaluations/{args.retriever}/{args.dataset}.jsonl')
+        # else:
+            
         # base_folder = f"/data/user_data/afreens/kilt/flanT5/nq/exp2/{top_k}/"
         evaluation_file_path = os.path.join(k_dir, 'all_data_evaluated.jsonl')
-        retriever_eval_file = os.path.join(base_dir, f'retriever_results/evaluations/{args.retriever}/{args.dataset}.jsonl')
+        
 
         reader_output_data = load_jsonl(evaluation_file_path, sort_by_id = True)
         if (len(reader_output_data) == 0):
@@ -97,5 +114,5 @@ if __name__ == "__main__":
             warnings.warn("Warning: EMPTY file")
             continue
         
-        zeno_format_data = convert_reader_results_to_zeno(reader_output_data, retriever_eval_data, 'bioasq' in args.dataset)
+        zeno_format_data = convert_reader_results_to_zeno(reader_output_data, retriever_eval_data, top_k == 'baseline', 'bioasq' in args.dataset)
         save_json(zeno_format_data, os.path.join(k_dir, "reader_results_zeno.json"))

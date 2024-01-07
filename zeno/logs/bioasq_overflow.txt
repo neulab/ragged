@@ -1,0 +1,11 @@
+bioasq
+/data/tir/projects/tir6/general/afreens/dbqa/reader_results/flanT5/bioasq/bm25/top30/reader_results_zeno.json
+zeno_client.exceptions.APIError: ERROR: Unable to upload system: row is too big: size 8200, maximum size 8160
+
+nq
+reading from /data/tir/projects/tir6/general/afreens/dbqa/reader_results/llama_7b/nq/bm25/top3/reader_results_zeno.json
+zeno_client.exceptions.APIError: ERROR: Unable to upload system: row is too big: size 8248, maximum size 8160
+
+complete-bioasq
+reading from /data/tir/projects/tir6/general/afreens/dbqa/reader_results/flanT5/complete_bioasq/bm25/top30/reader_results_zeno.json
+zeno_client.exceptions.APIError: ERROR: Unable to upload system: row is too big: size 8200, maximum size 8160
