@@ -9,12 +9,12 @@
 # retrievers=("bm25" "colbert")
 # datasets=("nq" "hotpotqa" "bioasq" "complete_bioasq")
 
-retrievers=()
-datasets=()
+retrievers=( "bm25" "colbert")
+datasets=("hotpotqa")
 max_new_tokens=10
+max_truncation=2000
 
-
-reader="llama_7b"
+reader="llama_7b_2000_truncation"
 
 top_ks=("0" "1" "2" "3" "5" "10" "20" "30" "50")
 

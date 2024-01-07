@@ -43,7 +43,7 @@ class LlamaReader:
 
     def generate(self, prompts, max_new_tokens=10, truncate=4000):
 
-        total_tokens = 4000
+        total_tokens = truncate
         prompt_strs = []
         context_length_changes = []
         context_prompt_tokenized = self.tokenizer(CONTEXT_PROMPT)["input_ids"]

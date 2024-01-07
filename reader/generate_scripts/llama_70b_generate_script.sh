@@ -7,18 +7,19 @@
 # **Set the below lines based on the need of generation**
 
 # retrievers=("colbert")
-# retrievers=( "colbert")
-# datasets=("nq" "hotpotqa")
+retrievers=( "bm25" "colbert")
+datasets=("bioasq")
 # datasets=("complete_bioasq")
 # datasets=("nq" "hotpotqa" "bioasq" "complete_bioasq")
 
-retrievers=()
-datasets=()
+# retrievers=()
+# datasets=()
 max_new_tokens=10
+max_truncation=2000
 
 
 # reader="llama_70b_265_tokens"
-reader="llama_70b"
+reader="llama_70b_2000_truncation"
 
 top_ks=("0" "1" "2" "3" "5" "10" "20" "30" "50")
 
@@ -30,7 +31,7 @@ for retriever in "${retrievers[@]}"; do
     for dataset in "${datasets[@]}"; do
         # Loop through each topk
         for topk in "${top_ks[@]}"; do
-            python /home/afreens/ragged/reader/generate_top_k.py --model $reader --retriever $retriever --dataset $dataset --start_offset 0 --end_offset 6000 --hosted_api_path $1 --top_k $topk --hosted_api_port $2 --max_new_tokens $max_new_tokens
+            python /home/afreens/ragged/reader/generate_top_k.py --model $reader --retriever $retriever --dataset $dataset --start_offset 0 --end_offset 6000 --hosted_api_path $1 --top_k $topk --hosted_api_port $2 --max_new_tokens $max_new_tokens --max_truncation $max_truncation
         done
     done
 done

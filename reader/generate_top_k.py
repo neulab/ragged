@@ -59,7 +59,7 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
     for chunkid, chunk in enumerate(chunks):
         chunk_prompts = [prompt for _, prompt in chunk]
         try:
-            answers, context_length_changes = reader_object.generate(chunk_prompts, max_new_tokens=args.max_new_tokens)
+            answers, context_length_changes = reader_object.generate(chunk_prompts, max_new_tokens=args.max_new_tokens, truncate=args.max_truncation)
             all_context_length_changes.extend(context_length_changes)
             print(answers)
             answers = post_process_answers(answers)
@@ -109,6 +109,7 @@ def get_args():
     parser.add_argument("--retriever", type=str)
     parser.add_argument("--dataset", type=str)
     parser.add_argument("--max_new_tokens", type=int)
+    parser.add_argument("--max_truncation", type=int, default=4000)
 
     args = parser.parse_args()
     print(f"args: {vars(args)}")
@@ -122,7 +123,9 @@ if __name__ == "__main__":
         "flanT5" : FlanT5Reader,
         "flanUl2" : FlanT5Reader,
         "llama_7b": LlamaReader,
-        "llama_70b_256_tokens": LlamaReader
+        "llama_70b_256_tokens": LlamaReader,
+        "llama_70b_2000_truncation": LlamaReader,
+        "llama_7b_2000_truncation" : LlamaReader
     }
 
     retriever_path_map = {
