@@ -22,7 +22,7 @@ def create_project(dataset):
         section_name = 'par'
 
     project = client.create_project(
-        name=f"Document QA - {dataset}",
+        name=f"Document QA (gold) - {dataset}",
         view={
             "data": {"type": "text", 
                     "label": "question:"
@@ -286,9 +286,9 @@ if __name__ == "__main__":
         project.upload_dataset(data_df, id_column="id", data_column="question")
 
     reader_models = ['flanUl2', 'llama_70b', 'flanT5', 'llama_7b', 'llama_70b_256_tokens']
-    # reader_models = ['llama_70b_256_tokens']
+    reader_models = ['llama_70b_2000_truncation']
     # retriever_models = ['gold','colbert', 'bm25']
-    retriever_models = ['colbert', 'bm25', 'gold']
+    retriever_models = ['colbert','gold']
     # retriever_models = ['gold']
     top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
     # top_ks =["top30", "top50"]

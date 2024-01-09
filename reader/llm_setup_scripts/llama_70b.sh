@@ -26,5 +26,5 @@ export user=jhsia2
 mkdir -p /scratch/$user
 # v3 text-generation-launcher --model-id $model_id --port 7103 --master-port 23456 --shard-uds-path /scratch/afreens/tgi-uds-socket-1 --huggingface-hub-cache /data/tir/projects/tir2/models/tgi_cache/hub --max-input-length 4000 --max-total-tokens 4096
 # v4 text-generation-launcher --model-id $model_id --port 9103 --master-port 23456 --shard-uds-path /scratch/afreens/tgi-uds-socket-1 --huggingface-hub-cache /data/tir/projects/tir2/models/tgi_cache/hub --max-input-length 4000 --max-total-tokens 4096
-text-generation-launcher --model-id $model_id --port 8103 --master-port 23456 --shard-uds-path /scratch/$user/tgi-uds-socket-1 --huggingface-hub-cache /data/tir/projects/tir2/models/tgi_cache/hub --max-input-length 4000 --max-total-tokens 4096
+text-generation-launcher --model-id $model_id --port 8104 --master-port 23456 --shard-uds-path /scratch/$user/tgi-uds-socket-1 --huggingface-hub-cache /data/tir/projects/tir2/models/tgi_cache/hub --max-input-length 4000 --max-total-tokens 4096
 # text-generation-launcher --model-id $model_id --port 9429 --master-port 23456 --shard-uds-path /scratch/afreens/tgi-udscd ../top  -socket-1 --huggingface-hub-cache /data/tir/projects/tir2/models/tgi_cache/hub --max-input-length 4000 --max-total-tokens 4096

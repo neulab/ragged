@@ -10,8 +10,8 @@ conda activate py10
 # Define arrays for retrievers, readers, and datasets
 retrievers=("colbert" "bm25")
 # retrievers=("bm25")
-readers=("llama_70b" "llama_7b" "flanT5" "flanUl2" "llama_70b_256_tokens")
-# readers=("llama_70b")
+# readers=("llama_70b" "llama_7b" "flanT5" "flanUl2" "llama_70b_256_tokens")
+readers=("llama_70b_2000_truncation")
 datasets=("nq-dev-kilt" "hotpotqa-dev-kilt" "bioasq" "complete_bioasq")
 # datasets=("nq-dev-kilt")
 

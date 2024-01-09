@@ -57,7 +57,7 @@ class LlamaReader:
             prompt_strs.append(create_prompt(question=prompt["question"], context=context_after_truncation))
 
         responses = asyncio.run(self.batch_generate(prompt_strs, max_new_tokens, truncate))
-        print(responses)
+        # print(responses)
         return [r.generated_text for r in responses], context_length_changes
     
         # if not self.hosted_api_endpoint:
