@@ -277,11 +277,11 @@ def generations_evaluation(models, retrievers, datasets, with_bert=False, args=N
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gold_eval", type=bool, default=False)
+    parser.add_argument('--gold_eval', dest='gold_eval', action='store_true')
     parser.add_argument("--readers", type=str)
     parser.add_argument("--retrievers", type=str, default=None)
     parser.add_argument("--datasets", type=str)
-    parser.add_argument("--with_bert", type=str, default=False)
+    parser.add_argument('--with_bert', dest='with_bert', action='store_true')
     # parser.add_argument("--merge_list_answers", type=bool, default=True)
     parser.add_argument('--merge_list_answers', dest='merge_list_answers', action='store_true')
 
@@ -299,6 +299,6 @@ if __name__ == "__main__":
 
 
 
-# python /home/afreens/ragged/reader/evaluate_top_k.py --readers llama_70b,llama_7b --retrievers colbert,bm25 --datasets bioasq,complete_bioasq 
+# python /home/afreens/ragged/reader/evaluate_top_k.py --readers llama_70b_2000_truncation --retrievers colbert,bm25 --datasets nq,hotpotqa,bioasq,complete_bioasq --merge_list_answers
 
 
