@@ -35,7 +35,8 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
     prompt_indices = []
     time1 = time.time()
     for i, ques_info in tqdm(enumerate(retriever_data[start_offset:end_offset])):
-        print("index : ", start_offset+i)
+        if ((start_offset + i)%1000==0):
+            print("index : ", start_offset+i)
 
         if ques_info["id"] in reader_ques_ids_already_generated:
             continue
@@ -57,11 +58,12 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
     all_answers = []
     all_context_length_changes = []
     for chunkid, chunk in enumerate(chunks):
+        print(f'{chunkid}/{len(chunks)}')
         chunk_prompts = [prompt for _, prompt in chunk]
         try:
             answers, context_length_changes = reader_object.generate(chunk_prompts, max_new_tokens=args.max_new_tokens, truncate=args.max_truncation)
             all_context_length_changes.extend(context_length_changes)
-            print(answers)
+            # print(answers)
             answers = post_process_answers(answers)
             all_answers.extend(answers)
             chunk_prompt_indices = [x[0] for x in chunk]
@@ -123,6 +125,7 @@ if __name__ == "__main__":
         "flanT5" : FlanT5Reader,
         "flanUl2" : FlanT5Reader,
         "llama_7b": LlamaReader,
+        "llama_7b_256_tokens": LlamaReader,
         "llama_70b_256_tokens": LlamaReader,
         "llama_70b_2000_truncation": LlamaReader,
         "llama_7b_2000_truncation" : LlamaReader,
@@ -141,7 +144,7 @@ if __name__ == "__main__":
         "bioasq": "bioasq.jsonl",
         "complete_bioasq": "complete_bioasq.jsonl"
     }
-    
+
     reader=model_class_dict[args.model](hosted_api_path =f"http://{args.hosted_api_path}:{args.hosted_api_port}/")
     
     retriever_data_path = f"{retriever_path_map[args.retriever]}{dataset_map[args.dataset]}"

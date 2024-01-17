@@ -230,10 +230,10 @@ def gold_baseline_evaluation(models, datasets, with_bert=False, args=None):
             all_data = load_jsonl(input_file)
             gold_data = load_jsonl(gold_file)
             all_data, metrics = evaluate_reader_results(all_data, gold_data,with_bert, args)
-            metrics_save_path = f'{input_path}gold_baseline_metrics.json'
+            metrics_save_path = f'{input_path}gold/gold_baseline_metrics.json'
             save_json(metrics, metrics_save_path)
 
-            evaluation_file_path = f'{input_path}gold_baseline_evaluated.jsonl'
+            evaluation_file_path = f'{input_path}gold/all_data_evaluated.jsonl'
             save_jsonl(all_data, evaluation_file_path)
             # df = pd.DataFrame(metrics)
             # df.T.to_csv(metrics_save_path[:-4]+"csv")
@@ -241,6 +241,7 @@ def gold_baseline_evaluation(models, datasets, with_bert=False, args=None):
 
 def generations_evaluation(models, retrievers, datasets, with_bert=False, args=None):
     top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
+    top_ks= ["baseline"]
     dataset_map = {
         "hotpotqa" : "hotpotqa-dev-kilt.jsonl",
         "nq": "nq-dev-kilt.jsonl",
@@ -299,6 +300,6 @@ if __name__ == "__main__":
 
 
 
-# python /home/afreens/ragged/reader/evaluate_top_k.py --readers llama_70b_2000_truncation --retrievers colbert,bm25 --datasets nq,hotpotqa,bioasq,complete_bioasq --merge_list_answers
+# python /home/jhsia2/ragged/reader/evaluate_top_k.py --readers llama_7b_2000_truncation --retrievers colbert,bm25 --datasets nq,hotpotqa,bioasq,complete_bioasq --merge_list_answers
 
 
