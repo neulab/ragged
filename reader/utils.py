@@ -1,6 +1,6 @@
 import glob
 import os
-from file_utils import READER_BASE_FOLDER, load_jsonl, save_jsonl
+from file_utils import BASE_FOLDER, READER_BASE_FOLDER, load_json, load_jsonl, save_jsonl
 from tqdm import tqdm
 from transformers import T5Tokenizer
 from transformers import LlamaTokenizer
@@ -117,40 +117,62 @@ def find_tokenization_limits_based_on_contexts(retriever_output_file, write_file
     save_jsonl(retriever_data, write_file)
 
 def convert_gold_files():
-    models = "flanT5 flanUl2 llama_70b llama_7b".split(" ")
+    models = "llama_70b_2000_truncation llama_70b_256_tokens llama_7b_2000_truncation llama_7b_256_tokens".split(" ")
     datasets = "nq hotpotqa bioasq".split(" ")
     for model in models:
         for dataset in datasets:
             input_file = f"{READER_BASE_FOLDER}/{model}/{dataset}/gold/all_data_evaluated.jsonl"
-            # output_file = f"{READER_BASE_FOLDER}/{model}/{dataset}/gold/all_data_evaluated_new.jsonl"
-            data = load_jsonl(input_file)
-            for dp in data:
-                dp["retrieved_passages"] = [{"text":dp["evidence_span"]}]
-            save_jsonl(data, input_file)
+            if os.path.exists(input_file):
+                # output_file = f"{READER_BASE_FOLDER}/{model}/{dataset}/gold/all_data_evaluated_new.jsonl"
+                data = load_jsonl(input_file)
+                for dp in data:
+                    dp["retrieved_passages"] = [{"text":dp["evidence_span"]}]
+                save_jsonl(data, input_file)
 
-if __name__ == "__main__":
-    retriever_path_map = {
-        "bm25": "/data/tir/projects/tir6/general/afreens/dbqa/retriever_results/predictions/bm25/",
-        "colbert": "/data/tir/projects/tir6/general/afreens/dbqa/retriever_results/predictions/colbert/"
-
-    }
-
+def add_question_type_to_bioasq():
     dataset_map = {
         "hotpotqa" : "hotpotqa-dev-kilt.jsonl",
-        "nq": "nq-dev-kilt.jsonl"
+        "nq": "nq-dev-kilt.jsonl",
+        "bioasq": "bioasq.jsonl",
+        "complete_bioasq": "complete_bioasq.jsonl"
     }
 
-    save_map = {
-        "hotpotqa" : "hotpotqa-truncation.jsonl",
-        "nq": "nq-truncation.jsonl"
-    }
-    find_tokenization_limits_based_on_contexts(f"{retriever_path_map['bm25']}{dataset_map['hotpotqa']}", f"{retriever_path_map['bm25']}{save_map['hotpotqa']}")
-    find_tokenization_limits_based_on_contexts(f"{retriever_path_map['bm25']}{dataset_map['nq']}", f"{retriever_path_map['bm25']}{save_map['nq']}")
-    find_tokenization_limits_based_on_contexts(f"{retriever_path_map['colbert']}{dataset_map['hotpotqa']}", f"{retriever_path_map['colbert']}{save_map['hotpotqa']}")
-    find_tokenization_limits_based_on_contexts(f"{retriever_path_map['colbert']}{dataset_map['nq']}", f"{retriever_path_map['colbert']}{save_map['nq']}")
+    type_file = "/data/tir/projects/tir6/general/afreens/dbqa/data/questions_categorized/bioasq_questions_categorized.json"
+    type_data = load_json(type_file)
+    for dataset in "bioasq complete_bioasq".split(" "):
+        gold_file = f"{BASE_FOLDER}/data/{dataset_map[dataset]}"
+        gold_data = load_jsonl(gold_file)
+        for dp in gold_data:
+            dp["question_type"] = type_data[dp["id"]]
 
-    # find_tokenization_limits(f"{retriever_path_map['bm25']}{dataset_map['hotpotqa']}", f"{retriever_path_map['bm25']}{save_map['hotpotqa']}")
-    # find_tokenization_limits(f"{retriever_path_map['bm25']}{dataset_map['nq']}", f"{retriever_path_map['bm25']}{save_map['nq']}")
-    # find_tokenization_limits(f"{retriever_path_map['colbert']}{dataset_map['hotpotqa']}", f"{retriever_path_map['colbert']}{save_map['hotpotqa']}")
-    # find_tokenization_limits(f"{retriever_path_map['colbert']}{dataset_map['nq']}", f"{retriever_path_map['colbert']}{save_map['nq']}")
-    # convert_gold_files()
+        save_jsonl(gold_data, gold_file)
+
+        
+if __name__ == "__main__":
+    # retriever_path_map = {
+    #     "bm25": "/data/tir/projects/tir6/general/afreens/dbqa/retriever_results/predictions/bm25/",
+    #     "colbert": "/data/tir/projects/tir6/general/afreens/dbqa/retriever_results/predictions/colbert/"
+
+    # }
+
+    # dataset_map = {
+    #     "hotpotqa" : "hotpotqa-dev-kilt.jsonl",
+    #     "nq": "nq-dev-kilt.jsonl"
+    # }
+
+    # save_map = {
+    #     "hotpotqa" : "hotpotqa-truncation.jsonl",
+    #     "nq": "nq-truncation.jsonl"
+    # }
+    # find_tokenization_limits_based_on_contexts(f"{retriever_path_map['bm25']}{dataset_map['hotpotqa']}", f"{retriever_path_map['bm25']}{save_map['hotpotqa']}")
+    # find_tokenization_limits_based_on_contexts(f"{retriever_path_map['bm25']}{dataset_map['nq']}", f"{retriever_path_map['bm25']}{save_map['nq']}")
+    # find_tokenization_limits_based_on_contexts(f"{retriever_path_map['colbert']}{dataset_map['hotpotqa']}", f"{retriever_path_map['colbert']}{save_map['hotpotqa']}")
+    # find_tokenization_limits_based_on_contexts(f"{retriever_path_map['colbert']}{dataset_map['nq']}", f"{retriever_path_map['colbert']}{save_map['nq']}")
+
+    # # find_tokenization_limits(f"{retriever_path_map['bm25']}{dataset_map['hotpotqa']}", f"{retriever_path_map['bm25']}{save_map['hotpotqa']}")
+    # # find_tokenization_limits(f"{retriever_path_map['bm25']}{dataset_map['nq']}", f"{retriever_path_map['bm25']}{save_map['nq']}")
+    # # find_tokenization_limits(f"{retriever_path_map['colbert']}{dataset_map['hotpotqa']}", f"{retriever_path_map['colbert']}{save_map['hotpotqa']}")
+    # # find_tokenization_limits(f"{retriever_path_map['colbert']}{dataset_map['nq']}", f"{retriever_path_map['colbert']}{save_map['nq']}")
+    convert_gold_files()
+
+    # add_question_type_to_bioasq()
