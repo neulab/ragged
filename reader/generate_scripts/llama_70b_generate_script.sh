@@ -7,9 +7,9 @@
 # **Set the below lines based on the need of generation**
 
 # retrievers=("colbert")
-retrievers=( "bm25" "colbert")
-datasets=("bioasq")
-# datasets=("complete_bioasq")
+retrievers=("colbert")
+# datasets=("bioasq")
+datasets=("complete_bioasq")
 # datasets=("nq" "hotpotqa" "bioasq" "complete_bioasq")
 
 # retrievers=()

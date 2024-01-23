@@ -55,7 +55,7 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
     all_context_length_changes = []
     for chunkid, chunk in enumerate(chunks):
         chunk_prompts = [prompt for _, prompt in chunk]
-        answers, context_length_changes = reader_object.generate(chunk_prompts, max_new_tokens=10)
+        answers, context_length_changes = reader_object.generate(chunk_prompts, max_new_tokens=args.max_new_tokens, truncate=args.max_truncation)
         all_context_length_changes.extend(context_length_changes)
         # print(answers)
         answers = post_process_answers(answers)
@@ -69,6 +69,7 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
         "retrieved_passages": ques_info["output"][0]["provenance"],
         "answer": answer
             })
+
         save_jsonl(reader_responses, output_file)
     save_jsonl(reader_responses, output_file)
             
@@ -83,6 +84,8 @@ def get_args():
     parser.add_argument("--end_offset", type=int, default=None)
     parser.add_argument("--model", type=str)
     parser.add_argument("--dataset", type=str)
+    parser.add_argument("--max_new_tokens", type=int)
+    parser.add_argument("--max_truncation", type=int, default=4000)
 
     args = parser.parse_args()
     print(f"args: {vars(args)}")
@@ -95,7 +98,11 @@ if __name__ == "__main__":
         "llama_70b" : LlamaReader,
         "flanT5" : FlanT5Reader,
         "flanUl2" : FlanT5Reader,
-        "llama_7b": LlamaReader
+        "llama_7b": LlamaReader,
+        "llama_70b_256_tokens": LlamaReader,
+        "llama_70b_2000_truncation": LlamaReader,
+        "llama_7b_256_tokens": LlamaReader,
+        "llama_7b_2000_truncation" : LlamaReader
     }
 
     dataset_map = {
@@ -108,7 +115,7 @@ if __name__ == "__main__":
     reader=model_class_dict[args.model](hosted_api_path =f"http://{args.hosted_api_path}:{args.hosted_api_port}/")
 
     # output_path = f"/data/user_data/afreens/kilt/{args.model}/{args.dataset}/{args.retriever}/top{args.top_k}/"
-    output_path = f"{READER_BASE_FOLDER}/{args.model}/{args.dataset}/"
+    output_path = f"{READER_BASE_FOLDER}/{args.model}/{args.dataset}/gold/"
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     output_file = f'{output_path}/gold/gold_baseline_answers.jsonl'

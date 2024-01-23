@@ -128,7 +128,8 @@ if __name__ == "__main__":
         "llama_7b_256_tokens": LlamaReader,
         "llama_70b_256_tokens": LlamaReader,
         "llama_70b_2000_truncation": LlamaReader,
-        "llama_7b_2000_truncation" : LlamaReader
+        "llama_7b_2000_truncation" : LlamaReader,
+        "llama_7b_256_tokens":LlamaReader
     }
 
     retriever_path_map = {

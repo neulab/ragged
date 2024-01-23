@@ -225,8 +225,8 @@ def gold_baseline_evaluation(models, datasets, with_bert=False, args=None):
         for dataset in datasets:
             print(model, dataset)
             gold_file = f"{BASE_FOLDER}/data/{dataset_map[dataset]}"
-            input_path = f"{READER_BASE_FOLDER}/{model}/{dataset}/"
-            input_file = f'{input_path}gold/gold_baseline_answers.jsonl'
+            input_path = f"{READER_BASE_FOLDER}/{model}/{dataset}/gold/"
+            input_file = f'{input_path}gold_baseline_answers.jsonl'
             all_data = load_jsonl(input_file)
             gold_data = load_jsonl(gold_file)
             all_data, metrics = evaluate_reader_results(all_data, gold_data,with_bert, args)
