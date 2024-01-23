@@ -1,13 +1,13 @@
 import json
 import pdb
-
+import os
 BASE_FOLDER = '/data/tir/projects/tir6/general/afreens/dbqa'
 READER_BASE_FOLDER = '/data/tir/projects/tir6/general/afreens/dbqa/reader_results'
 
-def load_jsonl(file_path, sort_by_id = True):
-    print('loading from', file_path)
+def load_jsonl(filename, sort_by_id = True):
+    print('loading from', filename)
     data = []
-    with open(file_path, 'r') as file:
+    with open(filename, 'r') as file:
         for line in file:
             json_obj = json.loads(line.strip())
             data.append(json_obj)
@@ -31,7 +31,7 @@ def save_json(data, filename):
         json.dump(data, f, indent=4, sort_keys=False)
 
 def load_json(filename, sort_by_id = False):
-    print('reading from', filename)
+    print('loading from', filename)
     assert filename.endswith("json"), "file provided to load_json does not end with .json extension. Please recheck!"
     data = json.load(open(filename))
     if sort_by_id:

@@ -6,7 +6,8 @@ source /home/jhsia2/.bashrc
 conda activate py10
 
 retrievers=("bm25" "colbert")
-readers=("llama_70b" "llama_7b" "flanT5" "flanUl2")
+# readers=("llama_70b" "llama_7b" "flanT5" "flanUl2")
+readers=("llama_7b_2000_truncation")
 datasets=("nq-dev-kilt" "hotpotqa-dev-kilt" "bioasq" "complete_bioasq")
 # datasets=()
 

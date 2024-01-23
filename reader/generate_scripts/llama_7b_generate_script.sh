@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-#SBATCH --job-name=llama7bgeneration
-#SBATCH --output=/home/jhsia2/ragged/reader/generate_scripts/logs/hotpotqa_llama_7b.out
-#SBATCH --error=/home/jhsia2/ragged/reader/generate_scripts/logs/hotpotqa_llama_7b.err
+#SBATCH --job-name=nq_llama7bgeneration
+#SBATCH --output=/home/jhsia2/ragged/reader/generate_scripts/logs/nq_llama_7b.out
+#SBATCH --error=/home/jhsia2/ragged/reader/generate_scripts/logs/nq_llama_7b.err
 #SBATCH --time=600
 
 # **Set the below lines based on the need of generation**
@@ -11,18 +11,18 @@ source /home/jhsia2/.bashrc
 conda activate tgi-env
 
 # retrievers=("bm25" "colbert")
-# datasets=("hotpotqa" "hotpotqa" "hotpotqa" "bioasq")
-datasets=("hotpotqa")
+# datasets=("nq" "nq" "nq" "bioasq")
+datasets=("nq")
 
 retrievers=("colbert" "bm25")
-# datasets=("hotpotqa")
+# datasets=("nq")
 max_new_tokens=256
 max_truncation=4000
 
 reader="llama_7b_256_tokens"
 
-top_ks=("0" "1" "2" "3" "5" "10" "20" "30" "50")
-# top_ks=("20" "30" "50")
+# top_ks=("0" "1" "2" "3" "5" "10" "20" "30" "50")
+top_ks=("20" "30" "50")
 user=jhsia2
 export PYTHONPATH=/home/$user/ragged
 

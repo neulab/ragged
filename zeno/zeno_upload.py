@@ -285,13 +285,14 @@ if __name__ == "__main__":
         data_df = pd.DataFrame({"question": [d["input"] for d in gold_data], 'id': [d['id'] for d in gold_data]})
         project.upload_dataset(data_df, id_column="id", data_column="question")
 
-    reader_models = ['flanUl2', 'llama_70b', 'flanT5', 'llama_7b', 'llama_70b_256_tokens']
-    reader_models = ['llama_70b_2000_truncation']
+    reader_models = ['flanUl2', 'llama_70b', 'flanT5', 'llama_7b', "llama_70b_2000_truncation", "llama_7b_2000_truncation"]
+    # reader_modles = ["llama_70b_256_tokens", "llama_7b_256_tokens"]
+    # reader_models = ['llama_70b_2000_truncation']
     # retriever_models = ['gold','colbert', 'bm25']
     retriever_models = ['colbert','gold']
     # retriever_models = ['gold']
     top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
-    # top_ks =["top30", "top50"]
+    # top_ks =["baseline"]
     print(retriever_models)
     print(reader_models)
     print(top_ks)

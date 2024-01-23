@@ -241,7 +241,7 @@ def gold_baseline_evaluation(models, datasets, with_bert=False, args=None):
 
 def generations_evaluation(models, retrievers, datasets, with_bert=False, args=None):
     top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
-    top_ks= ["baseline"]
+    # top_ks= ["baseline"]
     dataset_map = {
         "hotpotqa" : "hotpotqa-dev-kilt.jsonl",
         "nq": "nq-dev-kilt.jsonl",

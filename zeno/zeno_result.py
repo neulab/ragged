@@ -8,6 +8,7 @@ import os
 import warnings
 import pdb
 from file_utils import load_json, save_json, load_jsonl
+import pdb
 
 
 def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data, is_baseline, is_bioasq = False):
@@ -23,7 +24,6 @@ def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data, is_b
         section_key = 'start_paragraph_id'
         section_name = 'par'
 
-    # pdb.set_trace()
     # reader_output_data = sorted(reader_output_data, key=lambda x: x["id"])
     # retriever_eval_data = sorted(retriever_eval_data, key=lambda x: x["id"])
 
@@ -41,13 +41,15 @@ def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data, is_b
     for reader_q_info, retriever_info in zip(reader_output_data, retriever_eval_data):
         assert reader_q_info["id"] == retriever_info["id"]
         qid = reader_q_info["id"]
+        
         question = reader_q_info["input"]
         answer = reader_q_info["answer"]
         answer_evaluation = reader_q_info["answer_evaluation"]
         for retrieved_passage_info, retrieved_passage_info_eval in zip(reader_q_info["retrieved_passages"], retriever_info["doc-level results"][:len(reader_q_info["retrieved_passages"])]):
             # assert retrieved_passage_info["docid"] == retrieved_passage_info_eval["wiki_par_id"]
             retrieved_passage_info.update(retrieved_passage_info_eval)
-
+        # if qid == '587e0116ae05ffb474000002':
+        #     pdb.set_trace()
         zeno_format_data.append({
             "id": qid,
             "input": question,
@@ -62,9 +64,12 @@ def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data, is_b
                 f"answer_in_context": False
                 }
                 if is_baseline else {
-                f"{docid_name}_id_match": False if reader_q_info['retrieved_passages'][0].get(f"{docid_name}_id_match", None) is None else any([r[f"{docid_name}_id_match"] for r in reader_q_info["retrieved_passages"]]),
-                f"{docid_name}_{section_name}_id_match": False if reader_q_info['retrieved_passages'][0].get(f"{docid_name}_{section_name}_id_match", None) is None else any([r[f"{docid_name}_{section_name}_id_match"] for r in reader_q_info["retrieved_passages"]]),
-                f"answer_in_context": False if reader_q_info['retrieved_passages'][0].get(f"answer_in_context", None) is None else any([r[f"answer_in_context"] for r in reader_q_info["retrieved_passages"]]),
+                f"{docid_name}_id_match": False if len(reader_q_info['retrieved_passages'])== 0 else any([r[f"{docid_name}_id_match"] for r in reader_q_info["retrieved_passages"]]),
+                f"{docid_name}_{section_name}_id_match": False if len(reader_q_info['retrieved_passages'])== 0 else any([r[f"{docid_name}_{section_name}_id_match"] for r in reader_q_info["retrieved_passages"]]),
+                f"answer_in_context": False if len(reader_q_info['retrieved_passages'])== 0 else any([r[f"answer_in_context"] for r in reader_q_info["retrieved_passages"]]),
+                # f"{docid_name}_id_match": False if reader_q_info['retrieved_passages'][0].get(f"{docid_name}_id_match", None) is None else any([r[f"{docid_name}_id_match"] for r in reader_q_info["retrieved_passages"]]),
+                # f"{docid_name}_{section_name}_id_match": False if reader_q_info['retrieved_passages'][0].get(f"{docid_name}_{section_name}_id_match", None) is None else any([r[f"{docid_name}_{section_name}_id_match"] for r in reader_q_info["retrieved_passages"]]),
+                # f"answer_in_context": False if reader_q_info['retrieved_passages'][0].get(f"answer_in_context", None) is None else any([r[f"answer_in_context"] for r in reader_q_info["retrieved_passages"]]),
             }
             },
             "gold_answers": reader_q_info["gold_answers"],
@@ -80,7 +85,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50", "gold"]
-    # top_ks = ['gold']
+    top_ks = ["gold"]
+    if args.dataset == 'complete_bioasq':
+        top_ks.remove('gold')
+    # top_ks= ["baseline", "gold"]
 
     # top_ks = ["gold"]
     # metrics_map = {}
