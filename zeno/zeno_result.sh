@@ -8,12 +8,16 @@ source /home/jhsia2/.bashrc
 conda activate py10
 
 # Define arrays for retrievers, readers, and datasets
-retrievers=("colbert" "bm25")
-# retrievers=("bm25")
-# readers=("llama_70b" "llama_7b" "flanT5" "flanUl2" "llama_70b_256_tokens")
-readers=("llama_70b_2000_truncation")
-datasets=("nq-dev-kilt" "hotpotqa-dev-kilt" "bioasq" "complete_bioasq")
-# datasets=("nq-dev-kilt")
+# retrievers=("colbert" "bm25")
+
+# llama_70b_256_tokens/bioasq/gold
+
+retrievers=("colbert")
+readers=("llama_70b" "llama_7b" "flanT5" "flanUl2" "llama_70b_2000_truncation" "llama_7b_2000_truncation" "llama_70b_256_tokens")
+# readers=("llama_7b_256_tokens")
+datasets=("complete_bioasq" "bioasq" )
+# datasets=("complete_bioasq" "bioasq")
+# datasets=("bioasq")
 
 # Loop through each retriever
 for retriever in "${retrievers[@]}"; do

@@ -45,7 +45,7 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
             evidence_spans.append(o["text"])
         # assert len(evidence_spans)>0
         evidence_span = "\n".join(evidence_spans)
-        ques_info["evidence_span"] = evidence_span
+        # ques_info["evidence_span"] = evidence_span
         prompt = {"id": ques_info["id"], "question" : question, "context": evidence_span}
         all_prompts.append(prompt)
         prompt_indices.append(i)
@@ -57,7 +57,7 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
         chunk_prompts = [prompt for _, prompt in chunk]
         answers, context_length_changes = reader_object.generate(chunk_prompts, max_new_tokens=args.max_new_tokens, truncate=args.max_truncation)
         all_context_length_changes.extend(context_length_changes)
-        print(answers)
+        # print(answers)
         answers = post_process_answers(answers)
         all_answers.extend(answers)
         chunk_prompt_indices = [x[0] for x in chunk]
@@ -66,8 +66,7 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
             reader_responses.append({
                 "id" : ques_info["id"],
         "input" : ques_info["input"],
-        "evidence_span": ques_info["evidence_span"],
-        "retrieved_passages": ques_info["output"][0]['provenance'],
+        "retrieved_passages": ques_info["output"][0]["provenance"],
         "answer": answer
             })
 
@@ -119,7 +118,7 @@ if __name__ == "__main__":
     output_path = f"{READER_BASE_FOLDER}/{args.model}/{args.dataset}/gold/"
     if not os.path.exists(output_path):
         os.makedirs(output_path)
-    output_file = f'{output_path}gold_baseline_answers.jsonl'
+    output_file = f'{output_path}/gold/gold_baseline_answers.jsonl'
     gold_file = f"{BASE_FOLDER}/retriever_results/predictions/gold/{dataset_map[args.dataset]}"
     
     generate_reader_outputs(gold_file, reader, output_file=output_file, start_offset=args.start_offset, end_offset=args.end_offset, args=args)
