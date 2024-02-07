@@ -7,7 +7,7 @@ import time
 import traceback
 
 from tqdm import tqdm
-from file_utils import BASE_FOLDER, READER_BASE_FOLDER, save_jsonl, load_jsonl, save_json
+from file_utils import BASE_FOLDER, READER_BASE_FOLDER, READER_BASE_FOLDER_NON_GOLD, save_jsonl, load_jsonl, save_json
 from reader.llama2.llama2_reader import LlamaReader
 
 time_map = {}
@@ -16,8 +16,8 @@ time_map = {}
 def post_process_answers(answers):
     return [x.strip().split("\n")[0] for x in answers]
 
-def generate_reader_outputs(input_path, reader_object, output_file=None, start_offset=0, end_offset=None, top_k=1, args=None):
-    
+def generate_reader_outputs(input_path, reader_object, output_path=None, start_offset=0, end_offset=None, top_k=1, args=None):
+    output_file = f'{output_path}reader_output_index_{args.start_offset}_to_{args.end_offset}.jsonl'
     retriever_data = load_jsonl(input_path)
     reader_responses = load_jsonl(output_file) if os.path.exists(output_file) else []
     print(f"no.of. questions in range {start_offset} to {end_offset} for which response is already generated = {len(reader_responses)}")
@@ -42,9 +42,13 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
             continue
 
         question = ques_info["input"]+"?"
+        relevant_documents = ques_info["output"][0]["provenance"]
+        if args.non_gold:
+            match_term = "wiki_par_id_match" if args.dataset in ["nq", "hotpotqa"] else "pm_sec_id_match"
+            relevant_documents = [r for r in relevant_documents if r[match_term]==False]
 
         if top_k:
-            retrieved_passages = ques_info["output"][0]["provenance"][:top_k]
+            retrieved_passages = relevant_documents[:top_k]
             context = "\n".join([passage["text"] for passage in retrieved_passages])
         else:
             context = ""
@@ -95,7 +99,7 @@ def generate_reader_outputs(input_path, reader_object, output_file=None, start_o
     print("Total reader_responses : ", len(reader_responses))
     print("Time taken: ", time_map["complete_generation"])
     save_jsonl(reader_responses, output_file)
-    save_json(all_context_length_changes, f"{BASE_FOLDER}/reader_results/{args.model}/{args.dataset}/{args.retriever}/{'baseline' if args.top_k==0 else 'top'+str(args.top_k)}/reader_output_index_{args.start_offset}_to_{args.end_offset}_context_length_changes.json")
+    save_json(all_context_length_changes, f"{output_path}reader_output_index_{args.start_offset}_to_{args.end_offset}_context_length_changes.json")
             
 
     
@@ -112,6 +116,7 @@ def get_args():
     parser.add_argument("--dataset", type=str)
     parser.add_argument("--max_new_tokens", type=int)
     parser.add_argument("--max_truncation", type=int, default=4000)
+    parser.add_argument("--non_gold", action='store_true')
 
     args = parser.parse_args()
     print(f"args: {vars(args)}")
@@ -129,7 +134,9 @@ if __name__ == "__main__":
         "llama_70b_256_tokens": LlamaReader,
         "llama_70b_2000_truncation": LlamaReader,
         "llama_7b_2000_truncation" : LlamaReader,
-        "llama_7b_256_tokens":LlamaReader
+        "llama_7b_256_tokens":LlamaReader,
+        "flanUl2_265_tokens":FlanT5Reader,
+        "llama_7b_2000_truncation_v2": LlamaReader
     }
 
     retriever_path_map = {
@@ -150,13 +157,12 @@ if __name__ == "__main__":
     retriever_data_path = f"{retriever_path_map[args.retriever]}{dataset_map[args.dataset]}"
 
     # output_path = f"/data/user_data/afreens/kilt/{args.model}/{args.dataset}/{args.retriever}/top{args.top_k}/"
-    output_path = f"{READER_BASE_FOLDER}/{args.model}/{args.dataset}/{args.retriever}/{'baseline' if args.top_k==0 else 'top'+str(args.top_k) }/"
+    reader_base_folder = READER_BASE_FOLDER_NON_GOLD if args.non_gold else READER_BASE_FOLDER
+    output_path = f"{reader_base_folder}/{args.model}/{args.dataset}/{args.retriever}/{'baseline' if args.top_k==0 else 'top'+str(args.top_k) }/"
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     output_file = f'{output_path}reader_output_index_{args.start_offset}_to_{args.end_offset}.jsonl'
-    # output_file = f'{args.output_dir}reader_output_index_{args.start_offset}_to_{args.end_offset}.jsonl'
-
     
-    generate_reader_outputs(retriever_data_path, reader, output_file=output_file, start_offset=args.start_offset, end_offset=args.end_offset, top_k=args.top_k, args=args)
+    generate_reader_outputs(retriever_data_path, reader, output_path=output_path, start_offset=args.start_offset, end_offset=args.end_offset, top_k=args.top_k, args=args)
 
     print("DONE!")
