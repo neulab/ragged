@@ -1,6 +1,6 @@
 from reader.utils import combine_all_files
 from evaluation.eval_downstream import _bertscore, _exact_match_score, _f1_score, _metric_max_over_ground_truths, _rougel_score, get_gold_answers, normalize_answer
-from file_utils import BASE_FOLDER, READER_BASE_FOLDER, load_jsonl, save_json, save_jsonl
+from file_utils import BASE_FOLDER, READER_BASE_FOLDER, NOISY_READER_BASE_FOLDER, load_jsonl, save_json, save_jsonl
 import pandas as pd
 
 from word2number import w2n
@@ -225,7 +225,7 @@ def gold_baseline_evaluation(models, datasets, with_bert=False, args=None):
         for dataset in datasets:
             print(model, dataset)
             gold_file = f"{BASE_FOLDER}/data/{dataset_map[dataset]}"
-            input_path = f"{READER_BASE_FOLDER}/{model}/{dataset}/gold/"
+            input_path = f"{NOISY_READER_BASE_FOLDER}/{model}/{dataset}/gold/"  if args.noisy else f"{READER_BASE_FOLDER}/{model}/{dataset}/gold/" 
             input_file = f'{input_path}gold_baseline_answers.jsonl'
             all_data = load_jsonl(input_file)
             gold_data = load_jsonl(gold_file)
@@ -240,8 +240,8 @@ def gold_baseline_evaluation(models, datasets, with_bert=False, args=None):
             # print(df.T)
 
 def generations_evaluation(models, retrievers, datasets, with_bert=False, args=None):
-    top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
-    # top_ks= ["baseline"]
+    # top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
+    top_ks= ["top1", "top2", "top3"]
     dataset_map = {
         "hotpotqa" : "hotpotqa-dev-kilt.jsonl",
         "nq": "nq-dev-kilt.jsonl",
@@ -253,7 +253,7 @@ def generations_evaluation(models, retrievers, datasets, with_bert=False, args=N
         for retriever in retrievers:
             for dataset in datasets:
                 print(f"Eval - {model}/{dataset}/{retriever}/")
-                root_dir = f"{READER_BASE_FOLDER}/{model}/{dataset}/{retriever}/"
+                root_dir = f"{NOISY_READER_BASE_FOLDER}/{model}/{dataset}/{retriever}/" if args.noisy else f"{READER_BASE_FOLDER}/{model}/{dataset}/{retriever}/"
                 gold_file = f"{BASE_FOLDER}/data/{dataset_map[dataset]}"
 
                 metrics_map = {}
@@ -283,7 +283,7 @@ def get_args():
     parser.add_argument("--retrievers", type=str, default=None)
     parser.add_argument("--datasets", type=str)
     parser.add_argument('--with_bert', dest='with_bert', action='store_true')
-    # parser.add_argument("--merge_list_answers", type=bool, default=True)
+    parser.add_argument("--noisy", type=bool, default=False)
     parser.add_argument('--merge_list_answers', dest='merge_list_answers', action='store_true')
 
     args = parser.parse_args()
