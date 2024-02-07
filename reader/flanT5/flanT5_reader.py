@@ -27,8 +27,7 @@ class FlanT5Reader:
 
     def generate(self, prompts, max_new_tokens=10, truncate=2000):
         print("In flan t5 generation")
-
-        total_tokens = 2000
+        total_tokens = truncate
         prompt_strs = []
         context_length_changes = []
         context_prompt_tokenized = self.tokenizer(CONTEXT_PROMPT)["input_ids"]
