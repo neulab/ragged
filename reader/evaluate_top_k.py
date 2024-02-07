@@ -283,7 +283,7 @@ def get_args():
     parser.add_argument("--retrievers", type=str, default=None)
     parser.add_argument("--datasets", type=str)
     parser.add_argument('--with_bert', dest='with_bert', action='store_true')
-    parser.add_argument("--noisy", type=bool, default=False)
+    parser.add_argument("--noisy", dest = 'noisy', action='store_true')
     parser.add_argument('--merge_list_answers', dest='merge_list_answers', action='store_true')
 
     args = parser.parse_args()
