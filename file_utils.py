@@ -3,6 +3,7 @@ import pdb
 
 BASE_FOLDER = '/data/tir/projects/tir6/general/afreens/dbqa'
 READER_BASE_FOLDER = '/data/tir/projects/tir6/general/afreens/dbqa/reader_results'
+READER_BASE_FOLDER_NON_GOLD = "/data/tir/projects/tir6/general/afreens/dbqa/noisy_reader_results"
 
 def load_jsonl(file_path, sort_by_id = True):
     print('loading from', file_path)
