@@ -7,7 +7,7 @@ import time
 import traceback
 
 from tqdm import tqdm
-from file_utils import BASE_FOLDER, READER_BASE_FOLDER, READER_BASE_FOLDER_NON_GOLD, save_jsonl, load_jsonl, save_json
+from file_utils import BASE_FOLDER, NOISY_READER_BASE_FOLDER, READER_BASE_FOLDER, save_jsonl, load_jsonl, save_json
 from reader.llama2.llama2_reader import LlamaReader
 
 time_map = {}
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     retriever_data_path = f"{retriever_path_map[args.retriever]}{dataset_map[args.dataset]}"
 
     # output_path = f"/data/user_data/afreens/kilt/{args.model}/{args.dataset}/{args.retriever}/top{args.top_k}/"
-    reader_base_folder = READER_BASE_FOLDER_NON_GOLD if args.non_gold else READER_BASE_FOLDER
+    reader_base_folder = NOISY_READER_BASE_FOLDER if args.non_gold else READER_BASE_FOLDER
     output_path = f"{reader_base_folder}/{args.model}/{args.dataset}/{args.retriever}/{'baseline' if args.top_k==0 else 'top'+str(args.top_k) }/"
     if not os.path.exists(output_path):
         os.makedirs(output_path)
