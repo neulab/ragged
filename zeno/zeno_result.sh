@@ -13,20 +13,22 @@ conda activate py10
 # llama_70b_256_tokens/bioasq/gold
 
 retrievers=("colbert")
-readers=("llama_70b" "llama_7b" "flanT5" "flanUl2" "llama_70b_2000_truncation" "llama_7b_2000_truncation" "llama_70b_256_tokens")
+# readers=("llama_70b" "llama_7b" "flanT5" "flanUl2" "llama_70b_2000_truncation" "llama_7b_2000_truncation")
+readers=("llama_70b" "llama_7b" "flanT5" "flanUl2")
 # readers=("llama_7b_256_tokens")
-datasets=("complete_bioasq" "bioasq" )
-# datasets=("complete_bioasq" "bioasq")
-# datasets=("bioasq")
+# datasets=("hotpotqa-dev-kilt" "nq-dev-kilt" "complete_bioasq")
+datasets=("nq-dev-kilt" "complete_bioasq")
+# datasets=("nq-dev-kilt")
 
 # Loop through each retriever
 for retriever in "${retrievers[@]}"; do
+  # echo $retriever
   # Loop through each reader
   for reader in "${readers[@]}"; do
     # Loop through each dataset
     for dataset in "${datasets[@]}"; do
       # Call the Python script with the current combination
-      python zeno_result.py --retriever "$retriever" --reader "$reader" --dataset "$dataset"
+      python zeno_result.py --retriever "$retriever" --reader "$reader" --dataset "$dataset" --noisy
     done
   done
 done

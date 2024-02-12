@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PYTHONPATH=$PYTHONPATH:/home/jhsia2/ragged
+export PYTHONPATH=$PYTHONPATH:/home/jhsia2/ragged
 
 source /home/jhsia2/.bashrc
 conda activate py10

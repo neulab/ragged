@@ -7,7 +7,7 @@ export PYTHONPATH=$PYTHONPATH:/home/jhsia2/ragged
 
 # datasets=("nq" "hotpotqa" "complete_bioasq")
 # for dataset in "${datasets[@]}"; do
-python zeno_upload.py --dataset $dataset --create_project
+python zeno_upload.py --dataset $dataset 
 # done
 # python zeno_upload.py --dataset $dataset --create_project
 # done

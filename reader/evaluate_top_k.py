@@ -134,8 +134,10 @@ def evaluate_reader_results(reader_output, gold_data, WITH_BERT, args):
 
     gold_data_id_map = {str(gd["id"]):gd for gd in gold_data}
 
-    print(len(gold_data))
-    print(len(reader_output))
+    print('gold data len', len(gold_data))
+    print('reader out len', len(reader_output))
+    if len(gold_data) != len(reader_output):
+        print('size mismatch')
 
     total_count = 0
 
@@ -207,7 +209,7 @@ def evaluate_reader_results(reader_output, gold_data, WITH_BERT, args):
         method_metrics["bertscore_p"] = round(bertscore_p, 4)
         method_metrics["bertscore_r"] = round(bertscore_r, 4)
 
-    print(f"total questions - dev: {total_count}/2837")
+    print(f"total questions - dev: {total_count}/{len(gold_data)}")
     print("Reader metrics : ", method_metrics)
     
     return reader_output,method_metrics
@@ -230,18 +232,18 @@ def gold_baseline_evaluation(models, datasets, with_bert=False, args=None):
             all_data = load_jsonl(input_file)
             gold_data = load_jsonl(gold_file)
             all_data, metrics = evaluate_reader_results(all_data, gold_data,with_bert, args)
-            metrics_save_path = f'{input_path}gold/gold_baseline_metrics.json'
+            metrics_save_path = f'{input_path}gold_baseline_metrics.json'
             save_json(metrics, metrics_save_path)
 
-            evaluation_file_path = f'{input_path}gold/all_data_evaluated.jsonl'
+            evaluation_file_path = f'{input_path}all_data_evaluated.jsonl'
             save_jsonl(all_data, evaluation_file_path)
             # df = pd.DataFrame(metrics)
             # df.T.to_csv(metrics_save_path[:-4]+"csv")
             # print(df.T)
 
 def generations_evaluation(models, retrievers, datasets, with_bert=False, args=None):
-    # top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
-    top_ks= ["top1", "top2", "top3"]
+    top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
+    top_ks = top_ks[1:]
     dataset_map = {
         "hotpotqa" : "hotpotqa-dev-kilt.jsonl",
         "nq": "nq-dev-kilt.jsonl",
