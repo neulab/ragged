@@ -1,13 +1,15 @@
 #!/bin/bash
 #
 #SBATCH --exclude=shire-1-10,shire-1-6
-#SBATCH --job-name=flanT5_generation
-#SBATCH --output="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/flanT5/slurm-%A_%a.out"
-#SBATCH --error="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/flanT5/slurm-%A_%a.err"
+#SBATCH --job-name=flanT5_nq
+#SBATCH --output="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/flanT5/nq.out"
+#SBATCH --error="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/flanT5/nq.err"
 #SBATCH --time=800
 
 # **Set the below lines based on the need of generation**
-
+source /home/jhsia2/.bashrc
+conda activate tgi-env
+    
 # retrievers=("bm25" "colbert")
 # datasets=("nq" "hotpotqa" "bioasq" "complete_bioasq")
 retrievers=("colbert")
@@ -18,9 +20,9 @@ max_truncation=2000
 
 reader="flanT5"
 
-top_ks=("1")
+top_ks=("1" "2" "3" "5" "10" "20" "30" "50")
 
-export PYTHONPATH=/home/afreens/ragged
+export PYTHONPATH=/home/jhsia2/ragged
 
 # Loop through each retriever
 for retriever in "${retrievers[@]}"; do

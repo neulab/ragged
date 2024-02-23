@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=Llama-2-7b-hotpotqa
-#SBATCH --partition=babel-shared-long
-#SBATCH --output=/home/jhsia2/ragged/reader/llm_setup_scripts/logs/llama_7b_hotpotqa.out
-#SBATCH --error=/home/jhsia2/ragged/reader/llm_setup_scripts/logs/llama_7b_hotpotqa.err
+#SBATCH --job-name=Llama7b
+#SBATCH --partition=general
+#SBATCH --output=/home/jhsia2/ragged/reader/llm_setup_scripts/logs/llama_7b.out
+#SBATCH --error=/home/jhsia2/ragged/reader/llm_setup_scripts/logs/llama_7b.err
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:A6000:1
 #SBATCH --mem=50GB
-#SBATCH --time=1000
+#SBATCH --time=12:00:00
 
 source /home/jhsia2/.bashrc
 conda activate tgi-env
