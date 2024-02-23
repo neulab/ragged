@@ -81,27 +81,38 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process input, gold, and output files")
     parser.add_argument("--retriever", help='retriever')
     parser.add_argument("--reader", help='reader')
-    parser.add_argument("--noisy", dest = 'noisy', action='store_true')
+    parser.add_argument("--top_negative", dest = 'top_negative', action='store_true')
+    parser.add_argument("--top_positive", dest = 'top_positive', action='store_true')
     parser.add_argument("--dataset", help='dataset; nq-dev-kilt or hotpotqa-dev-kilt or bioasq')
     args = parser.parse_args()
     
     print(args.dataset)
-    # top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50", "gold"]
-    top_ks= ["top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
+    top_ks= ["baseline",  "gold", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50",]
+    if args.top_negative or args.top_positive:
+        top_ks = top_ks[2:]
+    # top_ks= ["top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
 
     base_dir = os.getenv('DBQA')
+
+    if (args.top_negative):
+        results_dir = os.path.join(base_dir, 'noisy_reader_results')
+    elif (args.top_positive):
+        results_dir = os.path.join(base_dir, 'only_gold_reader_results')
+    else:
+        results_dir = os.path.join(base_dir, 'reader_results')
+
     for top_k in top_ks:
         print(top_k)
         
         if top_k == 'gold':
             if args.dataset == 'complete_bioasq':
-                k_dir = os.path.join(base_dir, 'noisy_reader_results' if args.noisy else 'reader_results', args.reader, 'bioasq', 'gold')
+                k_dir = os.path.join(results_dir, args.reader, 'bioasq', 'gold')
             else:
-                k_dir = os.path.join(base_dir,'noisy_reader_results' if args.noisy else 'reader_results', args.reader, args.dataset.split('-')[0], 'gold')
+                k_dir = os.path.join(results_dir, args.reader, args.dataset.split('-')[0], 'gold')
             retriever_eval_file = os.path.join(base_dir, f'retriever_results/evaluations/gold/{args.dataset}.jsonl')
             
         else:
-            k_dir = os.path.join(base_dir,'noisy_reader_results' if args.noisy else 'reader_results', args.reader, args.dataset.split('-')[0], args.retriever, top_k)
+            k_dir = os.path.join(results_dir, args.reader, args.dataset.split('-')[0], args.retriever, top_k)
             retriever_eval_file = os.path.join(base_dir, f'retriever_results/evaluations/{args.retriever}/{args.dataset}.jsonl')
         # else:
             

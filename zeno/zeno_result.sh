@@ -16,8 +16,8 @@ retrievers=("colbert")
 # readers=("llama_70b" "llama_7b" "flanT5" "flanUl2" "llama_70b_2000_truncation" "llama_7b_2000_truncation")
 readers=("llama_70b" "llama_7b" "flanT5" "flanUl2")
 # readers=("llama_7b_256_tokens")
-# datasets=("hotpotqa-dev-kilt" "nq-dev-kilt" "complete_bioasq")
-datasets=("nq-dev-kilt" "complete_bioasq")
+datasets=("complete_bioasq")
+# datasets=("nq-dev-kilt" "hotpotqa-dev-kilt" "complete_bioasq")
 # datasets=("nq-dev-kilt")
 
 # Loop through each retriever
@@ -28,7 +28,7 @@ for retriever in "${retrievers[@]}"; do
     # Loop through each dataset
     for dataset in "${datasets[@]}"; do
       # Call the Python script with the current combination
-      python zeno_result.py --retriever "$retriever" --reader "$reader" --dataset "$dataset" --noisy
+      python zeno_result.py --retriever "$retriever" --reader "$reader" --dataset "$dataset" --top_positive
     done
   done
 done
