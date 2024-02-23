@@ -1,6 +1,6 @@
 from reader.utils import combine_all_files
 from evaluation.eval_downstream import _bertscore, _exact_match_score, _f1_score, _metric_max_over_ground_truths, _rougel_score, get_gold_answers, normalize_answer
-from file_utils import BASE_FOLDER, READER_BASE_FOLDER, NOISY_READER_BASE_FOLDER, load_jsonl, save_json, save_jsonl
+from file_utils import BASE_FOLDER, ONLY_GOLD_READER_BASE_FOLDER, READER_BASE_FOLDER, NOISY_READER_BASE_FOLDER, load_jsonl, save_json, save_jsonl
 import pandas as pd
 
 from word2number import w2n
@@ -230,18 +230,18 @@ def gold_baseline_evaluation(models, datasets, with_bert=False, args=None):
             all_data = load_jsonl(input_file)
             gold_data = load_jsonl(gold_file)
             all_data, metrics = evaluate_reader_results(all_data, gold_data,with_bert, args)
-            metrics_save_path = f'{input_path}gold/gold_baseline_metrics.json'
+            metrics_save_path = f'{input_path}gold_baseline_metrics.json'
             save_json(metrics, metrics_save_path)
 
-            evaluation_file_path = f'{input_path}gold/all_data_evaluated.jsonl'
+            evaluation_file_path = f'{input_path}all_data_evaluated.jsonl'
             save_jsonl(all_data, evaluation_file_path)
             # df = pd.DataFrame(metrics)
             # df.T.to_csv(metrics_save_path[:-4]+"csv")
             # print(df.T)
 
 def generations_evaluation(models, retrievers, datasets, with_bert=False, args=None):
-    # top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
-    top_ks= ["top1", "top2", "top3"]
+    top_ks= ["top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
+    # top_ks= ["top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
     dataset_map = {
         "hotpotqa" : "hotpotqa-dev-kilt.jsonl",
         "nq": "nq-dev-kilt.jsonl",
@@ -253,7 +253,12 @@ def generations_evaluation(models, retrievers, datasets, with_bert=False, args=N
         for retriever in retrievers:
             for dataset in datasets:
                 print(f"Eval - {model}/{dataset}/{retriever}/")
-                root_dir = f"{NOISY_READER_BASE_FOLDER}/{model}/{dataset}/{retriever}/" if args.noisy else f"{READER_BASE_FOLDER}/{model}/{dataset}/{retriever}/"
+                if args.noisy:
+                    root_dir = f"{NOISY_READER_BASE_FOLDER}/{model}/{dataset}/{retriever}/" 
+                elif args.only_gold:
+                    root_dir = f"{ONLY_GOLD_READER_BASE_FOLDER}/{model}/{dataset}/{retriever}/" 
+                else:
+                    root_dir = f"{READER_BASE_FOLDER}/{model}/{dataset}/{retriever}/" 
                 gold_file = f"{BASE_FOLDER}/data/{dataset_map[dataset]}"
 
                 metrics_map = {}
@@ -284,6 +289,7 @@ def get_args():
     parser.add_argument("--datasets", type=str)
     parser.add_argument('--with_bert', dest='with_bert', action='store_true')
     parser.add_argument("--noisy", dest = 'noisy', action='store_true')
+    parser.add_argument("--only_gold", dest = 'only_gold', action='store_true')
     parser.add_argument('--merge_list_answers', dest='merge_list_answers', action='store_true')
 
     args = parser.parse_args()
@@ -300,6 +306,6 @@ if __name__ == "__main__":
 
 
 
-# python /home/jhsia2/ragged/reader/evaluate_top_k.py --readers llama_7b_2000_truncation --retrievers colbert,bm25 --datasets nq,hotpotqa,bioasq,complete_bioasq --merge_list_answers
+# python /home/jhsia2/ragged/reader/evaluate_top_k.py --readers llama_7b_2000_truncation --retrievers colbert,bm25 --datasets nq,hotpotqa,complete_bioasq --merge_list_answers
 
-
+# python evaluate_top_k.py --readers llama_7b,llama_70b,flanT5,flanUl2 --retrievers colbert --datasets nq 

@@ -7,7 +7,7 @@ import time
 import traceback
 
 from tqdm import tqdm
-from file_utils import BASE_FOLDER, NOISY_READER_BASE_FOLDER, READER_BASE_FOLDER, save_jsonl, load_jsonl, save_json
+from file_utils import BASE_FOLDER, NOISY_READER_BASE_FOLDER, ONLY_GOLD_READER_BASE_FOLDER, READER_BASE_FOLDER, save_jsonl, load_jsonl, save_json
 from reader.llama2.llama2_reader import LlamaReader
 
 time_map = {}
@@ -17,6 +17,8 @@ def post_process_answers(answers):
     return [x.strip().split("\n")[0] for x in answers]
 
 def generate_reader_outputs(input_path, reader_object, output_path=None, start_offset=0, end_offset=None, top_k=1, args=None):
+    
+    batch_size = 50
     output_file = f'{output_path}reader_output_index_{args.start_offset}_to_{args.end_offset}.jsonl'
     retriever_data = load_jsonl(input_path)
     reader_responses = load_jsonl(output_file) if os.path.exists(output_file) else []
@@ -46,6 +48,9 @@ def generate_reader_outputs(input_path, reader_object, output_path=None, start_o
         if args.non_gold:
             match_term = "wiki_par_id_match" if args.dataset in ["nq", "hotpotqa"] else "pm_sec_id_match"
             relevant_documents = [r for r in relevant_documents if r[match_term]==False]
+        elif args.only_gold:
+            match_term = "wiki_par_id_match" if args.dataset in ["nq", "hotpotqa"] else "pm_sec_id_match"
+            relevant_documents = [r for r in relevant_documents if r[match_term]==True]
 
         if top_k:
             retrieved_passages = relevant_documents[:top_k]
@@ -58,7 +63,7 @@ def generate_reader_outputs(input_path, reader_object, output_path=None, start_o
         prompt_indices.append(i)
             
     
-    chunks = [list(zip(prompt_indices, all_prompts))[x:x+50] for x in range(0, len(all_prompts), 50)]
+    chunks = [list(zip(prompt_indices, all_prompts))[x:x+batch_size] for x in range(0, len(all_prompts), batch_size)]
     all_answers = []
     all_context_length_changes = []
     for chunkid, chunk in enumerate(chunks):
@@ -76,7 +81,7 @@ def generate_reader_outputs(input_path, reader_object, output_path=None, start_o
                 reader_responses.append({
                     "id" : ques_info["id"],
             "input" : ques_info["input"],
-            "retrieved_passages": ques_info["output"][0]["provenance"][:top_k],
+            "retrieved_passages": relevant_documents[:top_k],
             "answer": answer
                 })
                 
@@ -116,6 +121,7 @@ def get_args():
     parser.add_argument("--dataset", type=str)
     parser.add_argument("--max_new_tokens", type=int)
     parser.add_argument("--max_truncation", type=int, default=4000)
+    parser.add_argument("--only_gold", action='store_true')
     parser.add_argument("--non_gold", action='store_true')
 
     args = parser.parse_args()
@@ -157,7 +163,12 @@ if __name__ == "__main__":
     retriever_data_path = f"{retriever_path_map[args.retriever]}{dataset_map[args.dataset]}"
 
     # output_path = f"/data/user_data/afreens/kilt/{args.model}/{args.dataset}/{args.retriever}/top{args.top_k}/"
-    reader_base_folder = NOISY_READER_BASE_FOLDER if args.non_gold else READER_BASE_FOLDER
+    if args.non_gold:
+        reader_base_folder = NOISY_READER_BASE_FOLDER
+    elif args.only_gold:
+        reader_base_folder = ONLY_GOLD_READER_BASE_FOLDER
+    else:
+        reader_base_folder = READER_BASE_FOLDER
     output_path = f"{reader_base_folder}/{args.model}/{args.dataset}/{args.retriever}/{'baseline' if args.top_k==0 else 'top'+str(args.top_k) }/"
     if not os.path.exists(output_path):
         os.makedirs(output_path)

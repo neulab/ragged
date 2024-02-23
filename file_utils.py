@@ -4,6 +4,7 @@ import os
 BASE_FOLDER = '/data/tir/projects/tir6/general/afreens/dbqa'
 READER_BASE_FOLDER = os.path.join(BASE_FOLDER, 'reader_results')
 NOISY_READER_BASE_FOLDER = os.path.join(BASE_FOLDER, 'noisy_reader_results')
+ONLY_GOLD_READER_BASE_FOLDER  = os.path.join(BASE_FOLDER, 'only_gold_reader_results')
 
 def load_jsonl(filename, sort_by_id = True):
     print('loading from', filename)
