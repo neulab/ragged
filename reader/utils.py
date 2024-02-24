@@ -5,15 +5,30 @@ from tqdm import tqdm
 from transformers import T5Tokenizer
 from transformers import LlamaTokenizer
 
-CONTEXT_PROMPT = "Give simple short one phrase answers for the questions based on the context"
-NO_CONTEXT_PROMPT = "Give simple short one phrase answers for the question"
+INSTRUCTION_STR = "Give simple short one phrase answers for the questions based on the context"
+NO_CONTEXT_INSTRUCTION_STR = "Give simple short one phrase answers for the question"
+
+def truncate_prompt(prompt, tokenizer, instruction_str_tokens, total_tokens):
+    question_tokens = tokenizer(prompt["question"])["input_ids"]
+    remaining_length = total_tokens-len(instruction_str_tokens)-len(question_tokens)-max_new_tokens-5 #additional buffer of 5
+    context_tokens_before_truncation = tokenizer(prompt["context"], add_special_tokens=False)["input_ids"]
+    context_tokens_after_truncation = tokenizer(prompt["context"], max_length=remaining_length, truncation=True, add_special_tokens=False)["input_ids"]
+    context_str_after_truncation = tokenizer.decode(context_tokens_after_truncation)
+    context_length_change_info = {
+        "original_context_str_length": len(prompt["context"]),
+        "context_str_length_after_truncation": len(context_str_after_truncation),
+        "original_context_token_length": len(context_tokens_before_truncation),
+        "context_token_length_after_truncation": len(context_tokens_after_truncation)
+    }
+    modified_prompt = create_prompt(question=prompt["question"], context=context_str_after_truncation)
+    return modified_prompt, context_length_change_info
+
 def create_prompt(question, context):
     if context:
-        return f"{CONTEXT_PROMPT}\nContext: {context}\nQuestion: {question}\nAnswer: ".strip()
+        return f"{INSTRUCTION_STR}\nContext: {context}\nQuestion: {question}\nAnswer: ".strip()
     else:
-        return f"{NO_CONTEXT_PROMPT}\nQuestion: {question}\nAnswer: ".strip()
+        return f"{NO_CONTEXT_INSTRUCTION_STR}\nQuestion: {question}\nAnswer: ".strip()
     
-
 def combine_all_files(base_path, output_path=None):
     all_data = []
     all_data_unique = []
@@ -54,8 +69,8 @@ def find_tokenization_limits(retriever_output_file, write_file):
     retriever_data = load_data(retriever_output_file)
 
     top_ks = list(range(20, 51, 5))
-    t5_context_prompt_tokenized = t5_tokenizer(CONTEXT_PROMPT)["input_ids"]
-    llama_context_prompt_tokenized = llama_tokenizer(CONTEXT_PROMPT)["input_ids"]
+    t5_context_prompt_tokenized = t5_tokenizer(INSTRUCTION_STR)["input_ids"]
+    llama_context_prompt_tokenized = llama_tokenizer(INSTRUCTION_STR)["input_ids"]
 
     for r_dp in tqdm(retriever_data):
         r_dp["t5_truncation"] = {}
@@ -104,8 +119,8 @@ def find_tokenization_limits_based_on_contexts(retriever_output_file, write_file
     llama_tokenizer = LlamaTokenizer.from_pretrained("/data/datasets/models/meta-ai/llama2/weights/")
     retriever_data = load_data(retriever_output_file)
 
-    t5_context_prompt_tokenized = t5_tokenizer(CONTEXT_PROMPT)["input_ids"]
-    llama_context_prompt_tokenized = llama_tokenizer(CONTEXT_PROMPT)["input_ids"]
+    t5_context_prompt_tokenized = t5_tokenizer(INSTRUCTION_STR)["input_ids"]
+    llama_context_prompt_tokenized = llama_tokenizer(INSTRUCTION_STR)["input_ids"]
 
     for r_dp in tqdm(retriever_data):
         question = r_dp["input"]

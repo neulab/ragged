@@ -1,6 +1,5 @@
 import torch 
-import time
-from transformers import LlamaTokenizer
+from transformers import T5Tokenizer
 from pprint import pprint
 import asyncio
 from reader.utils import INSTRUCTION_STR, truncate_prompt
@@ -9,19 +8,21 @@ import text_generation as tg
 
 time_map = {}
         
-class LlamaReader:
-    def __init__(self, hosted_api_path=None, tokenizer_path="/data/datasets/models/meta-ai/llama2/weights/"):
-        self.tokenizer = LlamaTokenizer.from_pretrained(tokenizer_path)
-        self.hosted_api_endpoint = hosted_api_path
+class FlanReader:
+    def __init__(self, hosted_api_endpoint=None, tokenizer_path="google/flan-ul2"):
+        self.tokenizer = T5Tokenizer.from_pretrained(tokenizer_path)
+        self.hosted_api_endpoint = hosted_api_endpoint
+
+        # initialize async text generation inference client
         nest_asyncio.apply()
         self.async_client = tg.AsyncClient(self.hosted_api_endpoint)
 
     
-    async def batch_generate(self, texts, max_new_tokens=20, truncate=4000):
+    async def batch_generate(self, texts, max_new_tokens=10, truncate=2000):
         return await asyncio.gather(*[self.async_client.generate(text, max_new_tokens=max_new_tokens, truncate=truncate) for text in texts])
 
 
-    def generate(self, prompts, max_new_tokens=10, truncate=4000):
+    def generate(self, prompts, max_new_tokens=10, truncate=2000):
         total_tokens = truncate
         modified_prompts = []
         context_length_changes = []
@@ -33,6 +34,8 @@ class LlamaReader:
 
         responses = asyncio.run(self.batch_generate(modified_prompts, max_new_tokens, truncate))
         return [r.generated_text for r in responses], context_length_changes
+
             
+
 
 

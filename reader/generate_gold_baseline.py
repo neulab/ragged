@@ -1,6 +1,6 @@
 #file to generate the results of the QA taking retrival file as input
 
-from reader.flanT5.flanT5_reader import FlanT5Reader
+from reader.flanT5.flan_reader import FlanReader
 import argparse
 import os
 import time
@@ -96,8 +96,8 @@ if __name__ == "__main__":
 
     model_class_dict = {
         "llama_70b" : LlamaReader,
-        "flanT5" : FlanT5Reader,
-        "flanUl2" : FlanT5Reader,
+        "flanT5" : FlanReader,
+        "flanUl2" : FlanReader,
         "llama_7b": LlamaReader,
         "llama_70b_256_tokens": LlamaReader,
         "llama_70b_2000_truncation": LlamaReader,
