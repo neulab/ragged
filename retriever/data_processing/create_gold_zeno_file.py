@@ -34,13 +34,13 @@ def convert_gold_to_zeno(input_file):
                 if provs:
                     for prov in provs:
                         page_id = prov.get('page_id', None) 
-                        start_par_id = (int)(prov.get('par_id', None))
+                        start_par_id = (int)(prov.get('start_par_id', None))
                         end_par_id = (int)(start_par_id)
                         title = prov.get('title', None)
                         if(page_id):
                             new_data['output']['page_id_set'].add(page_id)
                             for par_id in range(start_par_id, end_par_id+1):
-                                new_data['output']['pag_par_id_set'].add(page_id + '_' + str(par_id))
+                                new_data['output']['page_par_id_set'].add(page_id + '_' + str(par_id))
                         if title:
                             new_data['output']['title_set'].add(title)
             for k in new_data['output']:

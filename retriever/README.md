@@ -21,7 +21,7 @@ Download and process corpus data
         This outputs '${corpus_name}/${corpus_name}.tsv' in corpus_dir
 
 Download query dataset
-    Download NQ, hotpotqa from KILT repo
+    Download NQ, hotpotqa from KILT repo as nq.jsonl and hotpotqa.jsonl in the ${data_dir}
 
     Download BioASQ
         From Bioasq website, download the following into data_dir/bioasq/
