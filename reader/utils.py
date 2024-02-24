@@ -48,8 +48,6 @@ def combine_all_files(base_path, output_path=None):
         qids.add(x["id"])
         all_data_unique.append(x)
     print(len(all_data_unique))
-    # assert len(all_data_unique) == 2837
-    
     if output_path:    
         save_jsonl(all_data_unique, output_path)
     return all_data_unique
@@ -138,7 +136,6 @@ def convert_gold_files():
         for dataset in datasets:
             input_file = f"{READER_BASE_FOLDER}/{model}/{dataset}/gold/all_data_evaluated.jsonl"
             if os.path.exists(input_file):
-                # output_file = f"{READER_BASE_FOLDER}/{model}/{dataset}/gold/all_data_evaluated_new.jsonl"
                 data = load_jsonl(input_file)
                 for dp in data:
                     dp["retrieved_passages"] = [{"text":dp["evidence_span"]}]
@@ -161,33 +158,3 @@ def add_question_type_to_bioasq():
             dp["question_type"] = type_data[dp["id"]]
 
         save_jsonl(gold_data, gold_file)
-
-        
-if __name__ == "__main__":
-    # retriever_path_map = {
-    #     "bm25": "/data/tir/projects/tir6/general/afreens/dbqa/retriever_results/predictions/bm25/",
-    #     "colbert": "/data/tir/projects/tir6/general/afreens/dbqa/retriever_results/predictions/colbert/"
-
-    # }
-
-    # dataset_map = {
-    #     "hotpotqa" : "hotpotqa-dev-kilt.jsonl",
-    #     "nq": "nq-dev-kilt.jsonl"
-    # }
-
-    # save_map = {
-    #     "hotpotqa" : "hotpotqa-truncation.jsonl",
-    #     "nq": "nq-truncation.jsonl"
-    # }
-    # find_tokenization_limits_based_on_contexts(f"{retriever_path_map['bm25']}{dataset_map['hotpotqa']}", f"{retriever_path_map['bm25']}{save_map['hotpotqa']}")
-    # find_tokenization_limits_based_on_contexts(f"{retriever_path_map['bm25']}{dataset_map['nq']}", f"{retriever_path_map['bm25']}{save_map['nq']}")
-    # find_tokenization_limits_based_on_contexts(f"{retriever_path_map['colbert']}{dataset_map['hotpotqa']}", f"{retriever_path_map['colbert']}{save_map['hotpotqa']}")
-    # find_tokenization_limits_based_on_contexts(f"{retriever_path_map['colbert']}{dataset_map['nq']}", f"{retriever_path_map['colbert']}{save_map['nq']}")
-
-    # # find_tokenization_limits(f"{retriever_path_map['bm25']}{dataset_map['hotpotqa']}", f"{retriever_path_map['bm25']}{save_map['hotpotqa']}")
-    # # find_tokenization_limits(f"{retriever_path_map['bm25']}{dataset_map['nq']}", f"{retriever_path_map['bm25']}{save_map['nq']}")
-    # # find_tokenization_limits(f"{retriever_path_map['colbert']}{dataset_map['hotpotqa']}", f"{retriever_path_map['colbert']}{save_map['hotpotqa']}")
-    # # find_tokenization_limits(f"{retriever_path_map['colbert']}{dataset_map['nq']}", f"{retriever_path_map['colbert']}{save_map['nq']}")
-    convert_gold_files()
-
-    # add_question_type_to_bioasq()
