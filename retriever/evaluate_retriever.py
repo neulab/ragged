@@ -17,8 +17,6 @@ def get_precision(guess_wiki_id_set, gold_wiki_id_set):
     return precision
 
 def get_recall(guess_wiki_id_set, gold_wiki_id_set):
-    # print(guess_wiki_id_set)
-    # print(gold_wiki_id_set)
     recall = np.mean([[s in guess_wiki_id_set] for s in gold_wiki_id_set]) if len(gold_wiki_id_set) > 0 else 0.0
     return recall
 

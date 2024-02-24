@@ -6,10 +6,7 @@ export PYTHONPATH=$PYTHONPATH:/home/jhsia2/ragged
 
 
 retrievers=("colbert" "bm25" "gold")
-# retrievers=("gold")
-datasets=("nq-dev-kilt" "hotpotqa-dev-kilt" "bioasq" "complete_bioasq")
-# datasets=("bioasq" "complete_bioasq")
-# datasets=("hotpotqa-dev-kilt")
+datasets=("nq-dev-kilt" "hotpotqa-dev-kilt" "bioasq")
 
 # Loop through each retriever
 for retriever in "${retrievers[@]}"; do
