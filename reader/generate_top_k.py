@@ -111,8 +111,7 @@ def generate_reader_outputs(input_path, reader_object, output_path=None, start_o
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--hosted_api_path", type=str, default="babel-1-23")
-    parser.add_argument("--hosted_api_port", type=str, default="9426")
+    parser.add_argument("--hosted_api_endpoint", type=str, default="babel-1-23:9426")
     parser.add_argument("--start_offset", type=int, default=0)
     parser.add_argument("--end_offset", type=int, default=None)
     parser.add_argument("--top_k", type=int, default=1)
@@ -158,7 +157,7 @@ if __name__ == "__main__":
         "complete_bioasq": "complete_bioasq.jsonl"
     }
 
-    reader=model_class_dict[args.model](hosted_api_path =f"http://{args.hosted_api_path}:{args.hosted_api_port}/")
+    reader=model_class_dict[args.model](hosted_api_path =f"http://{args.hosted_api_endpoint}/")
     
     retriever_data_path = f"{retriever_path_map[args.retriever]}{dataset_map[args.dataset]}"
 

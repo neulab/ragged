@@ -10,9 +10,9 @@ import text_generation as tg
 time_map = {}
         
 class LlamaReader:
-    def __init__(self, hosted_api_path=None, tokenizer_path="/data/datasets/models/meta-ai/llama2/weights/"):
+    def __init__(self, hosted_api_endpoint=None, tokenizer_path="/data/datasets/models/meta-ai/llama2/weights/"):
         self.tokenizer = LlamaTokenizer.from_pretrained(tokenizer_path)
-        self.hosted_api_endpoint = hosted_api_path
+        self.hosted_api_endpoint = hosted_api_endpoint
         nest_asyncio.apply()
         self.async_client = tg.AsyncClient(self.hosted_api_endpoint)
 
