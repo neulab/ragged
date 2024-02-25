@@ -1,9 +1,10 @@
 import glob
 import os
-from file_utils import BASE_FOLDER, READER_BASE_FOLDER, load_json, load_jsonl, save_jsonl
+from file_utils import load_json, load_jsonl, save_jsonl
 from tqdm import tqdm
 from transformers import T5Tokenizer
 from transformers import LlamaTokenizer
+from utils import BASE_FOLDER, READER_FOLDER
 
 INSTRUCTION_STR = "Give simple short one phrase answers for the questions based on the context"
 NO_CONTEXT_INSTRUCTION_STR = "Give simple short one phrase answers for the question"
@@ -114,7 +115,7 @@ def convert_gold_files():
     datasets = "nq hotpotqa bioasq".split(" ")
     for model in models:
         for dataset in datasets:
-            input_file = f"{READER_BASE_FOLDER}/{model}/{dataset}/gold/all_data_evaluated.jsonl"
+            input_file = f"{READER_FOLDER}/{model}/{dataset}/gold/all_data_evaluated.jsonl"
             if os.path.exists(input_file):
                 data = load_jsonl(input_file)
                 for dp in data:

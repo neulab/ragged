@@ -5,7 +5,7 @@ import traceback
 
 from tqdm import tqdm
 from file_utils import load_jsonl, save_jsonl
-from reader.reader import Reader
+from reader.reader_model import Reader
 from reader.utils import post_process_answers
 from utils import READER_FOLDER, RETRIEVER_FOLDER, get_tokenizer, dataset_map
 
