@@ -1,5 +1,5 @@
 #!/bin/bash
-
+export ROOT_DIR=/home/jhsia2/ragged
 export PYTHONPATH=$PYTHONPATH:/home/jhsia2/ragged
 
 source /home/jhsia2/.bashrc
@@ -21,7 +21,7 @@ for retriever in "${retrievers[@]}"; do
         export retriever=$retriever
         export reader=$reader
         export dataset=$dataset
-        sbatch --job-name=$dataset-$retriever-$reader --gres=gpu:1 --time=0-5:00:00 --mem=50G --output=logs/$dataset-$retriever-$reader-out.log --error=logs/$dataset-$retriever-$reader-err.log evaluate_top_k.sh
+        sbatch --job-name=$dataset-$retriever-$reader --gres=gpu:1 --time=0-5:00:00 --mem=50G --output=logs/$dataset-$retriever-$reader-out.log --error=logs/$dataset-$retriever-$reader-err.log $ROOT_DIR/reader/evaluate_top_k.sh
     done
   done
 done

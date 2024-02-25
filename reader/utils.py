@@ -158,3 +158,9 @@ def add_question_type_to_bioasq():
             dp["question_type"] = type_data[dp["id"]]
 
         save_jsonl(gold_data, gold_file)
+
+def merge_retriever_data_and_eval_results(retriever_data, retriever_eval_data):
+    for retriever_info, eval_info in zip(retriever_data, retriever_eval_data):
+        for r,e in zip(retriever_info["output"][0]["provenance"], eval_info["page-level results"]):
+            r["page_par_id_match"] = e["page_par_id_match"]
+    return retriever_data

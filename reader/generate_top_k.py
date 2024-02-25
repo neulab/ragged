@@ -9,6 +9,10 @@ import traceback
 from tqdm import tqdm
 from file_utils import BASE_FOLDER, NOISY_READER_BASE_FOLDER, ONLY_GOLD_READER_BASE_FOLDER, READER_BASE_FOLDER, save_jsonl, load_jsonl, save_json
 from reader.llama2.llama2_reader import LlamaReader
+from reader.reader import Reader
+from reader.utils import merge_retriever_data_and_eval_results
+from transformers import LlamaTokenizer, T5Tokenizer
+from utils import READER_FOLDER, RETRIEVER_FOLDER, get_tokenizer, dataset_map
 
 time_map = {}
 
@@ -16,44 +20,31 @@ time_map = {}
 def post_process_answers(answers):
     return [x.strip().split("\n")[0] for x in answers]
 
-def generate_reader_outputs(input_path, reader_object, output_path=None, start_offset=0, end_offset=None, top_k=1, args=None):
-    
-    batch_size = 50
-    output_file = f'{output_path}reader_output_index_{args.start_offset}_to_{args.end_offset}.jsonl'
-    retriever_data = load_jsonl(input_path)
-    reader_responses = load_jsonl(output_file) if os.path.exists(output_file) else []
-    print(f"no.of. questions in range {start_offset} to {end_offset} for which response is already generated = {len(reader_responses)}")
+def generate_reader_outputs(retriever_data, reader_object, output_path=None, top_k=None, args=None):    
+    batch_size = args.batch_size
+    output_file = f'{output_path}reader_results.jsonl'
+    additional_metadata_file = f'{output_path}additional_metadata.jsonl'
 
-    error_file_path = output_file[:-6]+"_errors.jsonl"
+    reader_responses = load_jsonl(output_file) if os.path.exists(output_file) else []
+    print(f"no.of. questions in range for which response is already generated = {len(reader_responses)}")
+
+    error_file_path = f'{output_path}reader_errors.jsonl'
     error_logs = load_jsonl(error_file_path, sort_by_id=False) if os.path.exists(error_file_path) else []
 
     reader_ques_ids_already_generated = [x['id'] for x in reader_responses] #can modify this to combined_jsonl file
-
-    if not end_offset:
-        end_offset = len(retriever_data)
-    end_offset = min(end_offset, len(retriever_data))
-
     all_prompts = []
     prompt_indices = []
-    time1 = time.time()
-    for i, ques_info in tqdm(enumerate(retriever_data[start_offset:end_offset])):
-        if ((start_offset + i)%1000==0):
-            print("index : ", start_offset+i)
-
+    for i, ques_info in tqdm(enumerate(retriever_data)):
         if ques_info["id"] in reader_ques_ids_already_generated:
             continue
-
         question = ques_info["input"]+"?"
-        relevant_documents = ques_info["output"][0]["provenance"]
-        if args.non_gold:
-            match_term = "wiki_par_id_match" if args.dataset in ["nq", "hotpotqa"] else "pm_sec_id_match"
-            relevant_documents = [r for r in relevant_documents if r[match_term]==False]
-        elif args.only_gold:
-            match_term = "wiki_par_id_match" if args.dataset in ["nq", "hotpotqa"] else "pm_sec_id_match"
-            relevant_documents = [r for r in relevant_documents if r[match_term]==True]
-
-        if top_k:
-            retrieved_passages = relevant_documents[:top_k]
+        context_documents = ques_info["output"][0]["provenance"]
+        if args.only_non_relevant:
+            context_documents = [r for r in context_documents if r["page_par_id_match"]==False]
+        elif args.only_relevant:
+            context_documents = [r for r in context_documents if r["page_par_id_match"]==True]
+        if top_k>0:
+            retrieved_passages = context_documents[:top_k]
             context = "\n".join([passage["text"] for passage in retrieved_passages])
         else:
             context = ""
@@ -62,7 +53,6 @@ def generate_reader_outputs(input_path, reader_object, output_path=None, start_o
         all_prompts.append(prompt)
         prompt_indices.append(i)
             
-    
     chunks = [list(zip(prompt_indices, all_prompts))[x:x+batch_size] for x in range(0, len(all_prompts), batch_size)]
     all_answers = []
     all_context_length_changes = []
@@ -77,19 +67,18 @@ def generate_reader_outputs(input_path, reader_object, output_path=None, start_o
             all_answers.extend(answers)
             chunk_prompt_indices = [x[0] for x in chunk]
             for q_index, answer in zip(chunk_prompt_indices, answers):
-                ques_info = retriever_data[start_offset:end_offset][q_index]
+                ques_info = retriever_data[q_index]
                 reader_responses.append({
                     "id" : ques_info["id"],
-            "input" : ques_info["input"],
-            "retrieved_passages": relevant_documents[:top_k],
-            "answer": answer
+                    "input" : ques_info["input"],
+                    "retrieved_passages": context_documents[:top_k],
+                    "answer": answer
                 })
                 
 
         except Exception:
             print(f"Exception in {chunkid} chunk")
             print(traceback.format_exc())
-
             error_logs.append(
                 {
                     "chunk_id" : chunkid,
@@ -99,29 +88,23 @@ def generate_reader_outputs(input_path, reader_object, output_path=None, start_o
             save_jsonl(error_logs, error_file_path)
         save_jsonl(reader_responses, output_file)
 
-    time2 = time.time()
-    time_map["complete_generation"] = time2-time1
     print("Total reader_responses : ", len(reader_responses))
-    print("Time taken: ", time_map["complete_generation"])
     save_jsonl(reader_responses, output_file)
-    save_json(all_context_length_changes, f"{output_path}reader_output_index_{args.start_offset}_to_{args.end_offset}_context_length_changes.json")
+    save_json(all_context_length_changes, additional_metadata_file)
             
-
-    
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--hosted_api_endpoint", type=str, default="babel-1-23:9426")
-    parser.add_argument("--start_offset", type=int, default=0)
-    parser.add_argument("--end_offset", type=int, default=None)
-    parser.add_argument("--top_k", type=int, default=1)
-    parser.add_argument("--model", type=str)
-    parser.add_argument("--retriever", type=str)
-    parser.add_argument("--dataset", type=str)
-    parser.add_argument("--max_new_tokens", type=int)
-    parser.add_argument("--max_truncation", type=int, default=4000)
-    parser.add_argument("--only_gold", action='store_true')
-    parser.add_argument("--non_gold", action='store_true')
+    parser.add_argument("--hosted_api_endpoint", type=str, help="the hosted endpoint of the TGI model server. SHould be of the format - <node>:<port>")
+    parser.add_argument("--top_k", type=int, default=1, help="the number of retrieved contexts to include in input for reader generation")
+    parser.add_argument("--batch_size", type=int, default=50, help="the number of reader inputs processed simultaneously")
+    parser.add_argument("--model_name", type=str, help="model name; <results_base_folder>/<model>")
+    parser.add_argument("--retriever", type=str, help="retriever name; results stored at <results_base_folder>/<model>/<retriever>")
+    parser.add_argument("--dataset", type=str, help="dataset name; results stored at <results_base_folder>/<model>/<retriever>/<dataset>")
+    parser.add_argument("--max_new_tokens", type=int, help="number of tokens that the model would generate.")
+    parser.add_argument("--max_truncation", type=int, default=4000, help="number of tokens fed to the reader model. If the input (i.e instruction+contexts+question) are greater than this value, they are truncated to these many tokens")
+    parser.add_argument("--only_relevant", action='store_true', help="When this flag is set, contexts that are marked relevant are only filtered and fed to the reader model along with the instruction and question")
+    parser.add_argument("--only_non_relevant", action='store_true', help="When this flag is set, contexts that are marked irrelevant are only filtered and fed to the reader model along with the instruction and question")
 
     args = parser.parse_args()
     print(f"args: {vars(args)}")
@@ -130,49 +113,28 @@ def get_args():
 if __name__ == "__main__":
     args = get_args()
 
-    model_class_dict = {
-        "llama_70b" : LlamaReader,
-        "flanT5" : FlanReader,
-        "flanUl2" : FlanReader,
-        "llama_7b": LlamaReader,
-        "llama_7b_256_tokens": LlamaReader,
-        "llama_70b_256_tokens": LlamaReader,
-        "llama_70b_2000_truncation": LlamaReader,
-        "llama_7b_2000_truncation" : LlamaReader,
-        "llama_7b_256_tokens":LlamaReader,
-        "flanUl2_265_tokens":FlanReader,
-        "llama_7b_2000_truncation_v2": LlamaReader
-    }
+    # define reader object
+    tokenizer = get_tokenizer(args.model_name)
+    reader=Reader(hosted_api_path =f"http://{args.hosted_api_endpoint}/", tokenizer=tokenizer)
 
-    retriever_path_map = {
-        "bm25": f"{BASE_FOLDER}/retriever_results/predictions/bm25/",
-        "colbert": f"{BASE_FOLDER}/retriever_results/predictions/colbert/"
+    # get retriever data
+    retriever_data_path = f"{RETRIEVER_FOLDER}/predictions/{args.retriever}/{dataset_map[args.dataset]}"
+    retriever_eval_path = f"{RETRIEVER_FOLDER}/evaluations/{args.retriever}/{dataset_map[args.dataset]}"
+    retriever_data = merge_retriever_data_and_eval_results(retriever_data_path, retriever_eval_path)
 
-    }
-
-    dataset_map = {
-        "hotpotqa" : "hotpotqa-dev-kilt.jsonl",
-        "nq": "nq-dev-kilt.jsonl",
-        "bioasq": "bioasq.jsonl",
-        "complete_bioasq": "complete_bioasq.jsonl"
-    }
-
-    reader=model_class_dict[args.model](hosted_api_path =f"http://{args.hosted_api_endpoint}/")
-    
-    retriever_data_path = f"{retriever_path_map[args.retriever]}{dataset_map[args.dataset]}"
-
-    # output_path = f"/data/user_data/afreens/kilt/{args.model}/{args.dataset}/{args.retriever}/top{args.top_k}/"
-    if args.non_gold:
-        reader_base_folder = NOISY_READER_BASE_FOLDER
-    elif args.only_gold:
-        reader_base_folder = ONLY_GOLD_READER_BASE_FOLDER
+    # determine results storage path and create needed folder
+    if args.only_relevant:
+        reader_base_folder = f"{READER_FOLDER}/only_relevant"
+    elif args.only_non_relevant:
+        reader_base_folder = f"{READER_FOLDER}/only_non_relevant"
     else:
-        reader_base_folder = READER_BASE_FOLDER
-    output_path = f"{reader_base_folder}/{args.model}/{args.dataset}/{args.retriever}/{'baseline' if args.top_k==0 else 'top'+str(args.top_k) }/"
+        reader_base_folder = f"{READER_FOLDER}/all_topk"
+    final_model_name = f"{args.model_name}_{args.max_truncation}truncation_{args.max_new_tokens}new_tokens"
+    output_path = f"{reader_base_folder}/{final_model_name}/{args.dataset}/{args.retriever}/{'baseline' if args.top_k==0 else 'top'+str(args.top_k)}/"
     if not os.path.exists(output_path):
         os.makedirs(output_path)
-    output_file = f'{output_path}reader_output_index_{args.start_offset}_to_{args.end_offset}.jsonl'
     
-    generate_reader_outputs(retriever_data_path, reader, output_path=output_path, start_offset=args.start_offset, end_offset=args.end_offset, top_k=args.top_k, args=args)
+    # generate reader results    
+    generate_reader_outputs(retriever_data, reader, output_path=output_path, top_k=args.top_k, args=args)
 
     print("DONE!")
