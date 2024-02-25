@@ -23,6 +23,9 @@ def truncate_prompt(prompt, tokenizer, instruction_str_tokens, total_tokens):
     modified_prompt = create_prompt(question=prompt["question"], context=context_str_after_truncation)
     return modified_prompt, context_length_change_info
 
+def post_process_answers(answers):
+    return [x.strip().split("\n")[0] for x in answers]
+
 def create_prompt(question, context):
     if context:
         return f"{INSTRUCTION_STR}\nContext: {context}\nQuestion: {question}\nAnswer: ".strip()

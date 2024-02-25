@@ -1,24 +1,15 @@
-#file to generate the results of the QA taking retrival file as input
-
-from reader.flanT5.flan_reader import FlanReader
 import argparse
 import os
 import time
 import traceback
 
 from tqdm import tqdm
-from file_utils import BASE_FOLDER, NOISY_READER_BASE_FOLDER, ONLY_GOLD_READER_BASE_FOLDER, READER_BASE_FOLDER, save_jsonl, load_jsonl, save_json
-from reader.llama2.llama2_reader import LlamaReader
+from file_utils import save_jsonl, load_jsonl, save_json
 from reader.reader import Reader
-from reader.utils import merge_retriever_data_and_eval_results
-from transformers import LlamaTokenizer, T5Tokenizer
+from reader.utils import merge_retriever_data_and_eval_results, post_process_answers
 from utils import READER_FOLDER, RETRIEVER_FOLDER, get_tokenizer, dataset_map
 
 time_map = {}
-
-
-def post_process_answers(answers):
-    return [x.strip().split("\n")[0] for x in answers]
 
 def generate_reader_outputs(retriever_data, reader_object, output_path=None, top_k=None, args=None):    
     batch_size = args.batch_size
