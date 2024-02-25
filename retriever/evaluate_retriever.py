@@ -54,7 +54,7 @@ def get_retriever_results(guess_data, gold_data):
 
                 retriever_result = {'id': guess['id'],\
                                     'gold provenance metadata': {f'num_page_ids': len(gold_page_ids)},\
-                                    'doc-level results': doc_retriever_results}
+                                    'page-level results': doc_retriever_results}
                 retriever_result['gold provenance metadata'][f'num_page_par_ids'] = len(gold_page_par_ids)
                 retriever_results.append(retriever_result)
     return retriever_results
@@ -70,7 +70,7 @@ def print_retriever_acc(retriever_results, gold_data, ks):
         page_par_ids = []
         answer_in_context = []
         
-        for d in r['doc-level results']:
+        for d in r['page-level results']:
             page_ids.append(d[f'page_id'])
             page_par_ids.append(d[f'page_par_id'])
             answer_in_context.append(d['answer_in_context'])

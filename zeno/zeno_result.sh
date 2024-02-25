@@ -7,18 +7,10 @@ export PYTHONPATH=$PYTHONPATH:/home/jhsia2/ragged
 source /home/jhsia2/.bashrc
 conda activate py10
 
-# Define arrays for retrievers, readers, and datasets
-# retrievers=("colbert" "bm25")
-
-# llama_70b_256_tokens/bioasq/gold
-
 retrievers=("colbert")
-# readers=("llama_70b" "llama_7b" "flanT5" "flanUl2" "llama_70b_2000_truncation" "llama_7b_2000_truncation")
 readers=("llama_70b" "llama_7b" "flanT5" "flanUl2")
-# readers=("llama_7b_256_tokens")
-datasets=("complete_bioasq")
-# datasets=("nq-dev-kilt" "hotpotqa-dev-kilt" "complete_bioasq")
-# datasets=("nq-dev-kilt")
+datasets=("bioasq")
+datasets=("nq-dev-kilt" "hotpotqa-dev-kilt" "complete_bioasq")
 
 # Loop through each retriever
 for retriever in "${retrievers[@]}"; do
@@ -28,7 +20,7 @@ for retriever in "${retrievers[@]}"; do
     # Loop through each dataset
     for dataset in "${datasets[@]}"; do
       # Call the Python script with the current combination
-      python zeno_result.py --retriever "$retriever" --reader "$reader" --dataset "$dataset" --top_positive
+      python zeno_result.py --retriever "$retriever" --reader "$reader" --retriever_reulsts_dir --reader_results_dir --k_subset --dataset "$dataset"
     done
   done
 done

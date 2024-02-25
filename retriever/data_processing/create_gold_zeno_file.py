@@ -62,4 +62,5 @@ if __name__ == "__main__":
     input_file = os.path.join(args.data_dir, f"{args.dataset}.jsonl")
     zeno_format_data = convert_gold_to_zeno(input_file)
     dataset = args.dataset.split('-')[0]
+    os.makedirs(os.path.join(args.data_dir, 'gold_zeno_files'), exist_ok=True)
     save_json(zeno_format_data, os.path.join(args.data_dir, 'gold_zeno_files', f'gold_{args.dataset}_zeno_file.json'))
