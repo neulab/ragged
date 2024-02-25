@@ -50,5 +50,5 @@ If you use our code, datasets, or concepts from our paper in your research, we w
 For any questions, feedback, or discussions regarding this project, please feel free to contact us:
 
 - **Contact**
-  - Email: [jhsia2@cs.cmu.edu](mailto:jhsia2@cs.cmu.edu) [afreens@cs.cmu.edu](mailto:afreens@cs.cmu.edu)
+  - Email: [jhsia2@cs.cmu.edu](mailto:jhsia2@cs.cmu.edu), [afreens@cs.cmu.edu](mailto:afreens@cs.cmu.edu)
 
