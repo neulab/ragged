@@ -1,6 +1,7 @@
 from transformers import LlamaTokenizer, T5Tokenizer
 
 BASE_FOLDER = "path/to/base/folder"
+DATA_FOLDER = f"{BASE_FOLDER}/data"
 RETRIEVER_FOLDER = f"{BASE_FOLDER}/retriever_results"
 READER_FOLDER = f"{BASE_FOLDER}/reader_results"
 

@@ -32,29 +32,6 @@ def create_prompt(question, context):
     else:
         return f"{NO_CONTEXT_INSTRUCTION_STR}\nQuestion: {question}\nAnswer: ".strip()
     
-def combine_all_files(base_path, output_path=None):
-    all_data = []
-    all_data_unique = []
-    if os.path.exists(os.path.join(base_path, "all_data.jsonl")):
-        data = load_jsonl(os.path.join(base_path, "all_data.jsonl"))
-        if len(data) > 0:
-            return data
-    for file in glob.glob(os.path.join(base_path, "*")):
-        if not file.endswith(".jsonl") or "error" in file:
-            continue
-        all_data.extend(load_jsonl(file))
-
-    qids = set()
-    for x in all_data:
-        if x["id"] in qids:
-            continue
-        qids.add(x["id"])
-        all_data_unique.append(x)
-    print(len(all_data_unique))
-    if output_path:    
-        save_jsonl(all_data_unique, output_path)
-    return all_data_unique
-
 def find_tokenization_limits(retriever_output_file, write_file):
 
     def get_diff(tokenizer, question, context, total_tokens, context_prompt_tokenized):
