@@ -1,8 +1,12 @@
 We support retrievers BM25 and ColBERT and retrieval corpuses kilt_wikipedia (KILT version) and the 2023 Annual Medline Corpus
 
-For each, you need download the repo and process the data differently.
+There are 4 steps: 
+1. Download and process corpus data
+2. Download query dataset
+3. Get retriever outputs
+4. Evaluate retriever outputs
 
-# Download and process corpus data
+# 1. Download and process corpus data
 
 ## Download BioAS corpus - Pubmed
 <!-- 
@@ -24,7 +28,7 @@ To process corpus for ColBERT format , use
     create_corpus_tsv.py --corpus_name kilt_wikipedia --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/
     This outputs '${corpus_name}/${corpus_name}.tsv' in corpus_dir
 
-# Download query dataset
+# 2. Download query dataset
 Download ${dataset}.jsonl from link to your ${data_dir}/${dataset}.jsonl
     <!-- Download NQ, hotpotqa from KILT repo as nq.jsonl and hotpotqa.jsonl in the ${data_dir} Download BioASQ
         From Bioasq website, download the following into data_dir/bioasq/
@@ -37,7 +41,7 @@ To process query tsv for ColBERT, use
     python create_query_tsv.py --data_dir --dataset
     This outputs a {dataset}-queries.tsv
 
-# Get retriever outupts
+# 3. Get retriever outputs
 ## Use BM25 for predictions
 Download the pyserini repo and KILT repo. https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation.
 
@@ -46,7 +50,7 @@ Run bm25.sh
 ## Use ColBERT for predictions
     Run colbert.sh
 
-# Evaluate retriever outputs
+# 4. Evaluate retriever outputs
 To evaluate the predictions, run evaluate_retriver.sh with the appropriate arguments.
 
 
