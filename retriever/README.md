@@ -14,15 +14,16 @@ There are 4 steps:
         This downloads the pubmed corpus in unprocessed form to ${data_dir}/bioasq/annual_zips/
 
         use python create_pubmed_jsonl.py --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files
-        This outputs 'pubmed/pubmed_jsonl/pubmed.jsonl' and 'pubmed/id2title.json' in corpus_dir  -->
+        This outputs 'pubmed/pubmed_jsonl/pubmed.jsonl' and 'pubmed/id2title.json' in corpus_dir 
+        python create_wiki_paragraph_jsonl.py --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files
+    This outputs 'kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl" in your corpus_dir -->
 
     Download pubmed.jsonl from link to your ${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl
 
 ## Download Wiki corpus
-        <!-- python create_wiki_paragraph_jsonl.py --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files
-        This outputs 'kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl" in your corpus_dir -->
-
     Download pubmed.jsonl from link to your ${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl
+    
+    
 
 To process corpus for ColBERT format , use
     create_corpus_tsv.py --corpus_name kilt_wikipedia --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/
