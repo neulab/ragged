@@ -11,7 +11,7 @@ Bioasq (complete medline corpus): https://hub.zenoml.com/project/17d95f38-aa53-4
 
 Bioasq (sampled): https://hub.zenoml.com/project/e7a27fce-bf84-4f52-ac1b-3d7975c44bf4/Document%20QA%20-%20bioasq/explore -->
 
-# [RAGGED: Towards Informed Design of \\Retrieval Augmented Generation Systems](arxivlink)
+# [RAGGED: Towards Informed Design of Retrieval Augmented Generation Systems](arxivlink)
 
 ## Description
 Retrieval-augmented generation (RAG) greatly benefits language models (LMs) by providing additional context for tasks such as document-based question answering (DBQA). 
