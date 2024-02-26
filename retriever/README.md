@@ -18,10 +18,10 @@ There are 4 steps:
         python create_wiki_paragraph_jsonl.py --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files
     This outputs 'kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl" in your corpus_dir -->
 
-    Download pubmed.jsonl from link to your ${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl
+    Download pubmed.jsonl from [here](https://drive.google.com/drive/folders/1k_Ij70bZcVkhWflMeH9YqTWkJcCJMQP6?usp=drive_link) to your ${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl
 
 ## Download Wiki corpus
-    Download pubmed.jsonl from link to your ${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl
+    Download pubmed.jsonl from [here](https://drive.google.com/drive/folders/1k_Ij70bZcVkhWflMeH9YqTWkJcCJMQP6?usp=drive_link) to your ${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl
     
     
 
@@ -30,7 +30,7 @@ To process corpus for ColBERT format , use
     This outputs '${corpus_name}/${corpus_name}.tsv' in corpus_dir
 
 # 2. Download query dataset
-Download ${dataset}.jsonl from link to your ${data_dir}/${dataset}.jsonl
+Download ${dataset}.jsonl from [here](https://drive.google.com/drive/folders/1k_Ij70bZcVkhWflMeH9YqTWkJcCJMQP6?usp=drive_link) to your ${data_dir}/${dataset}.jsonl
     <!-- Download NQ, hotpotqa from KILT repo as nq.jsonl and hotpotqa.jsonl in the ${data_dir} Download BioASQ
         From Bioasq website, download the following into data_dir/bioasq/
         Task11BGoldenEnriched/11B*_golden.json and BioASQ-training11b/training11b.json from BioASQ
