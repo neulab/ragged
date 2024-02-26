@@ -21,13 +21,11 @@ There are 4 steps:
 Download pubmed.jsonl from [here](https://drive.google.com/drive/folders/1k_Ij70bZcVkhWflMeH9YqTWkJcCJMQP6?usp=drive_link) to your ${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl
 
 ## Download Wiki corpus
-Download pubmed.jsonl from [here](https://drive.google.com/drive/folders/1k_Ij70bZcVkhWflMeH9YqTWkJcCJMQP6?usp=drive_link) to your ${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl
-    
+Download wikipedia.jsonl from [here](https://drive.google.com/drive/folders/1k_Ij70bZcVkhWflMeH9YqTWkJcCJMQP6?usp=drive_link) to your ${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl
     
 
-To process corpus for ColBERT format , use
-    create_corpus_tsv.py --corpus_name kilt_wikipedia --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/
-    This outputs '${corpus_name}/${corpus_name}.tsv' in corpus_dir
+To process corpus for ColBERT format , run `create_corpus_tsv.py --corpus_name $corpus --corpus_dir $corpus_dir`.
+This outputs '${corpus_name}/${corpus_name}.tsv' in corpus_dir
 
 # 2. Download query dataset
 Download ${dataset}.jsonl from [here](https://drive.google.com/drive/folders/1k_Ij70bZcVkhWflMeH9YqTWkJcCJMQP6?usp=drive_link) to your ${data_dir}/${dataset}.jsonl
@@ -38,8 +36,7 @@ Download ${dataset}.jsonl from [here](https://drive.google.com/drive/folders/1k_
         This outputs bioasq.jsonl in the data_dir -->
     
 
-To process query tsv for ColBERT, use 
-    python create_query_tsv.py --data_dir --dataset
+To process query tsv for ColBERT, run `python create_query_tsv.py --data_dir --dataset `
 This outputs a {dataset}-queries.tsv
 
 # 3. Get retriever outputs
@@ -48,16 +45,16 @@ Download the [pyserini repo](https://github.com/castorini/pyserini) and [KILT re
 
 Customize BM25/default_bm25.json for your select dataset and move the file into KILT/kilt/configs/retriever/default_bm25.json.
 
-Copy BM25/BM25_connector.py into  KILT/kilt/retrievers/BM25_connector.py.
+Copy BM25/BM25_connector.py into KILT/kilt/retrievers/BM25_connector.py.
 
 Modify KILT/kilt/configs/${dataset}.json for your select dataset.
 
-Run bm25.sh
+Run `bm25.sh`
 
 ## Use ColBERT for predictions
 Download our [modified version](https://github.com/jenhsia/RAGGED_ColBERT) of the [original ColBERT](https://github.com/stanford-futuredata/ColBERT).
 
-Run colbert.sh
+Run 'colbert.sh`
 
 # 4. Evaluate retriever outputs
 To evaluate the predictions, run evaluate_retriver.sh with the appropriate arguments.
