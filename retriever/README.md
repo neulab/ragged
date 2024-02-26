@@ -18,10 +18,10 @@ There are 4 steps:
         python create_wiki_paragraph_jsonl.py --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files
     This outputs 'kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl" in your corpus_dir -->
 
-    Download pubmed.jsonl from [here](https://drive.google.com/drive/folders/1k_Ij70bZcVkhWflMeH9YqTWkJcCJMQP6?usp=drive_link) to your ${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl
+Download pubmed.jsonl from [here](https://drive.google.com/drive/folders/1k_Ij70bZcVkhWflMeH9YqTWkJcCJMQP6?usp=drive_link) to your ${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl
 
 ## Download Wiki corpus
-    Download pubmed.jsonl from [here](https://drive.google.com/drive/folders/1k_Ij70bZcVkhWflMeH9YqTWkJcCJMQP6?usp=drive_link) to your ${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl
+Download pubmed.jsonl from [here](https://drive.google.com/drive/folders/1k_Ij70bZcVkhWflMeH9YqTWkJcCJMQP6?usp=drive_link) to your ${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl
     
     
 
