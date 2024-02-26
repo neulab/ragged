@@ -1,0 +1,5 @@
+{
+    "index":"${index_dir}/${corpus}_jsonl",
+    "k":100,
+    "num_threads":4
+}

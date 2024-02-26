@@ -44,12 +44,20 @@ To process query tsv for ColBERT, use
 
 # 3. Get retriever outputs
 ## Use BM25 for predictions
-Download the pyserini repo and KILT repo. https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation.
+Download the [pyserini repo](https://github.com/castorini/pyserini) and [KILT repo](https://github.com/facebookresearch/KILT/tree/main/kilt). See more details about bm25 input formatting [here] (https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
+
+Customize BM25/default_bm25.json for your select dataset and move the file into KILT/kilt/configs/retriever/default_bm25.json.
+
+Copy BM25/BM25_connector.py into  KILT/kilt/retrievers/BM25_connector.py.
+
+Modify KILT/kilt/configs/${dataset}.json for your select dataset.
 
 Run bm25.sh
 
 ## Use ColBERT for predictions
-    Run colbert.sh
+Download our [modified version](https://github.com/jenhsia/RAGGED_ColBERT) of the [original ColBERT](https://github.com/stanford-futuredata/ColBERT).
+
+Run colbert.sh
 
 # 4. Evaluate retriever outputs
 To evaluate the predictions, run evaluate_retriver.sh with the appropriate arguments.
