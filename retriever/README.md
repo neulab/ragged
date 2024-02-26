@@ -38,9 +38,9 @@ Download ${dataset}.jsonl from [here](https://drive.google.com/drive/folders/1k_
         This outputs bioasq.jsonl in the data_dir -->
     
 
-To process query tsv for ColBERT, use
+To process query tsv for ColBERT, use 
     python create_query_tsv.py --data_dir --dataset
-    This outputs a {dataset}-queries.tsv
+This outputs a {dataset}-queries.tsv
 
 # 3. Get retriever outputs
 ## Use BM25 for predictions
