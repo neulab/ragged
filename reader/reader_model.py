@@ -1,22 +1,23 @@
 import asyncio
 from reader.utils import INSTRUCTION_STR, truncate_prompt
-import nest_asyncio
-import text_generation as tg
+from utils import complete_model_names
+from litellm import batch_completion 
 
 time_map = {}
         
 class Reader:
-    def __init__(self, hosted_api_endpoint=None, tokenizer=None):
+    def __init__(self, model_identifier=None, hosted_api_endpoint=None, tokenizer=None):
+        self.model_identifier = model_identifier
         self.tokenizer = tokenizer
         self.hosted_api_endpoint = hosted_api_endpoint
-
-        # initialize async text generation inference client
-        nest_asyncio.apply()
-        self.async_client = tg.AsyncClient(self.hosted_api_endpoint)
-
     
-    async def batch_generate(self, texts, max_new_tokens=10, truncate=2000):
-        return await asyncio.gather(*[self.async_client.generate(text, max_new_tokens=max_new_tokens, truncate=truncate) for text in texts])
+    def batch_generate(self, texts, max_new_tokens=10):
+        messages = [[{"role":"user", "content":text}] for text in texts]
+        return batch_completion(model=complete_model_names[self.model_identifier], 
+                                messages=messages, 
+                                api_base=self.hosted_api_endpoint,
+                                max_tokens = max_new_tokens
+                                )
 
 
     def generate(self, prompts, max_new_tokens=10, truncate=2000):
@@ -29,5 +30,5 @@ class Reader:
             modified_prompts.append(modified_prompt)
             context_length_changes.append(context_length_change_info)
 
-        responses = asyncio.run(self.batch_generate(modified_prompts, max_new_tokens, truncate))
-        return [r.generated_text for r in responses], context_length_changes
+        responses = self.batch_generate(modified_prompts, max_new_tokens, truncate)
+        return [r.choices[0].message.content for r in responses], context_length_changes

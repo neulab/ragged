@@ -208,16 +208,17 @@ def gold_baseline_evaluation(models, datasets, with_bert=False, args=None):
     for model in models:
         for dataset in datasets:
             print(model, dataset)
-            gold_file = f"{DATA_FOLDER}/{dataset_map[dataset]}"
-            input_path = f"{READER_FOLDER}/{args.model}/{args.dataset}/gold/"
-            input_file = f"{input_path}reader_results.jsonl"
+            gold_file = os.path.join(DATA_FOLDER, dataset_map[dataset])
+            input_path = os.path.join(READER_FOLDER, args.model, args.dataset, "gold")
+            input_file = os.path.join(input_path, "reader_results.jsonl")
+
             reader_data = load_jsonl(input_file)
             gold_data = load_jsonl(gold_file)
             reader_data, metrics = evaluate_reader_results(reader_data, gold_data,with_bert, args)
-            metrics_save_path = f"gold_baseline_metrics.json"
+            metrics_save_path = os.path.join(input_path, "gold_baseline_metrics.json")
             save_json(metrics, metrics_save_path)
 
-            evaluation_file_path = f'{input_path}all_data_evaluated.jsonl'
+            evaluation_file_path = os.path.join(input_path, "all_data_evaluated.jsonl")
             save_jsonl(reader_data, evaluation_file_path)
 
 def generations_evaluation(models, retrievers, datasets, with_bert=False, args=None):
@@ -226,11 +227,11 @@ def generations_evaluation(models, retrievers, datasets, with_bert=False, args=N
         top_ks = top_ks[1:]
 
     if args.only_relevant:
-        reader_base_folder = f"{READER_FOLDER}/only_relevant"
+        reader_base_folder = os.path.join(READER_FOLDER, "only_relevant")
     elif args.only_non_relevant:
-        reader_base_folder = f"{READER_FOLDER}/only_non_relevant"
+        reader_base_folder = os.path.join(READER_FOLDER, "only_non_relevant")
     else:
-        reader_base_folder = f"{READER_FOLDER}/all_topk"
+        reader_base_folder = os.path.join(READER_FOLDER, "all_topk")
 
 
     WITH_BERT = with_bert
@@ -238,16 +239,17 @@ def generations_evaluation(models, retrievers, datasets, with_bert=False, args=N
         for retriever in retrievers:
             for dataset in datasets:
                 print(f"Eval - {model}/{dataset}/{retriever}/")
-                root_dir = f"{reader_base_folder}/{model}/{dataset}/{retriever}/"
-                gold_file = f"{DATA_FOLDER}/{dataset_map[dataset]}"
+                root_dir = os.path.join(reader_base_folder, model, dataset, retriever)
+                gold_file = os.path.join(DATA_FOLDER, dataset_map[dataset])
 
                 metrics_map = {}
-                metrics_save_path = f"{root_dir}combined_metrics.json"
+                metrics_save_path = os.path.join(root_dir, 'combined_metrics.json')
                 for top_k in top_ks:
                     print(top_k)
-                    base_folder = f"{root_dir}{top_k}/"
-                    evaluation_file_path = f"{base_folder}all_data_evaluated.jsonl"
-                    all_data = load_jsonl(f'{root_dir}/{top_k}/reader_results.jsonl')
+                    base_folder = os.path.join(root_dir, str(top_k))
+                    evaluation_file_path = os.path.join(base_folder, "all_data_evaluated.jsonl")
+                    all_data_file_path = os.path.join(root_dir, str(top_k), "reader_results.jsonl")
+                    all_data = load_jsonl(all_data_file_path)
                     gold_data = load_jsonl(gold_file)
 
                     all_data, metrics = evaluate_reader_results(all_data, gold_data,WITH_BERT, args)

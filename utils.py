@@ -5,6 +5,13 @@ DATA_FOLDER = f"{BASE_FOLDER}/data"
 RETRIEVER_FOLDER = f"{BASE_FOLDER}/retriever_results"
 READER_FOLDER = f"{BASE_FOLDER}/reader_results"
 
+complete_model_names = {
+   "llama2_7b": "huggingface/meta-llama/Llama-2-7b-hf",
+    "llama2_70b": "huggingface/meta-llama/Llama-2-70b-hf",
+    "flanT5": "huggingface/google/flan-t5-xxl",
+    "flanUl2": "huggingface/google/flan-ul2"
+}
+
 dataset_map = {
     "hotpotqa" : "hotpotqa-dev-kilt.jsonl",
     "nq": "nq-dev-kilt.jsonl",

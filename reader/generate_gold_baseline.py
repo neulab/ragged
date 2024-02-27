@@ -73,11 +73,11 @@ if __name__ == "__main__":
     tokenizer = get_tokenizer(args.model_name)
     reader=Reader(hosted_api_path =f"http://{args.hosted_api_endpoint}/", tokenizer=tokenizer)
 
-    output_path = f"{READER_FOLDER}/{args.model}/{args.dataset}/gold"
+    output_path = os.path.join(READER_FOLDER, args.model, args.dataset, "gold")
     if not os.path.exists(output_path):
         os.makedirs(output_path)
-    output_file = f'{output_path}/reader_results.jsonl'
-    gold_dataset_file = f"{RETRIEVER_FOLDER}/predictions/gold/{dataset_map[args.dataset]}"
+    output_file = os.path.join(output_path, 'reader_results.jsonl')
+    gold_dataset_file = os.path.join(RETRIEVER_FOLDER, "predictions", "gold", dataset_map[args.dataset])
     gold_dataset = load_jsonl(gold_dataset_file)
     
     generate_reader_outputs(gold_dataset, reader, output_file=output_file, args=args)

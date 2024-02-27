@@ -13,13 +13,13 @@ time_map = {}
 
 def generate_reader_outputs(retriever_data, reader_object, output_path=None, top_k=None, args=None):    
     batch_size = args.batch_size
-    output_file = f'{output_path}reader_results.jsonl'
-    additional_metadata_file = f'{output_path}additional_metadata.jsonl'
+    output_file = os.path.join(output_path, 'reader_results.jsonl')
+    additional_metadata_file = os.path.join(output_path, 'additional_metadata.jsonl')
 
     reader_responses = load_jsonl(output_file) if os.path.exists(output_file) else []
     print(f"no.of. questions in range for which response is already generated = {len(reader_responses)}")
 
-    error_file_path = f'{output_path}reader_errors.jsonl'
+    error_file_path = os.path.join(output_path, 'reader_errors.jsonl')
     error_logs = load_jsonl(error_file_path, sort_by_id=False) if os.path.exists(error_file_path) else []
 
     reader_ques_ids_already_generated = [x['id'] for x in reader_responses] #can modify this to combined_jsonl file
@@ -106,22 +106,23 @@ if __name__ == "__main__":
 
     # define reader object
     tokenizer = get_tokenizer(args.model_name)
-    reader=Reader(hosted_api_path =f"http://{args.hosted_api_endpoint}/", tokenizer=tokenizer)
+    reader=Reader(model_identifier=args.model_name, hosted_api_path =f"http://{args.hosted_api_endpoint}/", tokenizer=tokenizer)
 
     # get retriever data
-    retriever_data_path = f"{RETRIEVER_FOLDER}/predictions/{args.retriever}/{dataset_map[args.dataset]}"
-    retriever_eval_path = f"{RETRIEVER_FOLDER}/evaluations/{args.retriever}/{dataset_map[args.dataset]}"
+    retriever_data_path = os.path.join(RETRIEVER_FOLDER, "predictions", args.retriever, dataset_map[args.dataset])
+    retriever_eval_path = os.path.join(RETRIEVER_FOLDER, "evaluations", args.retriever, dataset_map[args.dataset])
     retriever_data = merge_retriever_data_and_eval_results(retriever_data_path, retriever_eval_path)
 
     # determine results storage path and create needed folder
     if args.only_relevant:
-        reader_base_folder = f"{READER_FOLDER}/only_relevant"
+        reader_base_folder = os.path.join(READER_FOLDER, "only_relevant")
     elif args.only_non_relevant:
-        reader_base_folder = f"{READER_FOLDER}/only_non_relevant"
+        reader_base_folder = os.path.join(READER_FOLDER, "only_non_relevant")
     else:
-        reader_base_folder = f"{READER_FOLDER}/all_topk"
+        reader_base_folder = os.path.join(READER_FOLDER, "all_topk")
     final_model_name = f"{args.model_name}_{args.max_truncation}truncation_{args.max_new_tokens}new_tokens"
-    output_path = f"{reader_base_folder}/{final_model_name}/{args.dataset}/{args.retriever}/{'baseline' if args.top_k==0 else 'top'+str(args.top_k)}/"
+    folder_name = 'baseline' if args.top_k == 0 else 'top' + str(args.top_k)
+    output_path = os.path.join(reader_base_folder, final_model_name, args.dataset, args.retriever, folder_name)
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     
