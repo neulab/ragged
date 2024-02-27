@@ -17,7 +17,7 @@ python -m pyserini.index.lucene \
   --threads 4 \
   --storePositions --storeDocvectors --storeRaw --storeContents
 
-python ${kilt_dir}scripts/execute_retrieval.py -m bm25 -o ${predictions_dir}/bm25 --test_config /home/jhsia2/KILT/kilt/configs/${dataset}.json
+python ${kilt_dir}scripts/execute_retrieval.py -m bm25 -o ${prediction_dir}/bm25 --test_config /home/jhsia2/KILT/kilt/configs/${dataset}.json
 
 conda deactivate
 

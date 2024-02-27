@@ -40,20 +40,36 @@ To process query tsv for ColBERT, run `python create_query_tsv.py --data_dir $da
 
 # 3. Get retriever outputs
 ## Use BM25 for predictions
-Download the [pyserini repo](https://github.com/castorini/pyserini) and [KILT repo](https://github.com/facebookresearch/KILT/tree/main/kilt). See more details about BM25 input formatting [here] (https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
+1. Download the [pyserini repo](https://github.com/castorini/pyserini) and [KILT repo](https://github.com/facebookresearch/KILT/tree/main/kilt). See more details about BM25 input formatting [here] (https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
 
-Customize [`BM25/default_bm25.json`](https://github.com/neulab/ragged/blob/main/retriever/BM25/default_bm25.json) for your select dataset and move the file into KILT/kilt/configs/retriever/default_bm25.json.
+2. Customize [`BM25/default_bm25.json`](https://github.com/neulab/ragged/blob/main/retriever/BM25/default_bm25.json) for your select dataset and move the file into `KILT/kilt/configs/retriever/default_bm25.json`.
 
-Copy [`BM25/BM25_connector.py`](https://github.com/neulab/ragged/blob/main/retriever/BM25/BM25_connector.py) into `KILT/kilt/retrievers/BM25_connector.py`.
+3. Copy [`BM25/BM25_connector.py`](https://github.com/neulab/ragged/blob/main/retriever/BM25/BM25_connector.py) into `KILT/kilt/retrievers/BM25_connector.py`.
 
-Modify `KILT/kilt/configs/${dataset}.json` for your select dataset.
+4. Customize `KILT/kilt/configs/${dataset}.json` for your select dataset.
 
-Run `bm25.sh`
+5. Run `bm25.sh` to output `${prediction_dir}/bm25/${dataset}.jsonl`.
+
+Each line corresponds to each query. This is an example of one line:
+```
+{"id": "-1027463814348738734", 
+"input": "pace maker is associated with which body organ", 
+"output": [{"provenance": [
+    # top 1 retrieved paragraph
+    {"wikipedia_id": "557054", 
+    "start_paragraph_id": "4", 
+    "end_paragraph_id": "4", 
+    "text": "Peristalsis of the smooth muscle originating in pace-maker cells originating in the walls of the calyces propels urine through the renal pelvis and ureters to the bladder. The initiation is caused by the increase in volume that stretches the walls of the calyces. This causes them to fire impulses which stimulate rhythmical contraction and relaxation, called peristalsis. Parasympathetic innervation enhances the peristalsis while sympathetic innervation inhibits it.", 
+    "score": 20.9375},
+    # top 2 retrieved paragraph ...
+    ]}]}
+```
+
 
 ## Use ColBERT for predictions
-Download our [modified version](https://github.com/jenhsia/RAGGED_ColBERT) of the [original ColBERT](https://github.com/stanford-futuredata/ColBERT).
+1. Download our [modified version](https://github.com/jenhsia/RAGGED_ColBERT) of the [original ColBERT](https://github.com/stanford-futuredata/ColBERT).
 
-Run `colbert.sh`
+2. Run `colbert.sh` to output `${prediction_dir}/colbert/${dataset}.jsonl`.
 
 # 4. Evaluate retriever outputs
 To evaluate the predictions, run \evaluate_retriver.sh' with the appropriate arguments.
