@@ -18,17 +18,17 @@ There are 4 steps:
         python create_wiki_paragraph_jsonl.py --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files
     This outputs 'kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl" in your corpus_dir -->
 
-Download pubmed.jsonl from [here](https://drive.google.com/drive/folders/1k_Ij70bZcVkhWflMeH9YqTWkJcCJMQP6?usp=drive_link) to your ${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl
+Download pubmed.jsonl from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to your ${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl
 
 ## Download Wiki corpus
-Download wikipedia.jsonl from [here](https://drive.google.com/drive/folders/1k_Ij70bZcVkhWflMeH9YqTWkJcCJMQP6?usp=drive_link) to your ${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl
+Download wikipedia.jsonl from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to your ${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl
     
 
 To process corpus for ColBERT format , run `create_corpus_tsv.py --corpus_name $corpus --corpus_dir $corpus_dir`.
 This outputs '${corpus_name}/${corpus_name}.tsv' in corpus_dir
 
 # 2. Download query dataset
-Download ${dataset}.jsonl from [here](https://drive.google.com/drive/folders/1k_Ij70bZcVkhWflMeH9YqTWkJcCJMQP6?usp=drive_link) to your ${data_dir}/${dataset}.jsonl
+Download ${dataset}.jsonl from [here](https://huggingface.co/datasets/jenhsia/ragged) to your ${data_dir}/${dataset}.jsonl
     <!-- Download NQ, hotpotqa from KILT repo as nq.jsonl and hotpotqa.jsonl in the ${data_dir} Download BioASQ
         From Bioasq website, download the following into data_dir/bioasq/
         Task11BGoldenEnriched/11B*_golden.json and BioASQ-training11b/training11b.json from BioASQ
@@ -36,7 +36,7 @@ Download ${dataset}.jsonl from [here](https://drive.google.com/drive/folders/1k_
         This outputs bioasq.jsonl in the data_dir -->
     
 
-To process query tsv for ColBERT, run `python create_query_tsv.py --data_dir --dataset `
+To process query tsv for ColBERT, run `python create_query_tsv.py --data_dir $data_dir --dataset $dataset`.
 This outputs a {dataset}-queries.tsv
 
 # 3. Get retriever outputs
@@ -54,7 +54,7 @@ Run `bm25.sh`
 ## Use ColBERT for predictions
 Download our [modified version](https://github.com/jenhsia/RAGGED_ColBERT) of the [original ColBERT](https://github.com/stanford-futuredata/ColBERT).
 
-Run 'colbert.sh`
+Run `colbert.sh`
 
 # 4. Evaluate retriever outputs
 To evaluate the predictions, run evaluate_retriver.sh with the appropriate arguments.
