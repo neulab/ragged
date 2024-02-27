@@ -18,17 +18,17 @@ There are 4 steps:
         python create_wiki_paragraph_jsonl.py --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files
     This outputs 'kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl" in your corpus_dir -->
 
-Download pubmed.jsonl from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to your ${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl
+Download pubmed.jsonl from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to your ${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl.
 
 ## Download Wiki corpus
-Download wikipedia.jsonl from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to your ${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl
+Download wikipedia.jsonl from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to your ${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl.
     
 
-To process corpus for ColBERT format , run `create_corpus_tsv.py --corpus_name $corpus --corpus_dir $corpus_dir`.
-This outputs '${corpus_name}/${corpus_name}.tsv' in corpus_dir
+To process corpus for ColBERT format , run `create_corpus_tsv.py --corpus $corpus --corpus_dir $corpus_dir`.
+This outputs '${corpus}/${corpus}.tsv' in $corpus_dir.
 
 # 2. Download query dataset
-Download ${dataset}.jsonl from [here](https://huggingface.co/datasets/jenhsia/ragged) to your ${data_dir}/${dataset}.jsonl
+Download ${dataset}.jsonl from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to ${data_dir}/${dataset}.jsonl
     <!-- Download NQ, hotpotqa from KILT repo as nq.jsonl and hotpotqa.jsonl in the ${data_dir} Download BioASQ
         From Bioasq website, download the following into data_dir/bioasq/
         Task11BGoldenEnriched/11B*_golden.json and BioASQ-training11b/training11b.json from BioASQ
@@ -36,16 +36,15 @@ Download ${dataset}.jsonl from [here](https://huggingface.co/datasets/jenhsia/ra
         This outputs bioasq.jsonl in the data_dir -->
     
 
-To process query tsv for ColBERT, run `python create_query_tsv.py --data_dir $data_dir --dataset $dataset`.
-This outputs a {dataset}-queries.tsv
+To process query tsv for ColBERT, run `python create_query_tsv.py --data_dir $data_dir --dataset $dataset`, which outputs $data_dir/${dataset}-queries.tsv.
 
 # 3. Get retriever outputs
 ## Use BM25 for predictions
-Download the [pyserini repo](https://github.com/castorini/pyserini) and [KILT repo](https://github.com/facebookresearch/KILT/tree/main/kilt). See more details about bm25 input formatting [here] (https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
+Download the [pyserini repo](https://github.com/castorini/pyserini) and [KILT repo](https://github.com/facebookresearch/KILT/tree/main/kilt). See more details about BM25 input formatting [here] (https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
 
-Customize BM25/default_bm25.json for your select dataset and move the file into KILT/kilt/configs/retriever/default_bm25.json.
+Customize [BM25/default_bm25.json](https://github.com/neulab/ragged/blob/main/retriever/BM25/default_bm25.json) for your select dataset and move the file into KILT/kilt/configs/retriever/default_bm25.json.
 
-Copy BM25/BM25_connector.py into KILT/kilt/retrievers/BM25_connector.py.
+Copy [BM25/BM25_connector.py](https://github.com/neulab/ragged/blob/main/retriever/BM25/BM25_connector.py) into KILT/kilt/retrievers/BM25_connector.py.
 
 Modify KILT/kilt/configs/${dataset}.json for your select dataset.
 
