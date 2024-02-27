@@ -105,7 +105,7 @@ This outputs retrieval performance for each k. We include an example below for k
 
 The third output file is `${evaluation_dir}/${retriever}/${dataset}_results_by_k.jpg` which plots retriever performance by k. 
 
-After evaluating each retriever as above, you can use `evalute_retriever.ipynb` to compare different retrievers across values of k.
+After evaluating each retriever as above, you can use `evaluate_retriever.ipynb` to compare different retrievers across values of k.
 
 
 
