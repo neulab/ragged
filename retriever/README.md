@@ -56,9 +56,9 @@ Each line corresponds to each query. This is an example of one line:
 "input": "pace maker is associated with which body organ", 
 "output": [{"provenance": [
     # top 1 retrieved paragraph
-    {"wikipedia_id": "557054", 
-    "start_paragraph_id": "4", 
-    "end_paragraph_id": "4", 
+    {"page_id": "557054", 
+    "start_par_id": "4", 
+    "end_par_id": "4", 
     "text": "Peristalsis of the smooth muscle originating in pace-maker cells originating in the walls of the calyces propels urine through the renal pelvis and ureters to the bladder. The initiation is caused by the increase in volume that stretches the walls of the calyces. This causes them to fire impulses which stimulate rhythmical contraction and relaxation, called peristalsis. Parasympathetic innervation enhances the peristalsis while sympathetic innervation inhibits it.", 
     "score": 20.9375},
     # top 2 retrieved paragraph ...
