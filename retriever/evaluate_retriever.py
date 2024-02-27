@@ -54,7 +54,7 @@ def get_retriever_results(guess_data, gold_data):
 
                 retriever_result = {'id': guess['id'],\
                                     'gold provenance metadata': {f'num_page_ids': len(gold_page_ids)},\
-                                    'page-level results': doc_retriever_results}
+                                    'paragraph-level results': doc_retriever_results}
                 retriever_result['gold provenance metadata'][f'num_page_par_ids'] = len(gold_page_par_ids)
                 retriever_results.append(retriever_result)
     return retriever_results
@@ -70,7 +70,7 @@ def print_retriever_acc(retriever_results, gold_data, ks):
         page_par_ids = []
         answer_in_context = []
         
-        for d in r['page-level results']:
+        for d in r['paragraph-level results']:
             page_ids.append(d[f'page_id'])
             page_par_ids.append(d[f'page_par_id'])
             answer_in_context.append(d['answer_in_context'])
@@ -118,7 +118,7 @@ def results_by_key(ks, results_by_k):
 
 def main(args):
     guess_file = os.path.join(args.prediction_dir, args.retriever, args.dataset + '.jsonl')
-    evaluation_dir = os.path.join(evaluation_dir, args.retriever)
+    evaluation_dir = os.path.join(args.evaluation_dir, args.retriever)
 
     guess_data = load_jsonl(guess_file, sort_by_id = True)
     gold_data = load_json(os.path.join(args.data_dir, 'gold_zeno_files', f"gold_{args.dataset}_zeno_file.json"), sort_by_id = True)
