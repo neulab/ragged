@@ -40,7 +40,7 @@ To process query tsv for ColBERT, run `python create_query_tsv.py --data_dir $da
 
 # 3. Get retriever outputs
 ## Use BM25 for predictions
-1. Download the [pyserini repo](https://github.com/castorini/pyserini) and [KILT repo](https://github.com/facebookresearch/KILT/tree/main/kilt). See more details about BM25 input formatting [here] (https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
+1. Git clone the [pyserini repo](https://github.com/castorini/pyserini) and [KILT repo](https://github.com/facebookresearch/KILT/tree/main). See more details about BM25 input formatting [here] (https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
 
 2. Customize [`BM25/default_bm25.json`](https://github.com/neulab/ragged/blob/main/retriever/BM25/default_bm25.json) for your select dataset and move the file into `KILT/kilt/configs/retriever/default_bm25.json`.
 
