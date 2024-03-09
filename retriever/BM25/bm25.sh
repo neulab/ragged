@@ -6,8 +6,6 @@ export PYTHONPATH="$PYTHONPATH:$RAGGED_PATH:$KILT_PATH"
 
 conda activate kilt
 
-python ${kilt_dir}/scripts/execute_retrieval.py -m bm25 -o ${prediction_dir}/bm25 --test_config KILT/kilt/configs/${dataset}.json
+python ${kilt_dir}/scripts/execute_retrieval.py -m bm25 -o ${prediction_dir}/bm25 --test_config $KILT_PATH/kilt/configs/${dataset}.json
 
 conda deactivate
-
-conda activate py10

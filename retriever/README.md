@@ -4,7 +4,8 @@ There are 4 steps:
 1. Download and process corpus data
 2. Download query dataset
 3. Get retriever outputs
-4. Evaluate retriever outputs
+4. Evaluate each retriever separately
+5. Compare retrievers
 
 # 1. Download and process corpus data
 
