@@ -40,17 +40,20 @@ To process query tsv for ColBERT, run `python create_query_tsv.py --data_dir $da
 
 # 3. Get retriever outputs
 ## Use BM25 for predictions
-1. Git clone the [pyserini repo](https://github.com/castorini/pyserini) and [KILT repo](https://github.com/facebookresearch/KILT/tree/main). See more details about BM25 input formatting [here] (https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
 
-2. Customize [`BM25/default_bm25.json`](https://github.com/neulab/ragged/blob/main/retriever/BM25/default_bm25.json) for your select dataset and move the file into `KILT/kilt/configs/retriever/default_bm25.json`.
+1. To get corpus indices for BM25, clone [pyserini repo](https://github.com/castorini/pyserini) and run [BM25/get_indices.sh](https://github.com/neulab/ragged/blob/main/retriever/BM25/get_indices.sh). This will output a folder `${index_dir}/${corpus}jsonl`. To adapt for your own dataset, see formatting instructions [here] (https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
 
-3. Copy [`BM25/BM25_connector.py`](https://github.com/neulab/ragged/blob/main/retriever/BM25/BM25_connector.py) into `KILT/kilt/retrievers/BM25_connector.py`.
+2. To get BM25 retrieval outputs, first clone [KILT repo](https://github.com/facebookresearch/KILT/tree/main).
+
+3. Replace "index" with `${index_dir}/${corpus}jsonl` in [`BM25/default_bm25.json`](https://github.com/neulab/ragged/blob/main/retriever/BM25/default_bm25.json), then move the file into your KILT directory: `KILT/kilt/configs/retriever/default_bm25.json`.
+
+3. Replace `KILT/kilt/retrievers/BM25_connector.py` with [`BM25/BM25_connector.py`](https://github.com/neulab/ragged/blob/main/retriever/BM25/BM25_connector.py).
 
 4. Customize `KILT/kilt/configs/${dataset}.json` for your select dataset.
 
-5. Run `bm25.sh` to output `${prediction_dir}/bm25/${dataset}.jsonl`.
+5. Run [`bm25.sh`](https://github.com/neulab/ragged/blob/main/retriever/BM25/bm25.sh) to output the top-k passages for each query in the file`${prediction_dir}/bm25/${dataset}.jsonl`.
 
-Each line corresponds to each query. This is an example of one line:
+Each line corresponds to a query. This is an example of one line:
 ```
 {"id": "-1027463814348738734", 
 "input": "pace maker is associated with which body organ", 
@@ -69,15 +72,16 @@ Each line corresponds to each query. This is an example of one line:
 ## Use ColBERT for predictions
 1. Download our [modified version](https://github.com/jenhsia/RAGGED_ColBERT) of the [original ColBERT](https://github.com/stanford-futuredata/ColBERT).
 
-2. Run `colbert.sh` to output `${prediction_dir}/colbert/${dataset}.jsonl`.
+2. Run [`ColBERT/colbert.sh`](https://github.com/neulab/ragged/blob/main/retriever/ColBERT/colbert.sh) to output `${prediction_dir}/colbert/${dataset}.jsonl`.
 
-# 4. Evaluate retriever outputs
-To evaluate the predictions, run \evaluate_retriver.sh' with the appropriate arguments.
+# 4. Evaluate each retriever
+To evaluate the predictions, run [`evaluate_retriver.sh`](https://github.com/neulab/ragged/blob/main/retriever/evaluate_retriever.sh) with the appropriate arguments.
 This outputs 3 files.
-The first output file is `${evaluation_dir}/${retriever}/${dataset}.jsonl`, for which each line corresponds to each query. 
-For each query, we include paragraph-level results for each of the k retrieved paragraphs. We include an example of one line below, 
-where 'id' corresponds to the query id.
 
+The first output file is `${evaluation_dir}/${retriever}/${dataset}.jsonl`. 
+<!-- For each line/query, we include paragraph-level results for each of the k retrieved paragraphs. We include an example of one line below, 
+where 'id' corresponds to the query id. -->
+Each line corresponds to a query. This is an example of one line:
 ```
 {"id": "-1027463814348738734",
 "gold provenance metadata": {"num_page_ids": 2, "num_page_par_ids": 2}, 
@@ -105,7 +109,8 @@ This outputs retrieval performance for each k. We include an example below for k
 
 The third output file is `${evaluation_dir}/${retriever}/${dataset}_results_by_k.jpg` which plots retriever performance by k. 
 
-After evaluating each retriever as above, you can use `evaluate_retriever.ipynb` to compare different retrievers across values of k.
+# 4. Compare retrievers
+After evaluating each retriever separately as above, use [`evaluate_retriever.ipynb`](https://github.com/neulab/ragged/blob/main/retriever/evaluate_retriever.ipynb) to compare different retrievers across values of k.
 
 
 
