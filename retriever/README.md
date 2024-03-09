@@ -1,6 +1,6 @@
 We support retrievers BM25 and ColBERT and retrieval corpuses kilt_wikipedia (KILT version) and the 2023 Annual Medline Corpus
 
-There are 4 steps: 
+There are 5 steps: 
 1. Download and process corpus data
 2. Download query dataset
 3. Get retriever outputs
