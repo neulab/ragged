@@ -1,22 +1,19 @@
 #!/bin/bash
-source /home/jhsia2/.bashrc
 
-conda activate py10
-
-export PYTHONPATH=$PYTHONPATH:/home/jhsia2/ragged
-
-
-conda deactivate 
+SCRIPT_PATH="$(realpath "$0")"
+RAGGED_PATH="${SCRIPT_PATH%/retriever/ColBERT/colbert.sh}"
+export PYTHONPATH="$PYTHONPATH:$RAGGED_PATH:$COLBERT_PATH"
 
 export COLBERT_LOAD_TORCH_EXTENSION_VERBOSE=True
 export FORCE_CUDA="1"
 conda activate colbert
 rm  -rf .cache/torch_extensions/
 
-export PYTHONPATH=$PYTHONPATH:/home/jhsia2/KILT:/home/jhsia2/ColBERT 
-
-python get_colbert_predictions.py --output_dir --model_dir --corpus_idr --corpus_name --data_dir --dataset
+python "$RAGGED_PATH/retriever/ColBERT/get_colbert_predictions.py" --prediction_dir $prediction_dir \
+                                                                    --model_dir $model_dir \
+                                                                    --corpus_dir $corpus_dir \
+                                                                    --corpus $corpus \
+                                                                    --data_dir $data_dir\
+                                                                    --dataset $dataset
 
 conda deactivate
-
-conda activate py10
