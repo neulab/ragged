@@ -44,7 +44,7 @@ To process query tsv for ColBERT, run `python create_query_tsv.py --data_dir $da
 This involves using pyserini repo to get BM25 indices then KILT repo to get BM25 outputs. 
 1. Clone [pyserini repo](https://github.com/castorini/pyserini).
 
-2. Run [BM25/get_indices.sh](https://github.com/neulab/ragged/blob/main/retriever/BM25/get_indices.sh). This will output a folder `${index_dir}/${corpus}_jsonl`. To adapt for your own dataset, see formatting instructions [here] (https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
+2. Run [BM25/get_indices.sh](https://github.com/neulab/ragged/blob/main/retriever/BM25/get_indices.sh). This will output a folder `${index_dir}/${corpus}_jsonl`. To adapt for your own dataset, see formatting instructions [here](https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
 
 3. Clone [KILT repo](https://github.com/facebookresearch/KILT/tree/main).
 
