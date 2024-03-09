@@ -1,45 +1,11 @@
 We support retrievers BM25 and ColBERT and retrieval corpuses kilt_wikipedia (KILT version) and the 2023 Annual Medline Corpus
 
-There are 5 steps: 
-1. Download and process corpus data
-2. Download query dataset
-3. Get retriever outputs
-4. Evaluate each retriever separately
-5. Compare retrievers
+There are 3 steps: 
+1. Get retriever outputs
+2. Evaluate each retriever separately
+3. Compare retrievers
 
-# 1. Download and process corpus data
-
-## Download BioAS corpus - Pubmed
-<!-- 
-        python download_pubmed_corpus.py --data_dir /data/tir/projects/tir6/general/afreens/dbqa/data
-        This downloads the pubmed corpus in unprocessed form to ${data_dir}/bioasq/annual_zips/
-
-        use python create_pubmed_jsonl.py --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files
-        This outputs 'pubmed/pubmed_jsonl/pubmed.jsonl' and 'pubmed/id2title.json' in corpus_dir 
-        python create_page_paragraph_jsonl.py --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files
-    This outputs 'kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl" in your corpus_dir -->
-
-Download pubmed.jsonl from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to `${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl`.
-
-## Download Wiki corpus
-Download wikipedia.jsonl from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to `${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl`.
-    
-
-To process corpus for ColBERT format , run `create_corpus_tsv.py --corpus $corpus --corpus_dir $corpus_dir`.
-This outputs `$corpus_dir/${corpus}/${corpus}.tsv`.
-
-# 2. Download query dataset
-Download each `$dataset` from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to `${data_dir}/${dataset}.jsonl`.
-    <!-- Download NQ, hotpotqa from KILT repo as nq.jsonl and hotpotqa.jsonl in the ${data_dir} Download BioASQ
-        From Bioasq website, download the following into data_dir/bioasq/
-        Task11BGoldenEnriched/11B*_golden.json and BioASQ-training11b/training11b.json from BioASQ
-        python compile_bioasq_questions.py --data_dir --corpus_dir 
-        This outputs bioasq.jsonl in the data_dir -->
-    
-
-To process query tsv for ColBERT, run `python create_query_tsv.py --data_dir $data_dir --dataset $dataset`, which outputs `$data_dir/${dataset}-queries.tsv`.
-
-# 3. Get retriever outputs
+# 1. Get retriever outputs
 ## Use BM25 for predictions
 This involves using pyserini repo to get BM25 indices then KILT repo to get BM25 outputs. 
 1. Clone [pyserini repo](https://github.com/castorini/pyserini).
@@ -79,7 +45,7 @@ Each line corresponds to a query. This is an example of one line:
 
 3. Run [`ColBERT/colbert.sh`](https://github.com/neulab/ragged/blob/main/retriever/ColBERT/colbert.sh) to output `${prediction_dir}/colbert/${dataset}.jsonl`.
 
-# 4. Evaluate each retriever
+# 2. Evaluate each retriever
 To evaluate the predictions, run [`evaluate_retriver.sh`](https://github.com/neulab/ragged/blob/main/retriever/evaluate_retriever.sh) with the appropriate arguments.
 This outputs 3 files.
 
@@ -114,7 +80,7 @@ This outputs retrieval performance for each k. We include an example below for k
 
 The third output file is `${evaluation_dir}/${retriever}/${dataset}_results_by_k.jpg` which plots retriever performance by k. 
 
-# 4. Compare retrievers
+# 3. Compare retrievers
 After evaluating each retriever separately as above, use [`evaluate_retriever.ipynb`](https://github.com/neulab/ragged/blob/main/retriever/evaluate_retriever.ipynb) to compare different retrievers across values of k.
 
 
