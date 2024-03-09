@@ -1,11 +1,7 @@
-#!/bin/bash
-source /home/jhsia2/.bashrc
-conda activate py10
-
-export PYTHONPATH=$PYTHONPATH:/home/jhsia2/ragged
+export PYTHONPATH=$PYTHONPATH:$ragged_dir
 
 
-export PYTHONPATH=$PYTHONPATH:/home/jhsia2/KILT:/home/jhsia2/pyserini
+export PYTHONPATH=$PYTHONPATH:$pyserini_dir
 
 conda activate kilt
 
@@ -17,10 +13,8 @@ python -m pyserini.index.lucene \
   --threads 4 \
   --storePositions --storeDocvectors --storeRaw --storeContents
 
-python ${kilt_dir}scripts/execute_retrieval.py -m bm25 -o ${prediction_dir}/bm25 --test_config /home/jhsia2/KILT/kilt/configs/${dataset}.json
+python ${kilt_dir}scripts/execute_retrieval.py -m bm25 -o ${prediction_dir}/bm25 --test_config $kilt_dir/kilt/configs/${dataset}.json
 
 conda deactivate
 
 conda activate py10
-
-# sbatch --job-name=b-bioasq --gres=gpu:4 --time=1-00:00:00 --mem=200G --output=b-bioasq-out.log --error=b-bioasq-err.log bm25_bioasq.sh
