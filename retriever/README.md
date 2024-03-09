@@ -41,18 +41,20 @@ To process query tsv for ColBERT, run `python create_query_tsv.py --data_dir $da
 
 # 3. Get retriever outputs
 ## Use BM25 for predictions
+This involves using pyserini repo to get BM25 indices then KILT repo to get BM25 outputs. 
+1. Clone [pyserini repo](https://github.com/castorini/pyserini).
 
-1. To get corpus indices for BM25, clone [pyserini repo](https://github.com/castorini/pyserini) and run [BM25/get_indices.sh](https://github.com/neulab/ragged/blob/main/retriever/BM25/get_indices.sh). This will output a folder `${index_dir}/${corpus}jsonl`. To adapt for your own dataset, see formatting instructions [here] (https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
+2. Run [BM25/get_indices.sh](https://github.com/neulab/ragged/blob/main/retriever/BM25/get_indices.sh). This will output a folder `${index_dir}/${corpus}_jsonl`. To adapt for your own dataset, see formatting instructions [here] (https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
 
-2. To get BM25 retrieval outputs, first clone [KILT repo](https://github.com/facebookresearch/KILT/tree/main).
+3. Clone [KILT repo](https://github.com/facebookresearch/KILT/tree/main).
 
-3. Replace "index" with `${index_dir}/${corpus}jsonl` in [`BM25/default_bm25.json`](https://github.com/neulab/ragged/blob/main/retriever/BM25/default_bm25.json), then move the file into your KILT directory: `KILT/kilt/configs/retriever/default_bm25.json`.
+4. Replace `${index_dir}/${corpus}_jsonl` in [`BM25/default_bm25.json`](https://github.com/neulab/ragged/blob/main/retriever/BM25/default_bm25.json), then move the file into your KILT directory: `KILT/kilt/configs/retriever/default_bm25.json`.
 
-3. Replace `KILT/kilt/retrievers/BM25_connector.py` with [`BM25/BM25_connector.py`](https://github.com/neulab/ragged/blob/main/retriever/BM25/BM25_connector.py).
+5. Replace `KILT/kilt/retrievers/BM25_connector.py` with [`BM25/BM25_connector.py`](https://github.com/neulab/ragged/blob/main/retriever/BM25/BM25_connector.py).
 
-4. Customize `KILT/kilt/configs/${dataset}.json` for your select dataset.
+6. Customize `KILT/kilt/configs/${dataset}.json` for your select dataset.
 
-5. Run [`bm25.sh`](https://github.com/neulab/ragged/blob/main/retriever/BM25/bm25.sh) to output the top-k passages for each query in the file`${prediction_dir}/bm25/${dataset}.jsonl`.
+7. Run [`bm25.sh`](https://github.com/neulab/ragged/blob/main/retriever/BM25/bm25.sh) to output the top-k passages for each query in the file`${prediction_dir}/bm25/${dataset}.jsonl`.
 
 Each line corresponds to a query. This is an example of one line:
 ```
