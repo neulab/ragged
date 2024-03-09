@@ -119,7 +119,6 @@ def results_by_key(ks, results_by_k):
 def main(args):
     guess_file = os.path.join(args.prediction_dir, args.retriever, args.dataset + '.jsonl')
     evaluation_dir = os.path.join(args.evaluation_dir, args.retriever)
-
     guess_data = load_jsonl(guess_file, sort_by_id = True)
     gold_data = load_json(os.path.join(args.data_dir, 'gold_zeno_files', f"gold_{args.dataset}_zeno_file.json"), sort_by_id = True)
 
