@@ -64,7 +64,8 @@ We support Natural Questions (KILT ver), HotpotQA (KILT ver), and BioASQ11B.
         Task11BGoldenEnriched/11B*_golden.json and BioASQ-training11b/training11b.json from BioASQ
         python compile_bioasq_questions.py --data_dir --corpus_dir 
         This outputs bioasq.jsonl in the data_dir -->
-The above files are ready for BM25 use. To reformat them for ColBERT use, run `python retriever/create_query_tsv.py --data_dir $data_dir --dataset $dataset`, which outputs `$data_dir/${dataset}-queries.tsv`.
+
+The above files are ready for BM25, but not for ColBERT. To reformat them for ColBERT, run `python retriever/create_query_tsv.py --data_dir $data_dir --dataset $dataset`, which outputs `$data_dir/${dataset}-queries.tsv`.
 
 
 ## Citation
