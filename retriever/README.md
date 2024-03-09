@@ -71,9 +71,11 @@ Each line corresponds to a query. This is an example of one line:
 
 
 ## Use ColBERT for predictions
-1. Download our [modified version](https://github.com/jenhsia/RAGGED_ColBERT) of the [original ColBERT](https://github.com/stanford-futuredata/ColBERT).
+1. Download our [modified version](https://github.com/jenhsia/RAGGED_ColBERT) of the [original ColBERT repo](https://github.com/stanford-futuredata/ColBERT).
 
-2. Run [`ColBERT/colbert.sh`](https://github.com/neulab/ragged/blob/main/retriever/ColBERT/colbert.sh) to output `${prediction_dir}/colbert/${dataset}.jsonl`.
+2. Download the pre-trained ColBERTv2 checkpoint into your $model_dir. This checkpoint has been trained on the MS MARCO Passage Ranking task. You can also optionally train your own ColBERT model.
+
+3. Run [`ColBERT/colbert.sh`](https://github.com/neulab/ragged/blob/main/retriever/ColBERT/colbert.sh) to output `${prediction_dir}/colbert/${dataset}.jsonl`.
 
 # 4. Evaluate each retriever
 To evaluate the predictions, run [`evaluate_retriver.sh`](https://github.com/neulab/ragged/blob/main/retriever/evaluate_retriever.sh) with the appropriate arguments.
