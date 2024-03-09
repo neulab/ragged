@@ -1,13 +1,13 @@
 We support retrievers BM25 and ColBERT and retrieval corpuses kilt_wikipedia (KILT version) and the 2023 Annual Medline Corpus
 
 There are 3 steps: 
-1. Get retriever outputs
+1. Get top-k passages from the retrievers
 2. Evaluate each retriever separately
 3. Compare retrievers
 
-# 1. Get retriever outputs
-## Use BM25 for predictions
-This involves using pyserini repo to get BM25 indices then KILT repo to get BM25 outputs. 
+# 1. Get top-k passages from the retrievers
+## BM25
+This involves two steps: 1) using pyserini repo to get BM25 indices, 2) using KILT repo to get BM25 outputs. 
 1. Clone [pyserini repo](https://github.com/castorini/pyserini).
 
 2. Run [BM25/get_indices.sh](https://github.com/neulab/ragged/blob/main/retriever/BM25/get_indices.sh). This will output a folder `${index_dir}/${corpus}_jsonl`. To adapt for your own dataset, see formatting instructions [here](https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
@@ -38,7 +38,7 @@ Each line corresponds to a query. This is an example of one line:
 ```
 
 
-## Use ColBERT for predictions
+## ColBERT
 1. Download our [modified version](https://github.com/jenhsia/RAGGED_ColBERT) of the [original ColBERT repo](https://github.com/stanford-futuredata/ColBERT).
 
 2. Download the pre-trained ColBERTv2 checkpoint into your $model_dir. This checkpoint has been trained on the MS MARCO Passage Ranking task. You can also optionally train your own ColBERT model.
