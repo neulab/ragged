@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 import pdb
+import re
 
 def create_project(dataset):
 
@@ -23,7 +24,6 @@ def create_project(dataset):
                 "keys": {
                     "gold answer set": {"type": "text", "label": "gold answer set: "},
                     # "gold title set": {"type": "text", "label": "gold title set: "},
-                    # "gold context set": {"type": "text", "label": "gold text set: "},
                     "answer": {"type": "text", "label": "reader answer: "},
                     "retrieved context": {
                         "type": "list",
@@ -49,13 +49,13 @@ def create_project(dataset):
         metrics=[
             # ZenoMetric(name="max retrieved score", type="mean", columns=["max_score"]),
             # ZenoMetric(name="avg retrieved score", type="mean", columns=["avg_score"]),
+            # ZenoMetric(name=f"gold page_par_id set size", type="mean", columns=[f"gold page_par_id set size"]),
+            # ZenoMetric(name="any page_id_match", type="mean", columns=["any page_id_match"]),
+            # ZenoMetric(name="any page_par_id_match", type="mean", columns=["any page_par_id_match"]),
             ZenoMetric(name="exact_match", type="mean", columns=["exact_match"]),
             ZenoMetric(name="f1", type="mean", columns=["f1"]),
             ZenoMetric(name="answer_in_context", type="mean", columns=["answer_in_context"]),
-            # ZenoMetric(name=f"gold page_par_id set size", type="mean", columns=[f"gold page_par_id set size"]),
             ZenoMetric(name="substring_match", type="mean", columns=["substring_match"]),
-            # ZenoMetric(name="any page_id_match", type="mean", columns=["any page_id_match"]),
-            # ZenoMetric(name="any page_par_id_match", type="mean", columns=["any page_par_id_match"]),
             ZenoMetric(name=f"precision - page_id_match", type="mean", columns=[f"precision page_id_match"]),
             ZenoMetric(name=f"precision - page_par_id_match", type="mean", columns=[f"precision page_par_id_match"]),
             ZenoMetric(name=f"recall - page_id_match", type="mean", columns=[f"recall page_id_match"]),
@@ -63,23 +63,6 @@ def create_project(dataset):
         ],
     )
     return project
-    
-
-def get_hist_info(size_set, unit, dataset):
-    print('avg', np.mean(size_set), 'std', np.std(size_set), 'min', np.min(size_set), 'max', np.max(size_set))
-
-    plt.hist(size_set, bins=np.arange(min(size_set)-0.5, max(size_set)+1.5, 1), edgecolor='black')
-
-    # Set the labels and title for the plot
-    plt.xlabel(f'gold {unit} set size')
-    plt.ylabel('frequency')
-    plt.title(f'gold {unit} set size - {dataset}')
-
-    # Set x-ticks to correspond to the integer values
-    plt.xticks(range(min(size_set), max(size_set) + 1))
-
-    # Display the plot
-    plt.show()
 
 def get_precision(guess_id_set, gold_id_set):
     precision = np.mean([[s in gold_id_set] for s in guess_id_set])
@@ -92,7 +75,6 @@ def get_reader_df(top_k, combined_data):
     return pd.DataFrame(
         {
             "question": [d['input'] for d in combined_data],
-            # "dataset": [d['dataset'] for d in combined_data],
             "question_category": [d['question_category'] for d in combined_data],
             "id": [d['id'] for d in combined_data],
             "output": [
@@ -100,17 +82,9 @@ def get_reader_df(top_k, combined_data):
                     {   
                         "gold answer set": ', '.join(d['gold_answer_set']),
                         # "gold title set": ', '.join(d['gold_title_set']),
-                        # "gold context set": '\n'.join(d['gold_text_set']),
-                        # "gold context": d['gold_context'],
                         "answer": d["output"]["answer"],
                         "retrieved context": [
-                            {
-                                # "page_id": None,
-                                # "text": None,
-                                # "score": None,
-                                # "page_id_match": None,
-                                # "page_par_id_match": None
-                            }
+                            {}
                         ] if top_k == 'baseline' else [
                             {
                                 f"page_id": "[{idx}]({url})".format(
@@ -194,6 +168,7 @@ if __name__ == "__main__":
     parser.add_argument("--corpus_dir", help='reader_results_dir')
     parser.add_argument("--corpus", help='reader_results_dir')
     parser.add_argument("--dataset_dir", help='reader_results_dir')
+    parser.add_argument("--top_ks", help = 'what are the comma separate list of k values?')
     parser.add_argument("--create_project", action='store_true', help='this overwrites past results and creates new project instead of resuming')
     args = parser.parse_args()
     load_dotenv(override=True)
@@ -203,20 +178,10 @@ if __name__ == "__main__":
     
     id2title = load_json(os.path.join(args.corpus_dir, args.corpus, 'id2title.json'))
 
-    project = create_project(dataset)
+    project = create_project(args.dataset)
 
     gold_data = load_json(os.path.join(args.dataset_dir, 'gold_zeno_files', f"gold_{args.dataset}_zeno_file.json"), sort_by_id = True)
 
-    # for d in gold_data:
-    #     d['dataset'] = dataset
-
-    # page_par_id_set_size = []
-    # page_id_set_size = []
-    # for d in gold_data:
-    #     page_par_id_set_size.append(len(d['output']['page_par_id_set']))
-    #     page_id_set_size.append(len(d['output']['page_id_set']))
-    # get_hist_info(page_par_id_set_size, unit = 'paragraph')
-    # get_hist_info(page_id_set_size, unit = 'page')
     
     questions_categorized = load_json(os.path.join(args.dataset_dir, f'{args.dataset}_questions_categorized.json'))
 
@@ -224,9 +189,9 @@ if __name__ == "__main__":
         data_df = pd.DataFrame({"question": [d["input"] for d in gold_data], 'id': [d['id'] for d in gold_data]})
         project.upload_dataset(data_df, id_column="id", data_column="question")
 
-    reader_models = ['flanUl2', 'flanT5', 'llama_70b', 'llama_7b']
-    retriever_models = ['bm25', 'colbert','gold']
-    top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
+    reader_models = re.split(r',\s*', args.reader_models)
+    retriever_models = re.split(r',\s*', args.retriever_models)
+    top_ks = terms_list = re.split(r',\s*', args.top_ks)
 
     print(retriever_models)
     print(reader_models)

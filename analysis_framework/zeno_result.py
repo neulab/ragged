@@ -1,26 +1,15 @@
 
 
 
-import csv
-import json
+import re
 import argparse
 import os
 import warnings
-import pdb
 from file_utils import load_json, save_json, load_jsonl
-import pdb
 
 
 def convert_reader_results_to_zeno(reader_output_data, retriever_eval_data, is_baseline):
-
-    print(len(reader_output_data), len(retriever_eval_data))
-    assert len(reader_output_data) == len(retriever_eval_data)
-
-    for i in range(len(reader_output_data)):
-        if(reader_output_data[i]['id'] != retriever_eval_data[i]['id']):
-            print(reader_output_data[i]['id'], retriever_eval_data[i]['id'])
-
-       
+    assert len(reader_output_data) == len(retriever_eval_data), f'len of reader output ({len(reader_output_data)})!= len of retriever output ({len(retriever_eval_data)})'
     assert [d["id"] for d in reader_output_data] == [d["id"] for d in retriever_eval_data]
 
     zeno_format_data = []
@@ -62,32 +51,35 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process input, gold, and output files")
     parser.add_argument("--retriever", help='retriever')
     parser.add_argument("--reader", help='reader')
-    parser.add_argument("--retriever_results_dir", help='reader')
-    parser.add_argument("--reader_results_dir", help='reader')
-    parser.add_argument("--k_subset", help = 'top_k, top_negative, or top_positive?')
+    parser.add_argument("--retriever_evaluation_dir", help='reader')
+    parser.add_argument("--reader_output_dir", help='reader')
+    parser.add_argument("--retrieval_mode", help = 'top_k, top_negative, or top_positive?')
+    parser.add_argument("--top_ks", help = 'what are the comma separate list of k values?')
     parser.add_argument("--dataset", help='dataset; nq-dev-kilt or hotpotqa-dev-kilt or bioasq')
     args = parser.parse_args()
     
-    top_ks= ["baseline",  "gold", "top1", "top2", "top3", "top5", "top10", "top20", "top30", "top50"]
-
+    top_ks = terms_list = re.split(r',\s*', args.top_ks)
     # if your're considering the top negative or top positive documents within the top_k documents, then there is no gold or baseline.
-    if args.k_subset == 'top_negative' or args.k_subset == 'top_positive':
-        top_ks = top_ks[2:]
-
-    base_dir = os.getenv('DBQA')
-
-    results_dir =  os.path.join(args.reader_results_dir, args.k_subset)
+    if args.retrieval_mode == 'top_negative' or args.retrieval_mode == 'top_positive':
+        try:
+            top_ks.remove('baseline')
+        except ValueError:
+            pass
+        try:
+            top_ks.remove('gold')
+        except ValueError:
+            pass
 
     for top_k in top_ks:
         print(top_k)
         
         if top_k == 'gold':
-            k_dir = os.path.join(results_dir, args.reader, args.dataset.split('-')[0], 'gold')
-            retriever_eval_file = os.path.join(base_dir, f'retriever_results/evaluations/gold/{args.dataset}.jsonl')
+            k_dir = os.path.join(args.reader_output_dir, args.retrieval_mode, args.reader, args.dataset, 'gold')
+            retriever_eval_file = f'{args.retriever_evaluation_dir}/gold/{args.dataset}.jsonl'
             
         else:
-            k_dir = os.path.join(results_dir, args.reader, args.dataset.split('-')[0], args.retriever, top_k)
-            retriever_eval_file = os.path.join(base_dir, f'retriever_results/evaluations/{args.retriever}/{args.dataset}.jsonl')
+            k_dir = os.path.join(args.reader_output_dir, args.retrieval_mode, args.reader, args.dataset, args.retriever, top_k)
+            retriever_eval_file = f'{args.retriever_evaluation_dir}/{args.retriever}/{args.dataset}.jsonl'
   
         evaluation_file_path = os.path.join(k_dir, 'all_data_evaluated.jsonl')
         
