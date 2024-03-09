@@ -25,15 +25,15 @@ RAGGED offers further insights into LMs' context utilization habits, where we fi
 To recreate the conda environment, run 
 `conda create --name ragged_env --file requirements.txt`.
 
-To run and evaluate the retriever, see [`retriver/README.md`](https://github.com/neulab/ragged/blob/main/retriever/README.md)
+To run and evaluate the retriever, see [`retriver/README.md`](https://github.com/neulab/ragged/blob/main/retriever/README.md).
 
-To run and evaluate the reader, see [`reader/README.md`](https://github.com/neulab/ragged/blob/main/reader/README.md)
+To run and evaluate the reader, see [`reader/README.md`](https://github.com/neulab/ragged/blob/main/reader/README.md).
 
-To conduct downstream RAGGED analysis, see [`analysis_framework/README.md`](https://github.com/neulab/ragged/blob/main/analysis_framework/README.md)
+To conduct downstream RAGGED analysis, see [`analysis_framework/README.md`](https://github.com/neulab/ragged/blob/main/analysis_framework/README.md).
 
 
 ## Datasets
-To download the datasets used in the paper, see instructions in reader/README.md and folder X. 
+To download the datasets used in the paper, see instructions in [`retriver/README.md`](https://github.com/neulab/ragged/blob/main/retriever/README.md).
 
 
 ## Citation
