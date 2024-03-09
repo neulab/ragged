@@ -17,10 +17,10 @@ def main(args):
         )
         print('STARTING INDEXING')
         indexer = Indexer(checkpoint=os.path.join(args.model_dir, 'colbertv2.0/'), config=config)
-        indexer.index(name="complete_medline_corpus", collection=os.path.join(args.corpus_dir, args.corpus, f'{args.corpus}.tsv'), overwrite = 'reuse')
+        indexer.index(name=args.corpus, collection=os.path.join(args.corpus_dir, args.corpus, f'{args.corpus}.tsv'), overwrite = 'reuse')
         print('DONE INDEXING')
 
-        searcher = Searcher(index="complete_medline_corpus", config=config)
+        searcher = Searcher(index=args.corpus, config=config)
         query_file = os.path.join(args.data_dir, args.dataset + '-queries.tsv')
         print('loading query from', query_file)
         queries = Queries(query_file)
