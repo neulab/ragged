@@ -54,7 +54,7 @@ This involves using pyserini repo to get BM25 indices then KILT repo to get BM25
 
 6. Customize `KILT/kilt/configs/${dataset}.json` for your select dataset.
 
-7. Run [`bm25.sh`](https://github.com/neulab/ragged/blob/main/retriever/BM25/bm25.sh) to output the top-k passages for each query in the file`${prediction_dir}/bm25/${dataset}.jsonl`.
+7. Run [`BM25/bm25.sh`](https://github.com/neulab/ragged/blob/main/retriever/BM25/bm25.sh) to output the top-k passages for each query in the file`${prediction_dir}/bm25/${dataset}.jsonl`.
 
 Each line corresponds to a query. This is an example of one line:
 ```
