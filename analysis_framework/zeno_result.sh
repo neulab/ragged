@@ -4,7 +4,7 @@ SCRIPT_PATH="$(realpath "$0")"
 RAGGED_PATH="${SCRIPT_PATH%/analysis_framework/zeno_result.sh}"
 export PYTHONPATH="$PYTHONPATH:$RAGGED_PATH"
 
-conda activate py10
+conda activate ragged_env
 
 retrievers=("colbert")
 readers=("llama_70b" "llama_7b" "flanT5" "flanUl2")

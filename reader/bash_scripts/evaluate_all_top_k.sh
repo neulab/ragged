@@ -3,7 +3,7 @@ export ROOT_DIR=/home/jhsia2/ragged
 export PYTHONPATH=$PYTHONPATH:/home/jhsia2/ragged
 
 source /home/jhsia2/.bashrc
-conda activate py10
+conda activate ragged_env
 
 retrievers=("bm25" "colbert")
 # readers=("llama_70b" "llama_7b" "flanT5" "flanUl2")

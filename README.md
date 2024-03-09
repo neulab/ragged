@@ -23,7 +23,7 @@ RAGGED offers further insights into LMs' context utilization habits, where we fi
 
 ## Installation
 To recreate the conda environment, run 
-`conda env create -f environment.yml`.
+'conda create --name ragged_env --file requirements.txt'.
 
 To run and evaluate the retriever, see retriver/README.md
 
