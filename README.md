@@ -35,9 +35,9 @@ To conduct downstream RAGGED analysis, see [`analysis_framework/README.md`](http
 ## Datasets
 Download the retrieval corpus dataset and the query datasets as follows.
 <!-- To download the datasets used in the paper, see instructions in [`retriver/README.md`](https://github.com/neulab/ragged/blob/main/retriever/README.md). -->
-# 1. Download and process corpus data
+### 1. Download and process corpus datasets
 
-## Download BioAS corpus - Pubmed
+<!-- ## Download BioAS corpus - Pubmed -->
 <!-- 
         python download_pubmed_corpus.py --data_dir /data/tir/projects/tir6/general/afreens/dbqa/data
         This downloads the pubmed corpus in unprocessed form to ${data_dir}/bioasq/annual_zips/
@@ -47,17 +47,18 @@ Download the retrieval corpus dataset and the query datasets as follows.
         python create_page_paragraph_jsonl.py --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files
     This outputs 'kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl" in your corpus_dir -->
 
-Download pubmed.jsonl from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to `${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl`.
+Download the Pubmed corpus for BioASQ from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to `${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl`.
 
-## Download Wiki corpus
-Download kilt_wikipedia.jsonl from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to `${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl`.
+<!-- ## Download Wiki corpus -->
+Download the KILT wikipedia corpus from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to `${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl`.
     
 
 To process corpus for ColBERT format , run `create_corpus_tsv.py --corpus $corpus --corpus_dir $corpus_dir`.
 This outputs `$corpus_dir/${corpus}/${corpus}.tsv`.
 
-# 2. Download query dataset
+### 2. Download query datasets
 Download each `$dataset` from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to `${data_dir}/${dataset}.jsonl`.
+We support Natural Questions (KILT ver), HotpotQA (KILT ver), and BioASQ11B.
     <!-- Download NQ, hotpotqa from KILT repo as nq.jsonl and hotpotqa.jsonl in the ${data_dir} Download BioASQ
         From Bioasq website, download the following into data_dir/bioasq/
         Task11BGoldenEnriched/11B*_golden.json and BioASQ-training11b/training11b.json from BioASQ
