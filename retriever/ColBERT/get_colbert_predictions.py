@@ -44,7 +44,8 @@ def main(args):
                 for i, (c_id, rank, score) in enumerate(ranking.data[r]):
                     page_id, paragraph_id = searcher.collection.pid_list[c_id].split('_')
                     r_results['output'][0]['provenance'].append({"page_id": page_id,\
-                                                                "par_id": paragraph_id,\
+                                                                "start_par_id": paragraph_id,\
+                                                                "end_par_id": paragraph_id,\
                                                                 "text": searcher.collection.data[c_id],\
                                                                 "score": score})
                 json.dump(r_results, outfile)

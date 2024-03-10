@@ -45,7 +45,6 @@ def get_retriever_results(guess_data, gold_data):
                     
                     doc_retriever_result = {f'page_id': guess_page_id,
                                         f'page_id_match': guess_page_id in gold_page_ids}
-                    
                     guess_page_par_id = guess_page_id + '_' + str(p['start_par_id'])
                     doc_retriever_result['answer_in_context'] = any([ans in p['text'] for ans in gold['output']['answer_set']])
                     doc_retriever_result[f'page_par_id'] = guess_page_par_id
@@ -120,7 +119,7 @@ def main(args):
     guess_file = os.path.join(args.prediction_dir, args.retriever, args.dataset + '.jsonl')
     evaluation_dir = os.path.join(args.evaluation_dir, args.retriever)
     guess_data = load_jsonl(guess_file, sort_by_id = True)
-    gold_data = load_json(os.path.join(args.data_dir, 'gold_zeno_files', f"gold_{args.dataset}_zeno_file.json"), sort_by_id = True)
+    gold_data = load_json(os.path.join(args.data_dir, 'gold_compilation_files', f"gold_{args.dataset}_compilation_file.json"), sort_by_id = True)
 
     par_retriever_results = get_retriever_results(guess_data, gold_data)
 

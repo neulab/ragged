@@ -47,8 +47,10 @@ Each line corresponds to a query. This is an example of one line:
 3. Run [`ColBERT/colbert.sh`](https://github.com/neulab/ragged/blob/main/retriever/ColBERT/colbert.sh) to output `${prediction_dir}/colbert/${dataset}.jsonl`.
 
 # 2. Evaluate each retriever
-To evaluate the predictions, run [`evaluate_retriver.sh`](https://github.com/neulab/ragged/blob/main/retriever/evaluate_retriever.sh) with the appropriate arguments.
-This outputs 3 files.
+To evaluate the predictions, first compile all gold (evidence) information by running `python retriever/data_processing/get_gold_compilation.py --data_dir $data_dir --dataset $dataset`
+which outputs `$data_dir/gold_compilation_files/gold_${dataset}_compilation_file.json`.
+
+Then, run [`evaluate_retriver.sh`](https://github.com/neulab/ragged/blob/main/retriever/evaluate_retriever.sh), which outputs the following 3 files.
 
 The first output file is `${evaluation_dir}/${retriever}/${dataset}.jsonl`. 
 <!-- For each line/query, we include paragraph-level results for each of the k retrieved paragraphs. We include an example of one line below, 

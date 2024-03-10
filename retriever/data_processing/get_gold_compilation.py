@@ -8,7 +8,7 @@ import os
 from file_utils import load_json, save_json, load_jsonl
 import pdb
 
-def convert_gold_to_zeno(input_file):
+def create_gold_file(input_file):
     gold_data_list = []
 
     with open(input_file, 'r') as infile:
@@ -51,16 +51,12 @@ def convert_gold_to_zeno(input_file):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--prediction_dir", help='which directory are you saving the colbert predictions in?')
-    parser.add_argument("--model_dir", help='where did you save the colbert model you downloaded?')
-    parser.add_argument("--corpus_dir", help='what is the base directory for all corpus files?')
-    parser.add_argument("--corpus", help='what is the name of the corpus you are using? wikipedia or pubmed')
     parser.add_argument("--data_dir", help='where is the folder you stored the dataset jsonl in?')
     parser.add_argument("--dataset", help='what is the name of the dataset?')
     args = parser.parse_args()
 
     input_file = os.path.join(args.data_dir, f"{args.dataset}.jsonl")
-    zeno_format_data = convert_gold_to_zeno(input_file)
+    gold_data = create_gold_file(input_file)
     dataset = args.dataset.split('-')[0]
-    os.makedirs(os.path.join(args.data_dir, 'gold_zeno_files'), exist_ok=True)
-    save_json(zeno_format_data, os.path.join(args.data_dir, 'gold_zeno_files', f'gold_{args.dataset}_zeno_file.json'))
+    os.makedirs(os.path.join(args.data_dir, 'gold_compilation_files'), exist_ok=True)
+    save_json(gold_data, os.path.join(args.data_dir, 'gold_compilation_files', f'gold_{args.dataset}_compilation_file.json'))
