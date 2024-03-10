@@ -69,8 +69,8 @@ We support Natural Questions (KILT ver), HotpotQA (KILT ver), and BioASQ11B.
 The above files are ready for BM25, but not for ColBERT. To reformat them for ColBERT, run `python retriever/data_processing/create_query_tsv.py --data_dir $data_dir --dataset $dataset`, which outputs `$data_dir/${dataset}-queries.tsv`.
 
 ### 3. Adapt your own datasets.
-To adapt for BM25, see formatting instructions [here](https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
-TO adapt for ColBERT, see formatting instructions here. \jhsia2
+To adapt for BM25, format your corpus and query as jsonl files as instructed [here](https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
+To adapt for ColBERT, format your corpus and query datasets as instructed [here](https://github.com/stanford-futuredata/ColBERT).
 
 
 ## Citation
