@@ -71,12 +71,12 @@ The second output file is `${evaluation_dir}/${retriever}/${dataset}_results_by_
 This outputs retrieval performance for each k. We include an example below for k = 1.
 ```
     "1": {
-        "top-k wiki_id accuracy": 0.3595347197744096,
-        "top-k wiki_par_id accuracy": 0.24814945364821994,
-        "precision@k wiki_id": 0.3595347197744096,
-        "precision@k wiki_par_id": 0.24814945364821994,
-        "recall@k wiki_id": 0.27195394195746725,
-        "recall@k wiki_par_id": 0.12315278912917237,
+        "top-k page_id accuracy": 0.3595347197744096,
+        "top-k page_par_id accuracy": 0.24814945364821994,
+        "precision@k page_id": 0.3595347197744096,
+        "precision@k page_par_id": 0.24814945364821994,
+        "recall@k page_id": 0.27195394195746725,
+        "recall@k page_par_id": 0.12315278912917237,
         "answer_in_context@k": 0.44448360944659854
     }
 ```
