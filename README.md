@@ -53,7 +53,7 @@ Download the Pubmed corpus for BioASQ from [our Huggingface link](https://huggin
 Download the KILT wikipedia corpus from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to `${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl`.
     
 
-To process corpus for ColBERT format , run `create_corpus_tsv.py --corpus $corpus --corpus_dir $corpus_dir`.
+To process corpus for ColBERT format , run `python retriever/data_processing/create_corpus_tsv.py --corpus $corpus --corpus_dir $corpus_dir`.
 This outputs `$corpus_dir/${corpus}/${corpus}.tsv`.
 
 ### 2. Download query datasets
@@ -65,7 +65,11 @@ We support Natural Questions (KILT ver), HotpotQA (KILT ver), and BioASQ11B.
         python compile_bioasq_questions.py --data_dir --corpus_dir 
         This outputs bioasq.jsonl in the data_dir -->
 
-The above files are ready for BM25, but not for ColBERT. To reformat them for ColBERT, run `python retriever/create_query_tsv.py --data_dir $data_dir --dataset $dataset`, which outputs `$data_dir/${dataset}-queries.tsv`.
+The above files are ready for BM25, but not for ColBERT. To reformat them for ColBERT, run `python retriever/data_processing/create_query_tsv.py --data_dir $data_dir --dataset $dataset`, which outputs `$data_dir/${dataset}-queries.tsv`.
+
+### 3. Adapt your own datasets.
+To adapt for BM25, see formatting instructions [here](https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
+TO adapt for ColBERT, see formatting instructions here. \jhsia2
 
 
 ## Citation
