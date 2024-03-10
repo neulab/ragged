@@ -23,7 +23,8 @@ RAGGED offers further insights into LMs' context utilization habits, where we fi
 
 ## Installation
 To recreate the conda environment, run 
-`conda create --name ragged_env --file requirements.txt`.
+`conda create -n ragged -y python=3.10`
+`pip install -r requirements.txt`
 
 To run and evaluate the retriever, see [`retriver/README.md`](https://github.com/neulab/ragged/blob/main/retriever/README.md).
 
