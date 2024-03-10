@@ -1,0 +1,6 @@
+{
+    "Single Hop QA": {
+        "Example": "${dataset_dir}/${dataset}.jsonl"
+        
+    }
+}

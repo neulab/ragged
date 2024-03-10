@@ -1,12 +1,3 @@
-# This is a modified version of KILT/kilt/retrievers/BM25_connector.py.
-# The modification is in the output formatting.
-# Copyright (c) Facebook, Inc. and its affiliates.
-# All rights reserved.
-#
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
-
-
 import multiprocessing
 from multiprocessing.pool import ThreadPool
 import json
@@ -14,8 +5,8 @@ import pdb
 from tqdm import tqdm
 import jnius_config
 
-import kilt.kilt_utils as utils
-from kilt.retrievers.base_retriever import Retriever
+import bm25_utils as utils
+from base_retriever import Retriever
 
 
 def _run_thread(arguments):
@@ -28,10 +19,10 @@ def _run_thread(arguments):
     # bm25_a = arguments["bm25_a"]
     # bm25_b = arguments["bm25_b"]
     # searcher.set_bm25(bm25_a, bm25_b)
-
-    from pyserini.search import SimpleSearcher
+    from pyserini.search.lucene import LuceneSearcher
+    # from pyserini.search import SimpleSearcher
     # pdb.set_trace()
-    searcher = SimpleSearcher(index)
+    searcher = LuceneSearcher(index)
 
     _iter = data
     if idz == 0:
@@ -52,15 +43,16 @@ def _run_thread(arguments):
             try:
                 doc_data = json.loads(str(y.docid).strip())
                 doc_data["score"] = y.score
-                doc_data["text"] = y.contents.strip()
+                doc_data["text"] = y.lucene_document.get('contents').strip()
                 element.append(doc_data)
             except Exception as e:
                 # print(e)
                 page_id, par_id = y.docid.split('_')
+                # pdb.set_trace()
                 element.append(
                     {
                         "score": y.score,
-                        "text": y.contents.strip(),
+                        "text": y.lucene_document.get('contents').strip(),
                         "page_id": page_id,
                         "start_par_id": (int)(par_id),
                         "end_par_id" : (int)(par_id),
@@ -104,7 +96,6 @@ class BM25(Retriever):
 
     def run(self):
         pool = ThreadPool(self.num_threads)
-        # pdb.set_trace()
         results = pool.map(_run_thread, self.arguments)
 
         provenance = {}
