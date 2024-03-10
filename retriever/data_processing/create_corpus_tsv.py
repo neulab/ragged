@@ -23,4 +23,5 @@ if __name__ == '__main__':
             id = data['id']
             p = data['contents']
             outfile.write('\t'.join([id, p.encode('unicode_escape').decode()]) + '\n')
-    print('done')
+    
+    print(f'writing to {output_file}')

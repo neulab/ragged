@@ -6,12 +6,14 @@ from colbert import Searcher
 import os
 import json
 import argparse
+import pdb
 
 def main(args):
     exp_name = 'colbert'
 
     with Run().context(RunConfig(nranks=1, experiment=exp_name)):
         config = ColBERTConfig(
+            index_path = os.path.join(args.index_dir, 'colbert', args.corpus),
             nbits=2,
             root= args.prediction_dir,
         )
@@ -57,5 +59,6 @@ if __name__=='__main__':
     parser.add_argument("--corpus", help='what is the name of the corpus you are using? wikipedia or pubmed')
     parser.add_argument("--data_dir", help='where is the folder you stored the dataset jsonl in?')
     parser.add_argument("--dataset", help='what is the name of the dataset?')
+    parser.add_argument("--index_dir", help='what is the name of the colbert index dir?')
     args = parser.parse_args()
     main(args)

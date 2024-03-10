@@ -8,19 +8,21 @@ There are 3 steps:
 # 1. Get top-k passages from the retrievers
 ## BM25
 This involves two steps: 1) using pyserini repo to get BM25 indices, 2) using KILT repo to get BM25 outputs. 
-1. Clone [pyserini repo](https://github.com/castorini/pyserini).
+<!-- 1. Clone [pyserini repo](https://github.com/castorini/pyserini). -->
 
-2. Run [BM25/get_indices.sh](https://github.com/neulab/ragged/blob/main/retriever/BM25/get_indices.sh). This will output a folder `${index_dir}/${corpus}_jsonl`. To adapt for your own dataset, see formatting instructions [here](https://github.com/castorini/pyserini/blob/master/docs/usage-index.md#building-a-bm25-index-direct-java-implementation).
+1. Install Java 11.
 
-3. Clone [KILT repo](https://github.com/facebookresearch/KILT/tree/main).
+2. Run [BM25/get_indices.sh](https://github.com/neulab/ragged/blob/main/retriever/BM25/get_indices.sh). This will output a folder `${index_dir}/${corpus}_jsonl`. 
 
-4. Replace `${index_dir}/${corpus}_jsonl` in [`BM25/default_bm25.json`](https://github.com/neulab/ragged/blob/main/retriever/BM25/default_bm25.json), then move the file into your KILT directory: `KILT/kilt/configs/retriever/default_bm25.json`.
+<!-- 3. Clone [KILT repo](https://github.com/facebookresearch/KILT/tree/main). -->
 
-5. Replace `KILT/kilt/retrievers/BM25_connector.py` with [`BM25/BM25_connector.py`](https://github.com/neulab/ragged/blob/main/retriever/BM25/BM25_connector.py).
+4. Replace `${index_dir}/${corpus}_jsonl` in [`BM25/default_bm25.json`](https://github.com/neulab/ragged/blob/main/retriever/BM25/default_bm25.json).
 
-6. Customize `KILT/kilt/configs/${dataset}.json` for your select dataset.
+<!-- 5. Replace `KILT/kilt/retrievers/BM25_connector.py` with [`BM25/BM25_connector.py`](https://github.com/neulab/ragged/blob/main/retriever/BM25/BM25_connector.py). -->
 
-7. Run [`BM25/bm25.sh`](https://github.com/neulab/ragged/blob/main/retriever/BM25/bm25.sh) to output the top-k passages for each query in the file`${prediction_dir}/bm25/${dataset}.jsonl`.
+3. Customize `KILT/kilt/configs/${dataset}.json` for your select dataset.
+
+4. Run [`BM25/bm25.sh`](https://github.com/neulab/ragged/blob/main/retriever/BM25/bm25.sh) to output the top-k passages for each query in the file`${prediction_dir}/bm25/${dataset}.jsonl`.
 
 Each line corresponds to a query. This is an example of one line:
 ```
@@ -37,11 +39,10 @@ Each line corresponds to a query. This is an example of one line:
     ]}]}
 ```
 
-
 ## ColBERT
-1. Download our [modified version](https://github.com/jenhsia/RAGGED_ColBERT) of the [original ColBERT repo](https://github.com/stanford-futuredata/ColBERT).
+1. Clone our [modified version](https://github.com/jenhsia/RAGGED_ColBERT/tree/merged) of the [original ColBERT repo](https://github.com/stanford-futuredata/ColBERT).
 
-2. Download the pre-trained ColBERTv2 checkpoint into your $model_dir. This checkpoint has been trained on the MS MARCO Passage Ranking task. You can also optionally train your own ColBERT model.
+2. Download the [pre-trained ColBERTv2](https://github.com/stanford-futuredata/ColBERT?tab=readme-ov-file#:~:text=pre%2Dtrained%20ColBERTv2%20checkpoint) checkpoint into your $model_dir. This checkpoint has been trained on the MS MARCO Passage Ranking task. You can also optionally [train your own ColBERT model](https://github.com/stanford-futuredata/ColBERT?tab=readme-ov-file#:~:text=train%20your%20own%20ColBERT%20model).
 
 3. Run [`ColBERT/colbert.sh`](https://github.com/neulab/ragged/blob/main/retriever/ColBERT/colbert.sh) to output `${prediction_dir}/colbert/${dataset}.jsonl`.
 
