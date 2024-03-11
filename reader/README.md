@@ -36,11 +36,21 @@ python generate_top_k.py --hosted_api_endpoint "<your-api-endpoint>" --model_nam
 
 ## READER RESULTS EVALUATION
 The evaluation can be conducted in two modes: 
-1. Evaluating LLM's baseline answer generation performance considering the gold context from dataset.
+1. Evaluating LLM's baseline answer generation performance when provided with no contexts.
+1. Evaluating LLM's baseline answer generation performance when provided with all of the gold contexts.
 2. Evaluating LLM's generated answers for various top\_k retrieved documents. 
 
-To evaluate the reader output against either no_context or gold baseline: 
-`python evaluate_top_k.py --retriever gold --reader flanT5 --dataset nq` or 
+To evaluate the reader output given no contexts:
+`python evaluate_top_k.py --retriever gold --reader flanT5 --dataset nq`
+
+To evaluate the reader output given gold contexts:
+```
+python ragged/retriever/data_processing/get_gold_contexts.py --prediction_dir $retriever_prediction_dir\
+                                                            --corpus_dir $corpus_dir\
+                                                            --corpus $corpus\
+                                                            --data_dir $data_dir\
+                                                            --dataset $dataset
+```
 `python evaluate_top_k.py --retriever no_context --reader flanT5 --dataset nq`
 
 To evaluate the reader output for various top\_k configurations: 
