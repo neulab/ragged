@@ -8,6 +8,20 @@ Before you begin, ensure you have met the following requirements:
 ## READER RESULTS GENERATION
 The reader component can be used in two primary ways: as a library in your Python scripts or via the command line interface provided by generate\_top\_k.py.
 
+The output structure is:
+
+READER_FOLDER
+│
+├── reader_A/
+│   ├── dataset_A/
+│   │   ├── retriever_A/
+│   │   │   └── retrieval_mode (top_k or top_positive or top_negative)
+│   │   │       ├── top_1/
+│   │   │       ├── ...
+│   │   │       └── top_50/
+│   │   ├── gold/
+│   │   └── no_context/
+
 #### Via code (for simple checks of the setup):
 ```
 from reader.reader_model import Reader
@@ -35,10 +49,11 @@ python generate_top_k.py --hosted_api_endpoint "<your-api-endpoint>" --model_nam
 *   \--retrieval\_mode: One of 3 context choices: provide all top-k retrieved passages (top_k), provide only the passages marked as relevant within the top-k retrieved passages(top_positive), provide only the passages not marked as relevant within the top-k retrieved passages (top_negative).
 
 ## READER RESULTS EVALUATION
-The evaluation can be conducted in two modes: 
+The evaluation can be conducted in three modes: 
 1. Evaluating LLM's baseline answer generation performance when provided with no contexts.
 1. Evaluating LLM's baseline answer generation performance when provided with all of the gold contexts.
-2. Evaluating LLM's generated answers for various top\_k retrieved documents. 
+2. Evaluating LLM's generated answers when provided with various top\_k retrieved documents. 
+
 
 To evaluate the reader output given no contexts:
 `python evaluate_top_k.py --retriever gold --reader flanT5 --dataset nq`
