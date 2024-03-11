@@ -68,12 +68,13 @@ def get_args():
 
 if __name__ == "__main__":
     args = get_args()
-
+    
     # define reader object
     tokenizer = get_tokenizer(args.model_name)
     reader=Reader(hosted_api_path =f"http://{args.hosted_api_endpoint}/", tokenizer=tokenizer)
-
-    output_path = os.path.join(READER_FOLDER, args.model, args.dataset, "gold")
+    final_model_name = f"{args.model_name}_{args.max_truncation}truncation_{args.max_new_tokens}new_tokens"
+    output_path = os.path.join(READER_FOLDER, args.final_model_name, args.dataset, args.retriever, 'gold')
+    # output_path = os.path.join(READER_FOLDER, args.model, args.dataset, "gold")
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     output_file = os.path.join(output_path, 'reader_results.jsonl')

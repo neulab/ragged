@@ -6,6 +6,7 @@ from utils import DATA_FOLDER, READER_FOLDER, dataset_map
 from word2number import w2n
 import argparse
 import pandas as pd
+import re
 
 
 def is_potential_number(word):
@@ -203,89 +204,82 @@ def evaluate_reader_results(reader_output, gold_data, WITH_BERT, args):
     
     return reader_output,method_metrics
 
-def gold_baseline_evaluation(models, datasets, with_bert=False, args=None):
+def baseline_evaluation(model, dataset, with_bert=False, args=None):
     #gold baseline evaluation
-    for model in models:
-        for dataset in datasets:
-            print(model, dataset)
-            gold_file = os.path.join(DATA_FOLDER, dataset_map[dataset])
-            input_path = os.path.join(READER_FOLDER, args.model, args.dataset, "gold")
-            input_file = os.path.join(input_path, "reader_results.jsonl")
+    result_dir = os.path.join(READER_FOLDER, args.model, args.dataset, args.retriever)
+    # for model in models:
+    #     for dataset in datasets:
+    print(model, dataset)
 
-            reader_data = load_jsonl(input_file)
-            gold_data = load_jsonl(gold_file)
-            reader_data, metrics = evaluate_reader_results(reader_data, gold_data,with_bert, args)
-            metrics_save_path = os.path.join(input_path, "gold_baseline_metrics.json")
-            save_json(metrics, metrics_save_path)
+    gold_data = load_jsonl(os.path.join(DATA_FOLDER, dataset_map[dataset]))
+    reader_output = load_jsonl(os.path.join(result_dir, "reader_results.jsonl"))
+    evaluated_data, metrics = evaluate_reader_results(reader_output, gold_data, with_bert, args)
+    
+    metrics_save_path = os.path.join(result_dir, "combined_metrics.json")
+    save_json(metrics, metrics_save_path)
 
-            evaluation_file_path = os.path.join(input_path, "all_data_evaluated.jsonl")
-            save_jsonl(reader_data, evaluation_file_path)
+    evaluation_file_path = os.path.join(result_dir, "all_data_evaluated.jsonl")
+    save_jsonl(evaluated_data, evaluation_file_path)
 
-def generations_evaluation(models, retrievers, datasets, with_bert=False, args=None):
-    top_ks= ["baseline", "top1", "top2", "top3", "top5", "top10", "top20","top30", "top50"]
-    if args.only_non_relevant or args.only_non_relevant:
-        top_ks = top_ks[1:]
+def top_k_evaluation(model, retriever, dataset, with_bert=False, args=None):
 
-    if args.only_relevant:
-        reader_base_folder = os.path.join(READER_FOLDER, "only_relevant")
-    elif args.only_non_relevant:
-        reader_base_folder = os.path.join(READER_FOLDER, "only_non_relevant")
-    else:
-        reader_base_folder = os.path.join(READER_FOLDER, "all_topk")
+    k_list_str = re.split(r',\s*', args.k_list)
+    k_list = [int(num) for num in k_list_str]
 
+    # reader_base_folder = os.path.join(READER_FOLDER, args.retrieval_mode)
+    
+    # WITH_BERT = with_bert
+    # for model in models:
+    #     for retriever in retrievers:
+    #         for dataset in datasets:
+    print(f"Eval - {model}/{dataset}/{retriever}/")
+    root_dir = os.path.join(READER_FOLDER, model, dataset, retriever, args.retrieval_mode)
+    gold_file = os.path.join(DATA_FOLDER, dataset_map[dataset])
 
-    WITH_BERT = with_bert
-    for model in models:
-        for retriever in retrievers:
-            for dataset in datasets:
-                print(f"Eval - {model}/{dataset}/{retriever}/")
-                root_dir = os.path.join(reader_base_folder, model, dataset, retriever)
-                gold_file = os.path.join(DATA_FOLDER, dataset_map[dataset])
+    metrics_map = {}
+    metrics_save_path = os.path.join(root_dir, 'combined_metrics.json')
+    for k in k_list:
+        k_dir = os.path.join(root_dir, f'top_{k}')
+        reader_output = load_jsonl(os.path.join(k_dir, "reader_results.jsonl"))
+        gold_data = load_jsonl(gold_file)
 
-                metrics_map = {}
-                metrics_save_path = os.path.join(root_dir, 'combined_metrics.json')
-                for top_k in top_ks:
-                    print(top_k)
-                    base_folder = os.path.join(root_dir, str(top_k))
-                    evaluation_file_path = os.path.join(base_folder, "all_data_evaluated.jsonl")
-                    all_data_file_path = os.path.join(root_dir, str(top_k), "reader_results.jsonl")
-                    all_data = load_jsonl(all_data_file_path)
-                    gold_data = load_jsonl(gold_file)
+        evaluated_data, metrics = evaluate_reader_results(reader_output, gold_data, with_bert, args)
+        metrics_map[f'top_{k}'] = metrics
+        save_json(metrics_map, metrics_save_path)
+        evaluation_file_path = os.path.join(k_dir, "all_data_evaluated.jsonl")
+        save_jsonl(evaluated_data, evaluation_file_path)
 
-                    all_data, metrics = evaluate_reader_results(all_data, gold_data,WITH_BERT, args)
-                    metrics_map[top_k] = metrics
-                    save_json(metrics_map, metrics_save_path)
-                    save_jsonl(all_data, evaluation_file_path)
-
-                
-                df = pd.DataFrame(metrics_map)
-                df.T.to_csv(metrics_save_path[:-4]+"csv")
-                print(df.T)
+    df = pd.DataFrame(metrics_map)
+    df.T.to_csv(metrics_save_path[:-4]+"csv")
+    print(df.T)
 
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--gold_eval', dest='gold_eval', action='store_true', help="flag to evaluate gold baselines")
-    parser.add_argument("--readers", type=str, help="list of comma separated readers to evaluate")
-    parser.add_argument("--retrievers", type=str, default=[], help="list of comma separated retrievers to evaluate (this argument not needed when evaluating gold)")
-    parser.add_argument("--datasets", type=str, help="list of comma separated datasets to evaluate")
+    # parser.add_argument('--gold_eval', dest='gold_eval', action='store_true', help="flag to evaluate gold baselines")
+    parser.add_argument("--reader", type=str, help="list of comma separated readers to evaluate")
+    parser.add_argument("--retriever", type=str, default=[], help="list of comma separated retrievers to evaluate (this argument not needed when evaluating gold)")
+    parser.add_argument("--dataset", type=str, help="list of comma separated datasets to evaluate")
     parser.add_argument('--with_bert', dest='with_bert', action='store_true', help="flag to run bertscore metric as well. This metric generally takes time")
-    parser.add_argument("--only_non_relevant", dest = 'only_non_relevant', action='store_true', help="Evaluate the only_non_relevant generations of the reader+dataset+retriever combination")
-    parser.add_argument("--only_relevant", dest = 'only_relevant', action='store_true', help="Evaluate the only_relevant generations of the reader+dataset+retriever combination")
+    # parser.add_argument("--top_negative", dest = 'top_negative', action='store_true', help="Evaluate the top_negative generations of the reader+dataset+retriever combination")
+    # parser.add_argument("--top_positive", dest = 'top_positive', action='store_true', help="Evaluate the top_positive generations of the reader+dataset+retriever combination")
+    parser.add_argument("--retrieval_mode", help = 'top_k, top_negative, top_positive?')
     parser.add_argument('--merge_list_answers', dest='merge_list_answers', action='store_true', help="flag to merge gold answers before evaluation")
-
+    parser.add_argument("--k_list", help = 'what are the comma separate list of k values?')
     args = parser.parse_args()
     print(f"args: {vars(args)}")
     return args
 
 if __name__ == "__main__":
     args = get_args()
-    datasets = [x.strip() for x in args.datasets.split(",")]
-    retrievers = [x.strip() for x in args.retrievers.split(",")]
-    readers = [x.strip() for x in args.readers.split(",")]
-    if args.gold_eval:
-        gold_baseline_evaluation(readers, datasets, with_bert=args.with_bert, args=args)
+
+    # datasets = [x.strip() for x in args.datasets.split(",")]
+    # retrievers = [x.strip() for x in args.retrievers.split(",")]
+    # readers = [x.strip() for x in args.readers.split(",")]
+
+    if args.retriever == 'gold' or args.retriever == 'no_context':
+        baseline_evaluation(args.reader, args.dataset, with_bert=args.with_bert, args=args)
     else:
-        generations_evaluation(readers, retrievers, datasets, with_bert=args.with_bert, args=args)
+        top_k_evaluation(args.reader, args.retriver, args.dataset, with_bert=args.with_bert, args=args)
 
 

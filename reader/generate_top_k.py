@@ -11,7 +11,13 @@ from utils import READER_FOLDER, RETRIEVER_FOLDER, get_tokenizer, dataset_map
 
 time_map = {}
 
-def generate_reader_outputs(retriever_data, reader_object, output_path=None, top_k=None, args=None):    
+def generate_reader_outputs(retriever_data, reader_object, output_path=None, args=None):  
+    if args.retriever == 'no_context':
+        k = 0 
+    elif args.retriever == 'gold':
+        k = None
+    else:
+        k = args.k
     batch_size = args.batch_size
     output_file = os.path.join(output_path, 'reader_results.jsonl')
     additional_metadata_file = os.path.join(output_path, 'additional_metadata.jsonl')
@@ -30,12 +36,12 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, top
             continue
         question = ques_info["input"]+"?"
         context_documents = ques_info["output"][0]["provenance"]
-        if args.only_non_relevant:
+        if args.top_negative:
             context_documents = [r for r in context_documents if r["page_par_id_match"]==False]
-        elif args.only_relevant:
+        elif args.top_positive:
             context_documents = [r for r in context_documents if r["page_par_id_match"]==True]
-        if top_k>0:
-            retrieved_passages = context_documents[:top_k]
+        if k != 0:
+            retrieved_passages = context_documents[:k]
             context = "\n".join([passage["text"] for passage in retrieved_passages])
         else:
             context = ""
@@ -62,7 +68,7 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, top
                 reader_responses.append({
                     "id" : ques_info["id"],
                     "input" : ques_info["input"],
-                    "retrieved_passages": context_documents[:top_k],
+                    "retrieved_passages": context_documents[:k],
                     "answer": answer
                 })
                 
@@ -87,15 +93,16 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, top
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--hosted_api_endpoint", type=str, help="the hosted endpoint of the TGI model server. SHould be of the format - <node>:<port>")
-    parser.add_argument("--top_k", type=int, default=1, help="the number of retrieved contexts to include in input for reader generation")
+    parser.add_argument("--k", type=int, default=1, help="the number of retrieved contexts to include in input for reader generation")
     parser.add_argument("--batch_size", type=int, default=50, help="the number of reader inputs processed simultaneously")
     parser.add_argument("--model_name", type=str, help="model name; <results_base_folder>/<model>")
     parser.add_argument("--retriever", type=str, help="retriever name; results stored at <results_base_folder>/<model>/<retriever>")
     parser.add_argument("--dataset", type=str, help="dataset name; results stored at <results_base_folder>/<model>/<retriever>/<dataset>")
     parser.add_argument("--max_new_tokens", type=int, help="number of tokens that the model would generate.")
     parser.add_argument("--max_truncation", type=int, default=4000, help="number of tokens fed to the reader model. If the input (i.e instruction+contexts+question) are greater than this value, they are truncated to these many tokens")
-    parser.add_argument("--only_relevant", action='store_true', help="When this flag is set, contexts that are marked relevant are only filtered and fed to the reader model along with the instruction and question")
-    parser.add_argument("--only_non_relevant", action='store_true', help="When this flag is set, contexts that are marked irrelevant are only filtered and fed to the reader model along with the instruction and question")
+    parser.add_argument("--retrieval_mode", help = 'top_k, top_negative, top_positive, no_context, or gold?')
+    # parser.add_argument("--top_positive", action='store_true', help="When this flag is set, contexts that are marked relevant are only filtered and fed to the reader model along with the instruction and question")
+    # parser.add_argument("--top_negative", action='store_true', help="When this flag is set, contexts that are marked irrelevant are only filtered and fed to the reader model along with the instruction and question")
 
     args = parser.parse_args()
     print(f"args: {vars(args)}")
@@ -112,21 +119,21 @@ if __name__ == "__main__":
     retriever_data_path = os.path.join(RETRIEVER_FOLDER, "predictions", args.retriever, dataset_map[args.dataset])
     retriever_eval_path = os.path.join(RETRIEVER_FOLDER, "evaluations", args.retriever, dataset_map[args.dataset])
     retriever_data = merge_retriever_data_and_eval_results(retriever_data_path, retriever_eval_path)
-
-    # determine results storage path and create needed folder
-    if args.only_relevant:
-        reader_base_folder = os.path.join(READER_FOLDER, "only_relevant")
-    elif args.only_non_relevant:
-        reader_base_folder = os.path.join(READER_FOLDER, "only_non_relevant")
-    else:
-        reader_base_folder = os.path.join(READER_FOLDER, "all_topk")
+        
     final_model_name = f"{args.model_name}_{args.max_truncation}truncation_{args.max_new_tokens}new_tokens"
-    folder_name = 'baseline' if args.top_k == 0 else 'top' + str(args.top_k)
-    output_path = os.path.join(reader_base_folder, final_model_name, args.dataset, args.retriever, folder_name)
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
+    
+    output_path  = os.path.join(READER_FOLDER, args.final_model_name, args.dataset, args.retriever)
+    # else:
+    
+    
+    if args.retriever != 'no_context' and args.retriever != 'gold':
+        # output_path = 
+        output_path = os.path.join(output_path, args.retrieval_mode, f'top_{args.k}')
+
+    os.makedirs(output_path, exist_ok = True)
     
     # generate reader results    
-    generate_reader_outputs(retriever_data, reader, output_path=output_path, top_k=args.top_k, args=args)
+    # generate_reader_outputs(retriever_data, reader, output_path=output_path, k=args.k, args=args)
+    generate_reader_outputs(retriever_data, reader, output_path=output_path, args=args)
 
     print("DONE!")
