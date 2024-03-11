@@ -28,11 +28,11 @@ python generate_top_k.py --hosted_api_endpoint "<your-api-endpoint>" --model_nam
 *   \--k: Specifies the number of top retrieved contexts (passages) to be used by the reader for generating an answer. Default is 1.
 *   \--batch\_size: The number of inputs (questions with context) that the reader model processes in one go. Default is 50.
 *   \--model\_name: Identifier for the model being used, results for this model are stored under `<base folder for results>/<model_name>`. Base folder for results is specified in [ragged/utils.py](https://github.com/neulab/ragged/blob/main/utils.py)
-*   \--retriever: Name of the retriever component used, results for this retriever are stored under `<base folder>/<model_name>/<retriever>`
+*   \--retriever: Name of the retriever component used, results for this retriever are stored under `<base folder>/<model_name>/<retriever>`. This could be a retriever model, `no_context`, or `gold` (provide all passages marked as relevant).
 *   \--dataset: Name of the dataset being processed, results for this retriever are stored under `<base folder>/<model_name>/<retriever>/<dataset>`
 *   \--max\_new\_tokens: Maximum number of new tokens the model is allowed to generate for each answer.
 *   \--max\_truncation: The maximum number of tokens from the input (including instruction, context, and question) fed to the reader. Inputs longer than this are truncated.
-*   \--retrieval\_mode: One of 4 context choices: provide all top-k retrieved passages (top_k), provide only the passages marked as relevant within the top-k retrieved passages(top_positive), provide only the passages not marked as relevant within teh top-k retrieved passages (top_negative), provide no contexts (no_context), or provide all passages marked as relevant (gold)
+*   \--retrieval\_mode: One of 3 context choices: provide all top-k retrieved passages (top_k), provide only the passages marked as relevant within the top-k retrieved passages(top_positive), provide only the passages not marked as relevant within the top-k retrieved passages (top_negative).
 
 ## READER RESULTS EVALUATION
 The evaluation can be conducted in two modes: 
