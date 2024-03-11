@@ -1,4 +1,3 @@
-import asyncio
 from reader.utils import INSTRUCTION_STR, truncate_prompt
 from utils import complete_model_names
 from litellm import batch_completion 
@@ -26,7 +25,7 @@ class Reader:
         context_length_changes = []
         instruction_str_tokens = self.tokenizer(INSTRUCTION_STR)["input_ids"]
         for prompt in prompts:
-            modified_prompt, context_length_change_info = truncate_prompt(prompt, self.tokenizer, instruction_str_tokens, total_tokens)
+            modified_prompt, context_length_change_info = truncate_prompt(prompt, self.tokenizer, instruction_str_tokens, total_tokens, max_new_tokens)
             modified_prompts.append(modified_prompt)
             context_length_changes.append(context_length_change_info)
 

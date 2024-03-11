@@ -1,15 +1,7 @@
-import glob
-import os
-from file_utils import load_json, load_jsonl, save_jsonl
-from tqdm import tqdm
-from transformers import T5Tokenizer
-from transformers import LlamaTokenizer
-from utils import BASE_FOLDER, READER_FOLDER
-
 INSTRUCTION_STR = "Give simple short one phrase answers for the questions based on the context"
 NO_CONTEXT_INSTRUCTION_STR = "Give simple short one phrase answers for the question"
 
-def truncate_prompt(prompt, tokenizer, instruction_str_tokens, total_tokens):
+def truncate_prompt(prompt, tokenizer, instruction_str_tokens, total_tokens, max_new_tokens):
     question_tokens = tokenizer(prompt["question"])["input_ids"]
     remaining_length = total_tokens-len(instruction_str_tokens)-len(question_tokens)-max_new_tokens-5 #additional buffer of 5
     context_tokens_before_truncation = tokenizer(prompt["context"], add_special_tokens=False)["input_ids"]

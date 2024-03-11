@@ -1,5 +1,5 @@
-from evaluation.eval_downstream import _bertscore, _exact_match_score, _f1_score, _metric_max_over_ground_truths, _rougel_score, get_gold_answers, normalize_answer
-from file_utils import BASE_FOLDER, READER_BASE_FOLDER, NOISY_READER_BASE_FOLDER, load_jsonl, save_json, save_jsonl
+from rouge import Rouge
+from file_utils import load_jsonl, save_json, save_jsonl
 import pandas as pd
 import os
 from utils import DATA_FOLDER, READER_FOLDER, dataset_map
@@ -7,7 +7,84 @@ from word2number import w2n
 import argparse
 import pandas as pd
 import re
+import argparse
+import re
+import string
+from rouge import Rouge
+from evaluate import load
+bertscore = load("bertscore")
 
+from collections import Counter
+
+# utility to get max
+def _metric_max_over_ground_truths(metric_fn, prediction, ground_truths):
+    # pdb.set_trace()
+    scores_for_ground_truths = []
+    for ground_truth in ground_truths:
+        score = metric_fn(prediction, ground_truth)
+        scores_for_ground_truths.append(score)
+
+    if not isinstance(scores_for_ground_truths[0], dict):
+        return max(scores_for_ground_truths)
+    else:
+        return max(scores_for_ground_truths, key=lambda x:x["bertscore_f1"])
+
+
+# answer nomalization
+def normalize_answer(s):
+    """Lower text and remove punctuation, articles and extra whitespace."""
+
+    def remove_articles(text):
+        return re.sub(r"\b(a|an|the)\b", " ", text)
+
+    def white_space_fix(text):
+        return " ".join(text.split())
+
+    def remove_punc(text):
+        exclude = set(string.punctuation)
+        return "".join(ch for ch in text if ch not in exclude)
+
+    def lower(text):
+        return text.lower()
+
+    return white_space_fix(remove_articles(remove_punc(lower(s))))
+
+def _bertscore(prediction, ground_truth):
+    results = bertscore.compute(predictions=[normalize_answer(prediction)], references=[normalize_answer(ground_truth)], lang="en")
+    return {
+        "bertscore_precision" : results["precision"][0],
+        "bertscore_recall" : results["recall"][0],
+        "bertscore_f1" : results["f1"][0]
+    }
+
+# F1 score definition
+def _f1_score(prediction, ground_truth):
+    prediction_tokens = normalize_answer(prediction).split()
+    ground_truth_tokens = normalize_answer(ground_truth).split()
+    common = Counter(prediction_tokens) & Counter(ground_truth_tokens)
+    num_same = sum(common.values())
+    if num_same == 0:
+        return 0
+    precision = 1.0 * num_same / len(prediction_tokens)
+    recall = 1.0 * num_same / len(ground_truth_tokens)
+    f1 = (2 * precision * recall) / (precision + recall)
+    return f1
+
+
+# EM score definition
+def _exact_match_score(prediction, ground_truth):
+    return normalize_answer(prediction) == normalize_answer(ground_truth)
+
+
+# ROUGEL score definition
+def _rougel_score(prediction, ground_truth):
+    rouge = Rouge()
+    # no normalization
+    try:
+        scores = rouge.get_scores(prediction, ground_truth, avg=True)
+    except ValueError:  # "Hypothesis is empty."
+        return 0.0
+    return scores["rouge-l"]["f"]
 
 def is_potential_number(word):
     """
