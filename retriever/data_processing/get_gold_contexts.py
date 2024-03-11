@@ -25,7 +25,6 @@ def convert_gold_to_zeno(gold_info, corpus_file):
             text = '\t'.join(split_out[1:])
             par_id_to_text_map[id] = text
             ids.append(id)
-    # print(len(par_id_to_text_map))
 
     retriever_format_data = []
 
@@ -57,14 +56,13 @@ def convert_gold_to_zeno(gold_info, corpus_file):
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--prediction_dir", help='which directory are you saving the colbert predictions in?')
-    parser.add_argument("--model_dir", help='where did you save the colbert model you downloaded?')
     parser.add_argument("--corpus_dir", help='what is the base directory for all corpus files?')
     parser.add_argument("--corpus", help='what is the name of the corpus you are using? wikipedia or pubmed')
     parser.add_argument("--data_dir", help='where is the folder you stored the dataset jsonl in?')
     parser.add_argument("--dataset", help='what is the name of the dataset?')
     args = parser.parse_args()
 
-    gold_info = load_json(os.path.join(args.data_dir, 'gold_zeno_files', f'gold_{args.dataset}_zeno_file.json'))
+    gold_info = load_json(os.path.join(args.data_dir, 'gold_compilation_files', f'gold_{args.dataset}_compilation_file.json'))
     
     corpus_file  = os.path.join(args.corpus_dir, args.corpus, f'{args.corpus}.tsv')
     retriever_format_data = convert_gold_to_zeno(gold_info, corpus_file)

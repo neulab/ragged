@@ -53,13 +53,13 @@ which outputs `$data_dir/gold_compilation_files/gold_${dataset}_compilation_file
 Then, run [`evaluate_retriver.sh`](https://github.com/neulab/ragged/blob/main/retriever/evaluate_retriever.sh), which outputs the following 3 files.
 
 The first output file is `${evaluation_dir}/${retriever}/${dataset}.jsonl`. 
-<!-- For each line/query, we include paragraph-level results for each of the k retrieved paragraphs. We include an example of one line below, 
+<!-- For each line/query, we include passage-level results for each of the k retrieved paragraphs. We include an example of one line below, 
 where 'id' corresponds to the query id. -->
 Each line corresponds to a query. This is an example of one line:
 ```
 {"id": "-1027463814348738734",
 "gold provenance metadata": {"num_page_ids": 2, "num_page_par_ids": 2}, 
-"paragraph-level results": [
+"passage-level results": [
     {"page_id": "557054", "page_id_match": false, "answer_in_context": false, "page_par_id": "557054_4", "page_par_id_match": false},
     ...
     {"page_id": "12887799", "page_id_match": false, "answer_in_context": true, "page_par_id": "12887799_2", "page_par_id_match": false}
