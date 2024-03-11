@@ -75,7 +75,7 @@ def get_reader_df(top_k, combined_data):
     return pd.DataFrame(
         {
             "question": [d['input'] for d in combined_data],
-            "question_category": [d['question_category'] for d in combined_data],
+            # "question_category": [d['question_category'] for d in combined_data],
             "id": [d['id'] for d in combined_data],
             "output": [
                 json.dumps(
@@ -85,7 +85,7 @@ def get_reader_df(top_k, combined_data):
                         "answer": d["output"]["answer"],
                         "retrieved context": [
                             {}
-                        ] if top_k == 'baseline' else [
+                        ] if top_k == 'no_context' else [
                             {
                                 f"page_id": "[{idx}]({url})".format(
                                     idx=id2title.get(r[f"page_id"], 'Title not available.'),
@@ -109,10 +109,10 @@ def get_reader_df(top_k, combined_data):
             f"gold page_par_id set size": [
                 len(d[f"gold_page_par_id_set"]) for d in combined_data
             ],
-            # "max_score": [0 for d in combined_data] if top_k == 'baseline' else [
+            # "max_score": [0 for d in combined_data] if top_k == 'no_context' else [
             #     d["output"]["retrieved"][0]["score"] for d in combined_data
             # ],
-            # "avg_score": [0 for d in combined_data] if top_k == 'baseline' else [
+            # "avg_score": [0 for d in combined_data] if top_k == 'no_context' else [
             #     np.mean([r["score"] for r in d["output"]["retrieved"]]) for d in combined_data
             # ],
             "f1": [
@@ -127,22 +127,22 @@ def get_reader_df(top_k, combined_data):
             "answer_in_context": [
                 d["output"]["summary context evaluation"]["answer_in_context"] for d in combined_data
             ],
-            f"any page_id_match": [False for d in combined_data] if top_k == 'baseline' else [
+            f"any page_id_match": [False for d in combined_data] if top_k == 'no_context' else [
                 d["output"]["summary context evaluation"][f"page_id_match"] for d in combined_data
             ],
-            f"any page_par_id_match": [False for d in combined_data] if top_k == 'baseline' else [
+            f"any page_par_id_match": [False for d in combined_data] if top_k == 'no_context' else [
                 d["output"]["summary context evaluation"][f"page_par_id_match"] for d in combined_data
             ],
-            f"precision page_id_match": [0 for d in combined_data] if top_k == 'baseline' else [
+            f"precision page_id_match": [0 for d in combined_data] if top_k == 'no_context' else [
                 get_precision(set([r.get(f"page_id", None) for r in d["output"]["retrieved"]]), d[f'gold_page_id_set']) for d in combined_data
             ],
-            f"precision page_par_id_match": [0 for d in combined_data] if top_k == 'baseline' else [
+            f"precision page_par_id_match": [0 for d in combined_data] if top_k == 'no_context' else [
                 get_precision(set([r.get(f"page_par_id", None) for r in d["output"]["retrieved"]]), d[f'gold_page_par_id_set']) for d in combined_data
             ],
-            f"recall page_id_match": [0 for d in combined_data] if top_k == 'baseline' else [
+            f"recall page_id_match": [0 for d in combined_data] if top_k == 'no_context' else [
                 get_recall(set([r.get(f"page_id", None) for r in d["output"]["retrieved"]]), d[f'gold_page_id_set']) for d in combined_data
             ],
-            f"recall page_par_id_match": [0 for d in combined_data] if top_k == 'baseline' else [
+            f"recall page_par_id_match": [0 for d in combined_data] if top_k == 'no_context' else [
                 get_recall(set([r.get(f"page_par_id", None) for r in d["output"]["retrieved"]]), d[f'gold_page_par_id_set']) for d in combined_data
             ],
         }
@@ -153,7 +153,7 @@ def combine_gold_and_compiled(output_data, gold_data, questions_categorized):
         if(od['id'] != gd['id']):
             print(od, gd)
             break
-        od['question_category'] = questions_categorized[od['id']]
+        # od['question_category'] = questions_categorized[od['id']]
         od['gold_answer_set'] = gd['output']['answer_set']
         od[f'gold_page_id_set'] = gd['output'][f'page_id_set']
         od[f'gold_page_par_id_set'] = gd['output'][f'page_par_id_set']
@@ -180,10 +180,10 @@ if __name__ == "__main__":
 
     project = create_project(args.dataset)
 
-    gold_data = load_json(os.path.join(args.dataset_dir, 'gold_zeno_files', f"gold_{args.dataset}_zeno_file.json"), sort_by_id = True)
+    gold_data = load_json(os.path.join(args.data_dir, 'gold_compilation_files', f'gold_{args.dataset}_compilation_file.json'), sort_by_id = True)
 
+    # questions_categorized = load_json(os.path.join(args.dataset_dir, f'{args.dataset}_questions_categorized.json'))
     
-    questions_categorized = load_json(os.path.join(args.dataset_dir, f'{args.dataset}_questions_categorized.json'))
 
     if args.create_project:
         data_df = pd.DataFrame({"question": [d["input"] for d in gold_data], 'id': [d['id'] for d in gold_data]})
@@ -203,7 +203,7 @@ if __name__ == "__main__":
             print('reader', reader_model)
             if retriever_model == 'gold':
 
-                data = load_json(os.path.join(args.reader_results_dir, reader_model, args.dataset, 'gold', "reader_results_zeno.json"))
+                data = load_json(os.path.join(args.reader_results_dir, reader_model, args.dataset, 'gold', "compiled_results.json"))
                         
                 combined_data = combine_gold_and_compiled(data, gold_data, questions_categorized)
                 output_df = get_reader_df('gold', combined_data)
@@ -213,11 +213,11 @@ if __name__ == "__main__":
             else:
                 for top_k in top_ks:
                     print(top_k)
-                    data = load_json(os.path.join(args.reader_results_dir, reader_model, args.dataset, retriever_model, f"{top_k}/reader_results_zeno.json"))
+                    data = load_json(os.path.join(args.reader_results_dir, reader_model, args.dataset, retriever_model, f"{top_k}/compiled_results.json"))
                             
                     combined_data = combine_gold_and_compiled(data, gold_data, questions_categorized)
                     output_df = get_reader_df(top_k, combined_data)
-                    if top_k == 'baseline':
+                    if top_k == 'no_context':
                         project.upload_system(
                         output_df, name= (reader_model + ' ' + top_k), id_column="id", output_column="output"
                     )
