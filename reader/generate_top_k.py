@@ -34,17 +34,20 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
     for i, ques_info in tqdm(enumerate(retriever_data)):
         if ques_info["id"] in reader_ques_ids_already_generated:
             continue
-        question = ques_info["input"]+"?"
+        question = ques_info["input"].strip("?")+"?"
         context_documents = ques_info["output"][0]["provenance"]
-        if args.top_negative:
+        if args.top_negative and k!=None:
             context_documents = [r for r in context_documents if r["page_par_id_match"]==False]
-        elif args.top_positive:
+        elif args.top_positive and k!=None:
             context_documents = [r for r in context_documents if r["page_par_id_match"]==True]
-        if k != 0:
+        if k==None:
+            context = "\n".join([passage["text"] for passage in context_documents])
+        elif k == 0:
+            context = ""
+        else:
             retrieved_passages = context_documents[:k]
             context = "\n".join([passage["text"] for passage in retrieved_passages])
-        else:
-            context = ""
+            
         
         prompt = {"question" : question, "context": context}
         all_prompts.append(prompt)

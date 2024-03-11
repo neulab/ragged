@@ -1,3 +1,8 @@
+import os
+
+from file_utils import load_jsonl
+
+
 INSTRUCTION_STR = "Give simple short one phrase answers for the questions based on the context"
 NO_CONTEXT_INSTRUCTION_STR = "Give simple short one phrase answers for the question"
 
@@ -26,8 +31,15 @@ def create_prompt(question, context):
         return f"{NO_CONTEXT_INSTRUCTION_STR}\nQuestion: {question}\nAnswer: ".strip()
 
 
-def merge_retriever_data_and_eval_results(retriever_data, retriever_eval_data):
-    for retriever_info, eval_info in zip(retriever_data, retriever_eval_data):
-        for r,e in zip(retriever_info["output"][0]["provenance"], eval_info["page-level results"]):
-            r["page_par_id_match"] = e["page_par_id_match"]
-    return retriever_data
+def merge_retriever_data_and_eval_results(retriever_data_path, retriever_eval_data_path):
+    if os.path.exists(retriever_data_path) and os.path.exists(retriever_eval_data_path):
+        retriever_data = load_jsonl(retriever_data_path)
+        retriever_eval_data = load_jsonl(retriever_eval_data_path)
+        for retriever_info, eval_info in zip(retriever_data, retriever_eval_data):
+            for r,e in zip(retriever_info["output"][0]["provenance"], eval_info["page-level results"]):
+                r["page_par_id_match"] = e["page_par_id_match"]
+        return retriever_data
+    elif os.path.exists(retriever_data_path):
+        return load_jsonl(retriever_data_path)
+    else:
+        raise Exception(f"{retriever_data_path} does not exist!")

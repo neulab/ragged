@@ -284,8 +284,6 @@ def evaluate_reader_results(reader_output, gold_data, WITH_BERT, args):
 def baseline_evaluation(model, dataset, with_bert=False, args=None):
     #gold baseline evaluation
     result_dir = os.path.join(READER_FOLDER, args.model, args.dataset, args.retriever)
-    # for model in models:
-    #     for dataset in datasets:
     print(model, dataset)
 
     gold_data = load_jsonl(os.path.join(DATA_FOLDER, dataset_map[dataset]))
@@ -303,12 +301,6 @@ def top_k_evaluation(model, retriever, dataset, with_bert=False, args=None):
     k_list_str = re.split(r',\s*', args.k_list)
     k_list = [int(num) for num in k_list_str]
 
-    # reader_base_folder = os.path.join(READER_FOLDER, args.retrieval_mode)
-    
-    # WITH_BERT = with_bert
-    # for model in models:
-    #     for retriever in retrievers:
-    #         for dataset in datasets:
     print(f"Eval - {model}/{dataset}/{retriever}/")
     root_dir = os.path.join(READER_FOLDER, model, dataset, retriever, args.retrieval_mode)
     gold_file = os.path.join(DATA_FOLDER, dataset_map[dataset])
@@ -333,30 +325,22 @@ def top_k_evaluation(model, retriever, dataset, with_bert=False, args=None):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    # parser.add_argument('--gold_eval', dest='gold_eval', action='store_true', help="flag to evaluate gold baselines")
-    parser.add_argument("--reader", type=str, help="list of comma separated readers to evaluate")
-    parser.add_argument("--retriever", type=str, default=[], help="list of comma separated retrievers to evaluate (this argument not needed when evaluating gold)")
-    parser.add_argument("--dataset", type=str, help="list of comma separated datasets to evaluate")
-    parser.add_argument('--with_bert', dest='with_bert', action='store_true', help="flag to run bertscore metric as well. This metric generally takes time")
-    # parser.add_argument("--top_negative", dest = 'top_negative', action='store_true', help="Evaluate the top_negative generations of the reader+dataset+retriever combination")
-    # parser.add_argument("--top_positive", dest = 'top_positive', action='store_true', help="Evaluate the top_positive generations of the reader+dataset+retriever combination")
-    parser.add_argument("--retrieval_mode", help = 'top_k, top_negative, top_positive?')
-    parser.add_argument('--merge_list_answers', dest='merge_list_answers', action='store_true', help="flag to merge gold answers before evaluation")
-    parser.add_argument("--k_list", help = 'what are the comma separate list of k values?')
+    parser.add_argument("--reader", type=str, help="Name of reader model")
+    parser.add_argument("--retriever", type=str, default=[], help="Name of retriever")
+    parser.add_argument("--dataset", type=str, help="Name of dataset")
+    parser.add_argument('--with_bert', dest='with_bert', action='store_true', help="(Optional) Flag to include BERTScore in the evaluation metrics. Note this slows down reader evaluation significantly.")
+    parser.add_argument("--retrieval_mode", help = "One of 3 context choices: provide all top-k retrieved passages (top_k), provide only the passages marked as relevant within the top-k retrieved passages(top_positive), provide only the passages not marked as relevant within teh top-k retrieved passages (top_negative)")
+    parser.add_argument('--merge_list_answers', dest='merge_list_answers', action='store_true', help="Flag to merge list-type answers for evaluation. (this flag will be used only when the data under reader_results.jsonl has 'question_type' attribute set to 'list')")
+    parser.add_argument("--k_list", help = 'Comma-separated list of k (number of passages)')
     args = parser.parse_args()
     print(f"args: {vars(args)}")
     return args
 
 if __name__ == "__main__":
     args = get_args()
-
-    # datasets = [x.strip() for x in args.datasets.split(",")]
-    # retrievers = [x.strip() for x in args.retrievers.split(",")]
-    # readers = [x.strip() for x in args.readers.split(",")]
-
     if args.retriever == 'gold' or args.retriever == 'no_context':
         baseline_evaluation(args.reader, args.dataset, with_bert=args.with_bert, args=args)
     else:
-        top_k_evaluation(args.reader, args.retriver, args.dataset, with_bert=args.with_bert, args=args)
+        top_k_evaluation(args.reader, args.retriever, args.dataset, with_bert=args.with_bert, args=args)
 
 
