@@ -9,7 +9,7 @@ Before you begin, ensure you have met the following requirements:
 The reader component can be used in two primary ways: as a library in your Python scripts or via the command line interface provided by generate\_top\_k.py.
 
 The output structure is:
-
+```
 READER_FOLDER
 │
 ├── reader_A/
@@ -21,7 +21,8 @@ READER_FOLDER
 │   │   │       └── top_50/
 │   │   ├── gold/
 │   │   └── no_context/
-
+....
+```
 #### Via code (for simple checks of the setup):
 ```
 from reader.reader_model import Reader
