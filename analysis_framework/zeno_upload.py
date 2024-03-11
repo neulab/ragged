@@ -10,10 +10,10 @@ import argparse
 import pdb
 import re
 
-def create_project(dataset):
+def create_project(zeno_project_name):
 
     project = client.create_project(
-        name=f"Document QA - {dataset}",
+        name=zeno_project_name,
         view={
             "data": {"type": "text", 
                     "label": "question:"
@@ -71,7 +71,7 @@ def get_recall(guess_id_set, gold_id_set):
     recall = np.mean([[s in guess_id_set] for s in gold_id_set]) if len(gold_id_set) > 0 else 0.0
     return recall
 
-def get_reader_df(top_k, combined_data):
+def get_reader_df(retriever, combined_data):
     return pd.DataFrame(
         {
             "question": [d['input'] for d in combined_data],
@@ -85,7 +85,7 @@ def get_reader_df(top_k, combined_data):
                         "answer": d["output"]["answer"],
                         "retrieved context": [
                             {}
-                        ] if top_k == 'no_context' else [
+                        ] if retriever == 'no_context' else [
                             {
                                 f"page_id": "[{idx}]({url})".format(
                                     idx=id2title.get(r[f"page_id"], 'Title not available.'),
@@ -127,28 +127,28 @@ def get_reader_df(top_k, combined_data):
             "answer_in_context": [
                 d["output"]["summary context evaluation"]["answer_in_context"] for d in combined_data
             ],
-            f"any page_id_match": [False for d in combined_data] if top_k == 'no_context' else [
+            f"any page_id_match": [False for d in combined_data] if retriever == 'no_context' else [
                 d["output"]["summary context evaluation"][f"page_id_match"] for d in combined_data
             ],
-            f"any page_par_id_match": [False for d in combined_data] if top_k == 'no_context' else [
+            f"any page_par_id_match": [False for d in combined_data] if retriever == 'no_context' else [
                 d["output"]["summary context evaluation"][f"page_par_id_match"] for d in combined_data
             ],
-            f"precision page_id_match": [0 for d in combined_data] if top_k == 'no_context' else [
+            f"precision page_id_match": [0 for d in combined_data] if retriever == 'no_context' else [
                 get_precision(set([r.get(f"page_id", None) for r in d["output"]["retrieved"]]), d[f'gold_page_id_set']) for d in combined_data
             ],
-            f"precision page_par_id_match": [0 for d in combined_data] if top_k == 'no_context' else [
+            f"precision page_par_id_match": [0 for d in combined_data] if retriever == 'no_context' else [
                 get_precision(set([r.get(f"page_par_id", None) for r in d["output"]["retrieved"]]), d[f'gold_page_par_id_set']) for d in combined_data
             ],
-            f"recall page_id_match": [0 for d in combined_data] if top_k == 'no_context' else [
+            f"recall page_id_match": [0 for d in combined_data] if retriever == 'no_context' else [
                 get_recall(set([r.get(f"page_id", None) for r in d["output"]["retrieved"]]), d[f'gold_page_id_set']) for d in combined_data
             ],
-            f"recall page_par_id_match": [0 for d in combined_data] if top_k == 'no_context' else [
+            f"recall page_par_id_match": [0 for d in combined_data] if retriever == 'no_context' else [
                 get_recall(set([r.get(f"page_par_id", None) for r in d["output"]["retrieved"]]), d[f'gold_page_par_id_set']) for d in combined_data
             ],
         }
     )
 
-def combine_gold_and_compiled(output_data, gold_data, questions_categorized):
+def combine_gold_and_compiled(output_data, gold_data, questions_categorized = None):
     for i, (od, gd) in enumerate(zip(output_data, gold_data)):
         if(od['id'] != gd['id']):
             print(od, gd)
@@ -164,64 +164,60 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process input, gold, and output files")
     parser.add_argument("--dataset", help='dataset')
     parser.add_argument("--zeno_api_key")
-    parser.add_argument("--reader_results_dir", help='reader_results_dir')
-    parser.add_argument("--corpus_dir", help='reader_results_dir')
-    parser.add_argument("--corpus", help='reader_results_dir')
-    parser.add_argument("--dataset_dir", help='reader_results_dir')
-    parser.add_argument("--top_ks", help = 'what are the comma separate list of k values?')
+    parser.add_argument("--zeno_project_name")
+    parser.add_argument("--reader_output_dir", help='reader_output_dir')
+    parser.add_argument("--corpus_dir", help='reader_output_dir')
+    parser.add_argument("--corpus", help='reader_output_dir')
+    parser.add_argument("--dataset_dir", help='reader_output_dir')
+    parser.add_argument("--k_list", help = 'what are the comma separate list of k values?')
     parser.add_argument("--create_project", action='store_true', help='this overwrites past results and creates new project instead of resuming')
     args = parser.parse_args()
     load_dotenv(override=True)
 
     client = ZenoClient(args.zeno_api_key)
     
-    
     id2title = load_json(os.path.join(args.corpus_dir, args.corpus, 'id2title.json'))
-
     project = create_project(args.dataset)
-
     gold_data = load_json(os.path.join(args.data_dir, 'gold_compilation_files', f'gold_{args.dataset}_compilation_file.json'), sort_by_id = True)
 
     # questions_categorized = load_json(os.path.join(args.dataset_dir, f'{args.dataset}_questions_categorized.json'))
     
-
     if args.create_project:
         data_df = pd.DataFrame({"question": [d["input"] for d in gold_data], 'id': [d['id'] for d in gold_data]})
         project.upload_dataset(data_df, id_column="id", data_column="question")
 
-    reader_models = re.split(r',\s*', args.reader_models)
-    retriever_models = re.split(r',\s*', args.retriever_models)
-    top_ks = terms_list = re.split(r',\s*', args.top_ks)
+    readers = re.split(r',\s*', args.readers)
+    retrievers = re.split(r',\s*', args.retrievers)
+    k_list = terms_list = re.split(r',\s*', args.k_list)
 
-    print(retriever_models)
-    print(reader_models)
-    print(top_ks)
-    for retriever_model in retriever_models:
-        for reader_model in reader_models:
+    print(retrievers)
+    print(readers)
+    print(k_list)
+    for retriever in retrievers:
+        for reader in readers:
         
-            print('retriever', retriever_model)
-            print('reader', reader_model)
-            if retriever_model == 'gold':
+            print('retriever', retriever)
+            print('reader', reader)
+            input_dir = os.path.join(args.reader_output_dir, reader, args.dataset, retriever)
+            if retriever == 'gold' or retriever == 'no_context':
 
-                data = load_json(os.path.join(args.reader_results_dir, reader_model, args.dataset, 'gold', "compiled_results.json"))
-                        
-                combined_data = combine_gold_and_compiled(data, gold_data, questions_categorized)
-                output_df = get_reader_df('gold', combined_data)
+                data = load_json(os.path.join(input_dir, "compiled_results.json"))
+                
+                # combined_data = combine_gold_and_compiled(data, gold_data, questions_categorized)
+                combined_data = combine_gold_and_compiled(data, gold_data)
+                output_df = get_reader_df(retriever, combined_data)
                 project.upload_system(
-                    output_df, name= (reader_model + ' gold'), id_column="id", output_column="output"
+                    output_df, name= f'{reader} {retriever}', id_column="id", output_column="output"
                 )
             else:
-                for top_k in top_ks:
-                    print(top_k)
-                    data = load_json(os.path.join(args.reader_results_dir, reader_model, args.dataset, retriever_model, f"{top_k}/compiled_results.json"))
-                            
-                    combined_data = combine_gold_and_compiled(data, gold_data, questions_categorized)
-                    output_df = get_reader_df(top_k, combined_data)
-                    if top_k == 'no_context':
-                        project.upload_system(
-                        output_df, name= (reader_model + ' ' + top_k), id_column="id", output_column="output"
+                
+                for k in k_list:
+                    input_dir = os.path.join(input_dir, 'top_k', f'top_{k}')
+                    print(k)
+                    data = load_json(os.path.join(input_dir, "compiled_results.json"))
+                    # combined_data = combine_gold_and_compiled(data, gold_data, questions_categorized)
+                    combined_data = combine_gold_and_compiled(data, gold_data)
+                    output_df = get_reader_df(k, combined_data)
+                    project.upload_system(
+                        output_df, name= f'{reader} {retriever} top_{k}', id_column="id", output_column="output"
                     )
-                    else:
-                        project.upload_system(
-                            output_df, name= (retriever_model + ' ' + reader_model + ' ' + top_k), id_column="id", output_column="output"
-                        )

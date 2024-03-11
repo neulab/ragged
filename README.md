@@ -48,10 +48,11 @@ Download the retrieval corpus dataset and the query datasets as follows.
         python create_page_paragraph_jsonl.py --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files
     This outputs 'kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl" in your corpus_dir -->
 
-Download the Pubmed corpus for BioASQ from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to `${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl`.
+We provide our datasets from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged).
+For Pubmed corpus for BioASQ, download `pubmed`  to `${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl` and `pubmed_id2title`to `${corpus_dir}/pubmed/id2title.json`
 
 <!-- ## Download Wiki corpus -->
-Download the KILT wikipedia corpus from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to `${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl`.
+For KILT wikipedia corpus, download `kilt_wikipedia` to ${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl` and `kilt_wikipedia_id2title` to `${corpus_dir}/kilt_wikipedia/id2title.json`
     
 
 To process corpus for ColBERT format , run `python retriever/data_processing/create_corpus_tsv.py --corpus $corpus --corpus_dir $corpus_dir`.

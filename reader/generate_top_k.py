@@ -123,17 +123,12 @@ if __name__ == "__main__":
     final_model_name = f"{args.model_name}_{args.max_truncation}truncation_{args.max_new_tokens}new_tokens"
     
     output_path  = os.path.join(READER_FOLDER, args.final_model_name, args.dataset, args.retriever)
-    # else:
-    
     
     if args.retriever != 'no_context' and args.retriever != 'gold':
-        # output_path = 
         output_path = os.path.join(output_path, args.retrieval_mode, f'top_{args.k}')
 
     os.makedirs(output_path, exist_ok = True)
     
-    # generate reader results    
-    # generate_reader_outputs(retriever_data, reader, output_path=output_path, k=args.k, args=args)
     generate_reader_outputs(retriever_data, reader, output_path=output_path, args=args)
 
     print("DONE!")
