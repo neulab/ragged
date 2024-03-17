@@ -77,11 +77,11 @@ To adapt for ColBERT, format your corpus and query datasets as instructed [here]
 ## Citation
 If you use our code, datasets, or concepts from our paper in your research, we would appreciate citing it in your work. Here is an example BibTeX entry for citing our paper:
 ```bibtex
-@article{x,
-  title={x},
-  author={x},
-  journal={x},
-  year={x}
+@article{hsia2024ragged,
+  title={RAGGED: Towards Informed Design of Retrieval Augmented Generation Systems},
+  author={Jennifer Hsia and Afreen Shaikh and Zhiruo Wang and Graham Neubig},
+  journal={arXiv preprint arXiv:2403.09040},
+  year={2024}
 }
 ```
 ## Contact
