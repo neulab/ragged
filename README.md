@@ -34,7 +34,7 @@ To conduct downstream RAGGED analysis, see [`analysis_framework/README.md`](http
 
 
 ## Datasets
-Our datasets are available [here](https://huggingface.co/datasets/jenhsia/ragged) 
+Our datasets are available [on Huggingface](https://huggingface.co/datasets/jenhsia/ragged) 
 <!-- To download the datasets used in the paper, see instructions in [`retriver/README.md`](https://github.com/neulab/ragged/blob/main/retriever/README.md). -->
 ### 1. Download and process corpus datasets
 
@@ -66,8 +66,7 @@ For KILT wikipedia corpus, the corpus name is `kilt_wikipedia`.
 <!-- to  `${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl` and `kilt_wikipedia_id2title` to `${corpus_dir}/kilt_wikipedia/id2title.json` -->
   
 
-After downloading the datasets, process the corpus for ColBERT format by running `python retriever/data_processing/create_corpus_tsv.py --corpus $corpus --corpus_dir $corpus_dir`.
-This outputs `$corpus_dir/${corpus}/${corpus}.json`.
+After downloading the datasets, process the corpus for ColBERT format by running `python retriever/data_processing/create_corpus_tsv.py --corpus $corpus --corpus_dir $corpus_dir`, which outputs `$corpus_dir/${corpus}/${corpus}.json`.
 
 ### 2. Download query datasets
 Specify `data_dir` and `dataset_name` and see `download_data.py` for how to download the file to `${data_dir}/${dataset_name}.jsonl`.
