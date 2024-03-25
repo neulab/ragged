@@ -34,7 +34,7 @@ To conduct downstream RAGGED analysis, see [`analysis_framework/README.md`](http
 
 
 ## Datasets
-Download the retrieval corpus dataset and the query datasets as follows.
+Our datasets are available [here](https://huggingface.co/datasets/jenhsia/ragged) 
 <!-- To download the datasets used in the paper, see instructions in [`retriver/README.md`](https://github.com/neulab/ragged/blob/main/retriever/README.md). -->
 ### 1. Download and process corpus datasets
 
@@ -50,20 +50,23 @@ Download the retrieval corpus dataset and the query datasets as follows.
 
 <!-- We provide our datasets from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged). -->
 
-To download [our Huggingface datasets](https://huggingface.co/datasets/jenhsia/ragged) in jsonl/csv format, use [to_json] and ([to_csv](https://huggingface.co/docs/datasets/en/package_reference/main_classes#datasets.Dataset)) as follows:
+
+<!-- in jsonl/csv format, use [to_json] and ([to_csv](https://huggingface.co/docs/datasets/en/package_reference/main_classes#datasets.Dataset)) as follows: -->
 
 Specify `corpus_dir` and `corpus_name` and see `download_data.py` for how to download and save the files in appropriate folders.
 
-
-For Pubmed corpus for BioASQ, the corpus name is `pubmed`, and the files should be downloaded to `${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl` and `${corpus_dir}/pubmed/id2title.csv`.
+For Pubmed corpus for BioASQ, the corpus name is `pubmed`.
+<!-- , and the files should be downloaded to `${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl` and `${corpus_dir}/pubmed/id2title.csv`. -->
 <!-- `${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl` and `pubmed_id2title`to `${corpus_dir}/pubmed/id2title.csv` -->
 
 <!-- ## Download Wiki corpus -->
-For KILT wikipedia corpus, the corpus name is `kilt_wikipedia`, and the files should be downloaded to `${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl` and `${corpus_dir}/kilt_wikipedia/id2title.json`.
+For KILT wikipedia corpus, the corpus name is `kilt_wikipedia`.
+
+<!-- , and the files should be downloaded to `${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl` and `${corpus_dir}/kilt_wikipedia/id2title.json`. --> 
 <!-- to  `${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl` and `kilt_wikipedia_id2title` to `${corpus_dir}/kilt_wikipedia/id2title.json` -->
   
 
-To process corpus for ColBERT format , run `python retriever/data_processing/create_corpus_tsv.py --corpus $corpus --corpus_dir $corpus_dir`.
+After downloading the datasets, process the corpus for ColBERT format by running `python retriever/data_processing/create_corpus_tsv.py --corpus $corpus --corpus_dir $corpus_dir`.
 This outputs `$corpus_dir/${corpus}/${corpus}.json`.
 
 ### 2. Download query datasets
