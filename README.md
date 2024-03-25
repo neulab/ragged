@@ -48,18 +48,27 @@ Download the retrieval corpus dataset and the query datasets as follows.
         python create_page_paragraph_jsonl.py --corpus_dir /data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files
     This outputs 'kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl" in your corpus_dir -->
 
-We provide our datasets from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged).
-For Pubmed corpus for BioASQ, download `pubmed`  to `${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl` and `pubmed_id2title`to `${corpus_dir}/pubmed/id2title.json`
+<!-- We provide our datasets from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged). -->
+
+To download [our Huggingface datasets](https://huggingface.co/datasets/jenhsia/ragged) in jsonl/csv format, use [to_json] and ([to_csv](https://huggingface.co/docs/datasets/en/package_reference/main_classes#datasets.Dataset)) as follows:
+
+Specify `corpus_dir` and `corpus_name` and see `download_data.py` for how to download and save the files in appropriate folders.
+
+
+For Pubmed corpus for BioASQ, the corpus name is `pubmed`, and the files should be downloaded to `${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl` and `${corpus_dir}/pubmed/id2title.csv`.
+<!-- `${corpus_dir}/pubmed/pubmed_jsonl/pubmed.jsonl` and `pubmed_id2title`to `${corpus_dir}/pubmed/id2title.csv` -->
 
 <!-- ## Download Wiki corpus -->
-For KILT wikipedia corpus, download `kilt_wikipedia` to ${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl` and `kilt_wikipedia_id2title` to `${corpus_dir}/kilt_wikipedia/id2title.json`
-    
+For KILT wikipedia corpus, the corpus name is `kilt_wikipedia`, and the files should be downloaded to `${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl` and `${corpus_dir}/kilt_wikipedia/id2title.json`.
+<!-- to  `${corpus_dir}/kilt_wikipedia/kilt_wikipedia_jsonl/kilt_wikipedia.jsonl` and `kilt_wikipedia_id2title` to `${corpus_dir}/kilt_wikipedia/id2title.json` -->
+  
 
 To process corpus for ColBERT format , run `python retriever/data_processing/create_corpus_tsv.py --corpus $corpus --corpus_dir $corpus_dir`.
-This outputs `$corpus_dir/${corpus}/${corpus}.tsv`.
+This outputs `$corpus_dir/${corpus}/${corpus}.json`.
 
 ### 2. Download query datasets
-Download each `$dataset` from [our Huggingface link](https://huggingface.co/datasets/jenhsia/ragged) to `${data_dir}/${dataset}.jsonl`.
+Specify `data_dir` and `dataset_name` and see `download_data.py` for how to download the file to `${data_dir}/${dataset_name}.jsonl`.
+
 We support Natural Questions (KILT ver), HotpotQA (KILT ver), and BioASQ11B.
     <!-- Download NQ, hotpotqa from KILT repo as nq.jsonl and hotpotqa.jsonl in the ${data_dir} Download BioASQ
         From Bioasq website, download the following into data_dir/bioasq/
