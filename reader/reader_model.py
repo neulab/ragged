@@ -1,4 +1,4 @@
-from reader.utils import INSTRUCTION_STR, truncate_prompt
+from reader.reader_utils import INSTRUCTION_STR, truncate_prompt
 from utils import complete_model_names
 from litellm import batch_completion 
 
@@ -29,5 +29,5 @@ class Reader:
             modified_prompts.append(modified_prompt)
             context_length_changes.append(context_length_change_info)
 
-        responses = self.batch_generate(modified_prompts, max_new_tokens, truncate)
+        responses = self.batch_generate(modified_prompts, max_new_tokens)
         return [r.choices[0].message.content for r in responses], context_length_changes

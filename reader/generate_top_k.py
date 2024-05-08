@@ -6,12 +6,13 @@ import traceback
 from tqdm import tqdm
 from file_utils import save_jsonl, load_jsonl, save_json
 from reader.reader_model import Reader
-from reader.utils import merge_retriever_data_and_eval_results, post_process_answers
+from reader.reader_utils import merge_retriever_data_and_eval_results, post_process_answers
 from utils import READER_FOLDER, RETRIEVER_FOLDER, get_tokenizer, dataset_map
 
 time_map = {}
 
-def generate_reader_outputs(retriever_data, reader_object, output_path=None, args=None):  
+def generate_reader_outputs(retriever_data, reader_object, output_path=None, args=None):
+    start_time = time.time()  
     if args.retriever == 'no_context':
         k = 0 
     elif args.retriever == 'gold':
@@ -31,15 +32,17 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
     reader_ques_ids_already_generated = [x['id'] for x in reader_responses] #can modify this to combined_jsonl file
     all_prompts = []
     prompt_indices = []
+    context_document_list = []
     for i, ques_info in tqdm(enumerate(retriever_data)):
         if ques_info["id"] in reader_ques_ids_already_generated:
             continue
         question = ques_info["input"].strip("?")+"?"
         context_documents = ques_info["output"][0]["provenance"]
-        if args.top_negative and k!=None:
+        if args.retrieval_mode == "top_negative" and k!=None:
             context_documents = [r for r in context_documents if r["page_par_id_match"]==False]
-        elif args.top_positive and k!=None:
+        elif args.retrieval_mode == "top_positive" and k!=None:
             context_documents = [r for r in context_documents if r["page_par_id_match"]==True]
+        
         if k==None:
             context = "\n".join([passage["text"] for passage in context_documents])
         elif k == 0:
@@ -52,11 +55,13 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
         prompt = {"question" : question, "context": context}
         all_prompts.append(prompt)
         prompt_indices.append(i)
+        context_document_list.append(context.split("\n"))
+        
             
-    chunks = [list(zip(prompt_indices, all_prompts))[x:x+batch_size] for x in range(0, len(all_prompts), batch_size)]
+    chunks = [list(zip(prompt_indices, all_prompts, context_document_list))[x:x+batch_size] for x in range(0, len(all_prompts), batch_size)]
     all_answers = []
     all_context_length_changes = []
-    for chunkid, chunk in enumerate(chunks):
+    for chunkid, chunk, context_documents in enumerate(chunks):
         print(f'{chunkid}/{len(chunks)}')
         chunk_prompts = [prompt for _, prompt in chunk]
         try:
@@ -71,7 +76,7 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
                 reader_responses.append({
                     "id" : ques_info["id"],
                     "input" : ques_info["input"],
-                    "retrieved_passages": context_documents[:k],
+                    "retrieved_passages": context_documents,
                     "answer": answer
                 })
                 
@@ -89,8 +94,10 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
         save_jsonl(reader_responses, output_file)
 
     print("Total reader_responses : ", len(reader_responses))
+    time_taken = time.time() - start_time
     save_jsonl(reader_responses, output_file)
-    save_json(all_context_length_changes, additional_metadata_file)
+    save_json({"time":time_taken, 
+               "all_context_length_changes": all_context_length_changes}, additional_metadata_file)
             
 
 def get_args():
@@ -103,10 +110,8 @@ def get_args():
     parser.add_argument("--dataset", type=str, help="dataset name; results stored at <results_base_folder>/<model>/<retriever>/<dataset>")
     parser.add_argument("--max_new_tokens", type=int, help="number of tokens that the model would generate.")
     parser.add_argument("--max_truncation", type=int, default=4000, help="number of tokens fed to the reader model. If the input (i.e instruction+contexts+question) are greater than this value, they are truncated to these many tokens")
-    parser.add_argument("--retrieval_mode", help = 'top_k, top_negative, top_positive, no_context, or gold?')
-    # parser.add_argument("--top_positive", action='store_true', help="When this flag is set, contexts that are marked relevant are only filtered and fed to the reader model along with the instruction and question")
-    # parser.add_argument("--top_negative", action='store_true', help="When this flag is set, contexts that are marked irrelevant are only filtered and fed to the reader model along with the instruction and question")
-
+    parser.add_argument("--retrieval_mode", help = 'top_k, top_negative, top_positive')
+    
     args = parser.parse_args()
     print(f"args: {vars(args)}")
     return args
@@ -116,7 +121,7 @@ if __name__ == "__main__":
 
     # define reader object
     tokenizer = get_tokenizer(args.model_name)
-    reader=Reader(model_identifier=args.model_name, hosted_api_path =f"http://{args.hosted_api_endpoint}/", tokenizer=tokenizer)
+    reader=Reader(model_identifier=args.model_name, hosted_api_endpoint =f"http://{args.hosted_api_endpoint}/", tokenizer=tokenizer)
 
     # get retriever data
     retriever_data_path = os.path.join(RETRIEVER_FOLDER, "predictions", args.retriever, dataset_map[args.dataset])
@@ -125,10 +130,10 @@ if __name__ == "__main__":
         
     final_model_name = f"{args.model_name}_{args.max_truncation}truncation_{args.max_new_tokens}new_tokens"
     
-    output_path  = os.path.join(READER_FOLDER, args.final_model_name, args.dataset, args.retriever)
+    output_path  = os.path.join(READER_FOLDER, final_model_name, args.dataset, args.retriever)
     
     if args.retriever != 'no_context' and args.retriever != 'gold':
-        output_path = os.path.join(output_path, args.retrieval_mode, f'top_{args.k}')
+        output_path = os.path.join(output_path, args.retrieval_mode, f'top{args.k}')
 
     os.makedirs(output_path, exist_ok = True)
     
