@@ -5,7 +5,7 @@ import traceback
 
 from tqdm import tqdm
 from file_utils import save_jsonl, load_jsonl, save_json
-from reader.reader_model import Reader
+from reader.reader_model import Reader, GPT_Reader
 from reader.reader_utils import merge_retriever_data_and_eval_results, post_process_answers
 from utils import READER_FOLDER, RETRIEVER_FOLDER, get_tokenizer, dataset_map
 
@@ -103,10 +103,11 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--hosted_api_endpoint", type=str, help="the hosted endpoint of the TGI model server. SHould be of the format - <node>:<port>")
+    parser.add_argument("--api_key", type=str, help="the api key of your closed-source model")
     parser.add_argument("--k", type=int, default=1, help="the number of retrieved contexts to include in input for reader generation")
     parser.add_argument("--batch_size", type=int, default=50, help="the number of reader inputs processed simultaneously")
     parser.add_argument("--model_name", type=str, help="model name; <results_base_folder>/<model>")
-    parser.add_argument("--retriever", type=str, help="retriever name; results stored at <results_base_folder>/<model>/<retriever>")
+    parser.add_argument("--retriever", type=str, help="retriever name or no_context or gold; results stored at <results_base_folder>/<model>/<retriever>")
     parser.add_argument("--dataset", type=str, help="dataset name; results stored at <results_base_folder>/<model>/<retriever>/<dataset>")
     parser.add_argument("--max_new_tokens", type=int, help="number of tokens that the model would generate.")
     parser.add_argument("--max_truncation", type=int, default=4000, help="number of tokens fed to the reader model. If the input (i.e instruction+contexts+question) are greater than this value, they are truncated to these many tokens")
@@ -120,8 +121,13 @@ if __name__ == "__main__":
     args = get_args()
 
     # define reader object
-    tokenizer = get_tokenizer(args.model_name)
-    reader=Reader(model_identifier=args.model_name, hosted_api_endpoint =f"http://{args.hosted_api_endpoint}/", tokenizer=tokenizer)
+    if 'gpt' in args.model_name:
+         print('gpt reader')
+         reader= GPT_Reader(model_identifier=args.model_name, api_key = args.api_key)
+    else:
+        print('hf reader')
+        tokenizer = get_tokenizer(args.model_name)
+        reader=Reader(model_identifier=args.model_name, hosted_api_path =f"http://{args.hosted_api_endpoint}/", tokenizer=tokenizer)
 
     # get retriever data
     retriever_data_path = os.path.join(RETRIEVER_FOLDER, "predictions", args.retriever, dataset_map[args.dataset])
