@@ -2,10 +2,9 @@ import argparse
 import os
 import time
 import traceback
-
 from tqdm import tqdm
 from file_utils import save_jsonl, load_jsonl, save_json
-from reader.reader_model import Reader
+from reader.reader_model import Reader, GPT_Reader
 from reader.reader_utils import merge_retriever_data_and_eval_results, post_process_answers
 from utils import READER_FOLDER, RETRIEVER_FOLDER, get_tokenizer, dataset_map
 
@@ -23,7 +22,10 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
     output_file = os.path.join(output_path, 'reader_results.jsonl')
     additional_metadata_file = os.path.join(output_path, 'additional_metadata.jsonl')
 
-    reader_responses = load_jsonl(output_file) if os.path.exists(output_file) else []
+    if args.overwrite or not os.path.exists(output_file):
+        reader_responses = []
+    else:
+        reader_responses = load_jsonl(output_file)
     print(f"no.of. questions in range for which response is already generated = {len(reader_responses)}")
 
     error_file_path = os.path.join(output_path, 'reader_errors.jsonl')
@@ -43,44 +45,46 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
         elif args.retrieval_mode == "top_positive" and k!=None:
             context_documents = [r for r in context_documents if r["page_par_id_match"]==True]
         
+
         if k==None:
-            context = "\n".join([passage["text"] for passage in context_documents])
+            context_list = [passage["text"] for passage in context_documents]
+            context = "\n".join(context_list)
         elif k == 0:
+            context_list = []
             context = ""
         else:
             retrieved_passages = context_documents[:k]
-            context = "\n".join([passage["text"] for passage in retrieved_passages])
+            context_list = [passage["text"] for passage in retrieved_passages]
+            context = "\n".join(context_list)
             
         
         prompt = {"question" : question, "context": context}
         all_prompts.append(prompt)
         prompt_indices.append(i)
-        context_document_list.append(context.split("\n"))
+        context_document_list.append(context_list)
         
-            
-    chunks = [list(zip(prompt_indices, all_prompts, context_document_list))[x:x+batch_size] for x in range(0, len(all_prompts), batch_size)]
+    chunked_indices_list = [prompt_indices[x:x+batch_size] for x in range(0, len(all_prompts), batch_size)]
+    chunked_prompts_list = [all_prompts[x:x+batch_size] for x in range(0, len(all_prompts), batch_size)]
+    chunked_contexts_list = [context_document_list[x:x+batch_size] for x in range(0, len(all_prompts), batch_size)]
+    
     all_answers = []
     all_context_length_changes = []
-    for chunkid, chunk in enumerate(chunks):
-        print(f'{chunkid}/{len(chunks)}')
-        chunk_prompts = [prompt for _, prompt, _ in chunk]
+
+    for chunkid, (chunked_indices, chunked_prompts, chunked_contexts) in enumerate(zip(chunked_indices_list, chunked_prompts_list, chunked_contexts_list)):
+        print(f'{chunkid}/{len(chunked_indices_list)}')
         try:
-            answers, context_length_changes = reader_object.generate(chunk_prompts, max_new_tokens=args.max_new_tokens, truncate=args.max_truncation)
+            answers, context_length_changes = reader_object.generate(chunked_prompts, max_new_tokens=args.max_new_tokens, truncate=args.max_truncation)
             all_context_length_changes.extend(context_length_changes)
-            # print(answers)
             answers = post_process_answers(answers)
             all_answers.extend(answers)
-            chunk_prompt_indices = [x[0] for x in chunk]
-            context_documents_list = [x[2] for x in chunk]
-            for q_index, answer, context_documents in zip(chunk_prompt_indices, answers, context_documents_list):
+            for q_index, answer, chunked_docs in zip(chunked_indices, answers, chunked_contexts):
                 ques_info = retriever_data[q_index]
                 reader_responses.append({
                     "id" : ques_info["id"],
                     "input" : ques_info["input"],
-                    "retrieved_passages": context_documents,
+                    "retrieved_passages": chunked_docs,
                     "answer": answer
                 })
-                
 
         except Exception:
             print(f"Exception in {chunkid} chunk")
@@ -104,14 +108,16 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--hosted_api_endpoint", type=str, help="the hosted endpoint of the TGI model server. SHould be of the format - <node>:<port>")
+    parser.add_argument("--api_key", type=str, help="the api key of your closed-source model")
     parser.add_argument("--k", type=int, default=1, help="the number of retrieved contexts to include in input for reader generation")
     parser.add_argument("--batch_size", type=int, default=50, help="the number of reader inputs processed simultaneously")
     parser.add_argument("--model_name", type=str, help="model name; <results_base_folder>/<model>")
-    parser.add_argument("--retriever", type=str, help="retriever name; results stored at <results_base_folder>/<model>/<retriever>")
+    parser.add_argument("--retriever", type=str, help="retriever name or no_context or gold; results stored at <results_base_folder>/<model>/<retriever>")
     parser.add_argument("--dataset", type=str, help="dataset name; results stored at <results_base_folder>/<model>/<retriever>/<dataset>")
     parser.add_argument("--max_new_tokens", type=int, help="number of tokens that the model would generate.")
     parser.add_argument("--max_truncation", type=int, default=4000, help="number of tokens fed to the reader model. If the input (i.e instruction+contexts+question) are greater than this value, they are truncated to these many tokens")
     parser.add_argument("--retrieval_mode", help = 'top_k, top_negative, top_positive')
+    parser.add_argument("--overwrite", action=argparse.BooleanOptionalAction, help = 'overwrite even if there are existing results')
     
     args = parser.parse_args()
     print(f"args: {vars(args)}")
@@ -121,8 +127,13 @@ if __name__ == "__main__":
     args = get_args()
 
     # define reader object
-    tokenizer = get_tokenizer(args.model_name)
-    reader=Reader(model_identifier=args.model_name, hosted_api_endpoint =f"http://{args.hosted_api_endpoint}/", tokenizer=tokenizer)
+    if 'gpt' in args.model_name:
+         print('gpt reader')
+         reader= GPT_Reader(model_identifier=args.model_name, api_key = args.api_key)
+    else:
+        print('hf reader')
+        tokenizer = get_tokenizer(args.model_name)
+        reader=Reader(model_identifier=args.model_name, hosted_api_path =f"http://{args.hosted_api_endpoint}/", tokenizer=tokenizer)
 
     # get retriever data
     retriever_data_path = os.path.join(RETRIEVER_FOLDER, "predictions", args.retriever, dataset_map[args.dataset])
