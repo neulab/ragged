@@ -61,9 +61,9 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
     chunks = [list(zip(prompt_indices, all_prompts, context_document_list))[x:x+batch_size] for x in range(0, len(all_prompts), batch_size)]
     all_answers = []
     all_context_length_changes = []
-    for chunkid, chunk, context_documents in enumerate(chunks):
+    for chunkid, chunk in enumerate(chunks):
         print(f'{chunkid}/{len(chunks)}')
-        chunk_prompts = [prompt for _, prompt in chunk]
+        chunk_prompts = [prompt for _, prompt, _ in chunk]
         try:
             answers, context_length_changes = reader_object.generate(chunk_prompts, max_new_tokens=args.max_new_tokens, truncate=args.max_truncation)
             all_context_length_changes.extend(context_length_changes)
@@ -71,7 +71,8 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
             answers = post_process_answers(answers)
             all_answers.extend(answers)
             chunk_prompt_indices = [x[0] for x in chunk]
-            for q_index, answer in zip(chunk_prompt_indices, answers):
+            context_documents_list = [x[2] for x in chunk]
+            for q_index, answer, context_documents in zip(chunk_prompt_indices, answers, context_documents_list):
                 ques_info = retriever_data[q_index]
                 reader_responses.append({
                     "id" : ques_info["id"],

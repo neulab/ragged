@@ -1,17 +1,18 @@
 #!/bin/bash
 #
-#SBATCH --job-name=llama3_7bgen
+#SBATCH --job-name=llama3_70bgen
 #SBATCH --output="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/llama3_70b/slurm-%A_%a.out"
 #SBATCH --error="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/llama3_70b/slurm-%A_%a.err"
 #SBATCH --time=800
+#SBATCH --mem=48GB
 
 reader="llama3_70b"
-top_ks=("1" "2" "5" "10" "20" "50")
+top_ks=("10" "20" "50")
 # top_ks=("10")
 max_new_tokens=10
 max_truncation=8000
 # datasets=("nq")
-datasets=("nq" "hotpotqa" "complete_bioasq")
+datasets=("complete_bioasq")
 retrievers=("colbert")
 
 export PYTHONPATH="/home/afreens/ragged"
@@ -26,7 +27,7 @@ for retriever in "${retrievers[@]}"; do
             --model_name $reader \
             --retriever $retriever \
             --dataset $dataset \
-            --hosted_api_endpoint babel-4-36:8001 \
+            --hosted_api_endpoint babel-8-7:8001 \
             --k $topk \
             --batch_size 50 \
             --max_new_tokens $max_new_tokens \
