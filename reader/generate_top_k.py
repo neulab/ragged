@@ -2,7 +2,6 @@ import argparse
 import os
 import time
 import traceback
-
 from tqdm import tqdm
 from file_utils import save_jsonl, load_jsonl, save_json
 from reader.reader_model import Reader, GPT_Reader
@@ -23,7 +22,10 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
     output_file = os.path.join(output_path, 'reader_results.jsonl')
     additional_metadata_file = os.path.join(output_path, 'additional_metadata.jsonl')
 
-    reader_responses = load_jsonl(output_file) if os.path.exists(output_file) else []
+    if args.overwrite or not os.path.exists(output_file):
+        reader_responses = []
+    else:
+        reader_responses = load_jsonl(output_file)
     print(f"no.of. questions in range for which response is already generated = {len(reader_responses)}")
 
     error_file_path = os.path.join(output_path, 'reader_errors.jsonl')
@@ -49,37 +51,37 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
             context = ""
         else:
             retrieved_passages = context_documents[:k]
-            context = "\n".join([passage["text"] for passage in retrieved_passages])
+            context_list = [passage["text"] for passage in retrieved_passages]
+            context = "\n".join(context_list)
             
         
         prompt = {"question" : question, "context": context}
         all_prompts.append(prompt)
         prompt_indices.append(i)
-        context_document_list.append(context.split("\n"))
+        context_document_list.append(context_list)
         
-            
-    chunks = [list(zip(prompt_indices, all_prompts, context_document_list))[x:x+batch_size] for x in range(0, len(all_prompts), batch_size)]
+    chunked_indices_list = [prompt_indices[x:x+batch_size] for x in range(0, len(all_prompts), batch_size)]
+    chunked_prompts_list = [all_prompts[x:x+batch_size] for x in range(0, len(all_prompts), batch_size)]
+    chunked_contexts_list = [context_document_list[x:x+batch_size] for x in range(0, len(all_prompts), batch_size)]
+    
     all_answers = []
     all_context_length_changes = []
-    for chunkid, chunk, context_documents in enumerate(chunks):
-        print(f'{chunkid}/{len(chunks)}')
-        chunk_prompts = [prompt for _, prompt in chunk]
+
+    for chunkid, (chunked_indices, chunked_prompts, chunked_contexts) in enumerate(zip(chunked_indices_list, chunked_prompts_list, chunked_contexts_list)):
+        print(f'{chunkid}/{len(chunked_indices_list)}')
         try:
-            answers, context_length_changes = reader_object.generate(chunk_prompts, max_new_tokens=args.max_new_tokens, truncate=args.max_truncation)
+            answers, context_length_changes = reader_object.generate(chunked_prompts, max_new_tokens=args.max_new_tokens, truncate=args.max_truncation)
             all_context_length_changes.extend(context_length_changes)
-            # print(answers)
             answers = post_process_answers(answers)
             all_answers.extend(answers)
-            chunk_prompt_indices = [x[0] for x in chunk]
-            for q_index, answer in zip(chunk_prompt_indices, answers):
+            for q_index, answer, chunked_docs in zip(chunked_indices, answers, chunked_contexts):
                 ques_info = retriever_data[q_index]
                 reader_responses.append({
                     "id" : ques_info["id"],
                     "input" : ques_info["input"],
-                    "retrieved_passages": context_documents,
+                    "retrieved_passages": chunked_docs,
                     "answer": answer
                 })
-                
 
         except Exception:
             print(f"Exception in {chunkid} chunk")
@@ -112,6 +114,7 @@ def get_args():
     parser.add_argument("--max_new_tokens", type=int, help="number of tokens that the model would generate.")
     parser.add_argument("--max_truncation", type=int, default=4000, help="number of tokens fed to the reader model. If the input (i.e instruction+contexts+question) are greater than this value, they are truncated to these many tokens")
     parser.add_argument("--retrieval_mode", help = 'top_k, top_negative, top_positive')
+    parser.add_argument("--overwrite", action=argparse.BooleanOptionalAction, help = 'overwrite even if there are existing results')
     
     args = parser.parse_args()
     print(f"args: {vars(args)}")
