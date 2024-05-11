@@ -308,12 +308,12 @@ def top_k_evaluation(model, retriever, dataset, with_bert=False, args=None):
     metrics_map = {}
     metrics_save_path = os.path.join(root_dir, 'combined_metrics.json')
     for k in k_list:
-        k_dir = os.path.join(root_dir, f'top_{k}')
+        k_dir = os.path.join(root_dir, f'top{k}')
         reader_output = load_jsonl(os.path.join(k_dir, "reader_results.jsonl"))
         gold_data = load_jsonl(gold_file)
 
         evaluated_data, metrics = evaluate_reader_results(reader_output, gold_data, with_bert, args)
-        metrics_map[f'top_{k}'] = metrics
+        metrics_map[f'top{k}'] = metrics
         save_json(metrics_map, metrics_save_path)
         evaluation_file_path = os.path.join(k_dir, "all_data_evaluated.jsonl")
         save_jsonl(evaluated_data, evaluation_file_path)
@@ -331,7 +331,7 @@ def get_args():
     parser.add_argument('--with_bert', dest='with_bert', action='store_true', help="(Optional) Flag to include BERTScore in the evaluation metrics. Note this slows down reader evaluation significantly.")
     parser.add_argument("--retrieval_mode", help = "One of 3 context choices: provide all top-k retrieved passages (top_k), provide only the passages marked as relevant within the top-k retrieved passages(top_positive), provide only the passages not marked as relevant within teh top-k retrieved passages (top_negative)")
     parser.add_argument('--merge_list_answers', dest='merge_list_answers', action='store_true', help="Flag to merge list-type answers for evaluation. (this flag will be used only when the data under reader_results.jsonl has 'question_type' attribute set to 'list')")
-    parser.add_argument("--k_list", help = 'Comma-separated list of k (number of passages)')
+    parser.add_argument("--k_list", default='1,2,5,10,20,50', help = 'Comma-separated list of k (number of passages)')
     args = parser.parse_args()
     print(f"args: {vars(args)}")
     return args
@@ -342,5 +342,7 @@ if __name__ == "__main__":
         baseline_evaluation(args.reader, args.dataset, with_bert=args.with_bert, args=args)
     else:
         top_k_evaluation(args.reader, args.retriever, args.dataset, with_bert=args.with_bert, args=args)
+
+# python reader/evaluate_top_k.py --reader llama3_8b_8000truncation_10new_tokens --retriever colbert --dataset nq --retrieval_mode top_k --merge_list_answers
 
 
