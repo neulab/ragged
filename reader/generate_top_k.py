@@ -133,7 +133,7 @@ if __name__ == "__main__":
     else:
         print('hf reader')
         tokenizer = get_tokenizer(args.model_name)
-        reader=Reader(model_identifier=args.model_name, hosted_api_path =f"http://{args.hosted_api_endpoint}/", tokenizer=tokenizer)
+        reader=Reader(model_identifier=args.model_name, hosted_api_endpoint =f"http://{args.hosted_api_endpoint}/", tokenizer=tokenizer)
 
     # get retriever data
     retriever_data_path = os.path.join(RETRIEVER_FOLDER, "predictions", args.retriever, dataset_map[args.dataset])
