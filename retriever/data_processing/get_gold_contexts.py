@@ -12,19 +12,10 @@ def convert_gold_to_zeno(gold_info, corpus_file):
 
     par_id_to_text_map = {}
 
-    print('loading from corpus file', corpus_file)
-    ids = []
-    with open(corpus_file, 'r', encoding = 'UTF-8') as file:
-        for i, line in enumerate(file):
-            if (i%100_000 == 0 ):
-                print(i, flush = True)     
-            line = line.strip()
-            line = line.encode().decode('unicode_escape')
-            split_out = line.split('\t')
-            id = split_out[0]
-            text = '\t'.join(split_out[1:])
-            par_id_to_text_map[id] = text
-            ids.append(id)
+    with open(corpus_file, 'r') as file:
+        for line in file:
+            json_obj = json.loads(line.strip())
+            par_id_to_text_map[str(json_obj['id'])] = json_obj['contents']
 
     retriever_format_data = []
 
@@ -64,7 +55,7 @@ if __name__=='__main__':
 
     gold_info = load_json(os.path.join(args.data_dir, 'gold_compilation_files', f'gold_{args.dataset}_compilation_file.json'))
     
-    corpus_file  = os.path.join(args.corpus_dir, args.corpus, f'{args.corpus}.tsv')
+    corpus_file  = os.path.join(args.corpus_dir, args.corpus, f'{args.corpus}_jsonl', f'{args.corpus}.jsonl')
     retriever_format_data = convert_gold_to_zeno(gold_info, corpus_file)
 
     gold_dir = os.path.join(args.prediction_dir, 'gold')
