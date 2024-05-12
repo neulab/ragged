@@ -40,20 +40,20 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
             continue
         question = ques_info["input"].strip("?")+"?"
         context_documents = ques_info["output"][0]["provenance"]
-        if args.retrieval_mode == "top_negative" and k!=None:
-            context_documents = [r for r in context_documents if r["page_par_id_match"]==False]
-        elif args.retrieval_mode == "top_positive" and k!=None:
-            context_documents = [r for r in context_documents if r["page_par_id_match"]==True]
-        
 
-        if k==None:
+        if args.retriever == 'gold':
             context_list = [passage["text"] for passage in context_documents]
             context = "\n".join(context_list)
-        elif k == 0:
+        elif args.retriever == 'no_context':
             context_list = []
             context = ""
         else:
+            k = args.k
             retrieved_passages = context_documents[:k]
+            if args.retrieval_mode == "top_negative":
+                retrieved_passages = [r for r in retrieved_passages if r["page_par_id_match"]==False]
+            elif args.retrieval_mode == "top_positive":
+                retrieved_passages = [r for r in retrieved_passages if r["page_par_id_match"]==True]
             context_list = [passage["text"] for passage in retrieved_passages]
             context = "\n".join(context_list)
             
