@@ -40,11 +40,13 @@ Each line corresponds to a query. This is an example of one line:
 ```
 
 ## ColBERT
-1. Clone our [modified version](https://github.com/jenhsia/RAGGED_ColBERT/tree/merged) of the [original ColBERT repo](https://github.com/stanford-futuredata/ColBERT).
+1. Process the previously downloaded corpus file for ColBERT format by running `python retriever/data_processing/create_corpus_tsv.py --corpus $corpus --corpus_dir $corpus_dir`, which outputs `$corpus_dir/${corpus}/${corpus}.json`.
 
-2. Download the [pre-trained ColBERTv2](https://github.com/stanford-futuredata/ColBERT?tab=readme-ov-file#:~:text=pre%2Dtrained%20ColBERTv2%20checkpoint) checkpoint into your $model_dir. This checkpoint has been trained on the MS MARCO Passage Ranking task. You can also optionally [train your own ColBERT model](https://github.com/stanford-futuredata/ColBERT?tab=readme-ov-file#:~:text=train%20your%20own%20ColBERT%20model).
+2. Clone our [modified version](https://github.com/jenhsia/RAGGED_ColBERT/tree/merged) of the [original ColBERT repo](https://github.com/stanford-futuredata/ColBERT).
 
-3. Run [`ColBERT/colbert.sh`](https://github.com/neulab/ragged/blob/main/retriever/ColBERT/colbert.sh) to output `${prediction_dir}/colbert/${dataset}.jsonl`.
+3. Download the [pre-trained ColBERTv2](https://github.com/stanford-futuredata/ColBERT?tab=readme-ov-file#:~:text=pre%2Dtrained%20ColBERTv2%20checkpoint) checkpoint into your $model_dir. This checkpoint has been trained on the MS MARCO Passage Ranking task. You can also optionally [train your own ColBERT model](https://github.com/stanford-futuredata/ColBERT?tab=readme-ov-file#:~:text=train%20your%20own%20ColBERT%20model).
+
+4. Run [`ColBERT/colbert.sh`](https://github.com/neulab/ragged/blob/main/retriever/ColBERT/colbert.sh) to output `${prediction_dir}/colbert/${dataset}.jsonl`.
 
 # 2. Evaluate each retriever
 To evaluate the predictions, first compile all gold (evidence) information by running `python retriever/data_processing/get_gold_compilation.py --data_dir $data_dir --dataset $dataset`
