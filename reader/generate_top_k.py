@@ -48,10 +48,11 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
             context_list = []
             context = ""
         else:
+            k = args.k
             retrieved_passages = context_documents[:k]
-            if args.retrieval_mode == "top_negative" and k!=None:
+            if args.retrieval_mode == "top_negative":
                 retrieved_passages = [r for r in retrieved_passages if r["page_par_id_match"]==False]
-            elif args.retrieval_mode == "top_positive" and k!=None:
+            elif args.retrieval_mode == "top_positive":
                 retrieved_passages = [r for r in retrieved_passages if r["page_par_id_match"]==True]
             context_list = [passage["text"] for passage in retrieved_passages]
             context = "\n".join(context_list)
