@@ -3,19 +3,15 @@ from abc import ABC, abstractmethod
 
 
 class Retriever(ABC):
-    def __init__(self, name):
+    def __init__(self, name, **kwargs):
         self.name = name
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     @classmethod
     def from_default_config(cls, name):
-        import importlib.resources
-
-        config = json.loads(
-            "default_{name}.json".format(name=name)
-            # importlib.resources.read_text(
-            #     retriever, "default_{name}.json".format(name=name)
-            # )
-        )
+        with open(f'retriever/BM25/default_{name}.json', 'r') as cf:
+            config = json.load(cf)
         return cls(name, **config)
 
     @classmethod

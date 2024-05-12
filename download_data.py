@@ -20,7 +20,7 @@ dataset = load_dataset("jenhsia/ragged", dataset_name)
 
 id_title_dict = {}
 
-for example in dataset:
+for example in dataset['train']:
     id_title_dict[example['id']] = example['title']
 
 json_file_path = f'{corpus_dir}/{corpus_name}/id2title.json'
