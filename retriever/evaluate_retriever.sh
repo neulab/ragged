@@ -5,14 +5,8 @@ RAGGED_PATH="${SCRIPT_PATH%/retriever/evaluate_retriever.sh}"
 export PYTHONPATH="$PYTHONPATH:$RAGGED_PATH"
 
 
-# retrievers=("colbert" "bm25" "gold")
-# datasets=("nq" "hotpotqa" "bioasq")
-retrievers=("bm25")
-datasets=("example_query")
-export data_dir=/data/tir/projects/tir6/general/afreens/dbqa/zip_ready
-export prediction_dir=/data/tir/projects/tir6/general/afreens/dbqa/zip_ready/retriever_results/predictions
-export evaluation_dir=/data/tir/projects/tir6/general/afreens/dbqa/zip_ready/retriever_results/evaluations
-
+retrievers=("colbert" "bm25" "gold")
+datasets=("nq" "hotpotqa" "complete_bioasq")
 
 # Loop through each retriever
 for retriever in "${retrievers[@]}"; do
