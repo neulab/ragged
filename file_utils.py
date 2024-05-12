@@ -16,6 +16,8 @@ def load_jsonl(filename, sort_by_id = True):
     return data
 
 def save_jsonl(data, filename):
+    if os.path.dirname(filename):
+        os.makedirs(os.path.dirname(filename), exist_ok= True)
     print('writing to', filename)
     with open(filename, "w") as outfile:
         for idx, element in enumerate(data):
@@ -23,6 +25,8 @@ def save_jsonl(data, filename):
             outfile.write("\n")
 
 def save_json(data, filename):
+    if os.path.dirname(filename):
+        os.makedirs(os.path.dirname(filename), exist_ok= True)
     print('writing to', filename)
     # assert filename.endswith("json"), "file provided to save_json does not end with .json extension. Please recheck!"
     with open(filename, "w") as f:
