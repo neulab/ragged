@@ -27,7 +27,7 @@ for retriever in "${retrievers[@]}"; do
             --model_name $reader \
             --retriever $retriever \
             --dataset $dataset \
-            --hosted_api_endpoint babel-8-11:8200 \
+            --hosted_api_endpoint babel-3-13:8200  \
             --k $topk \
             --batch_size 50 \
             --max_new_tokens $max_new_tokens \

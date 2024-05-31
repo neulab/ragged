@@ -1,5 +1,5 @@
 from reader.reader_utils import INSTRUCTION_STR, NO_CONTEXT_INSTRUCTION_STR, truncate_prompt, num_gpt_tokens_per_content, num_gpt_tokens_per_message
-from reader.reader_utils import complete_model_names
+from utils import complete_model_names
 from litellm import batch_completion, Router
 import os
 import tiktoken
