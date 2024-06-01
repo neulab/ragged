@@ -265,16 +265,16 @@ def evaluate_reader_results(reader_output, gold_data, WITH_BERT, args):
             bertscore_r /= total_count
 
     method_metrics = {
-        "accuracy": round(accuracy, 4),
-        "exact_match": round(normalized_em, 4),
-        "substring_match":round(normalized_substring_match, 4),
-        "f1": round(normalized_f1, 4),
-        "rougel": round(rougel, 4)
+        "accuracy": round(accuracy, 4)*100,
+        "exact_match": round(normalized_em, 4)*100,
+        "substring_match":round(normalized_substring_match, 4)*100,
+        "f1": round(normalized_f1, 4)*100,
+        "rougel": round(rougel, 4)*100
     }
     if WITH_BERT:
-        method_metrics["bertscore_f1"] = round(bertscore_f1, 4)
-        method_metrics["bertscore_p"] = round(bertscore_p, 4)
-        method_metrics["bertscore_r"] = round(bertscore_r, 4)
+        method_metrics["bertscore_f1"] = round(bertscore_f1, 4)*100
+        method_metrics["bertscore_p"] = round(bertscore_p, 4)*100
+        method_metrics["bertscore_r"] = round(bertscore_r, 4)*100
 
     print(f"total questions - dev: {total_count}/{len(gold_data)}")
     print("Reader metrics : ", method_metrics)
