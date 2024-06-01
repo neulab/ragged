@@ -1,16 +1,16 @@
 #!/bin/bash
 #
-#SBATCH --job-name=llama3_70bgen
-#SBATCH --output="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/llama3_70b/slurm-%A_%a.out"
-#SBATCH --error="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/llama3_70b/slurm-%A_%a.err"
+#SBATCH --job-name=llama2_7bgen
+#SBATCH --output="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/llama2_7b/slurm-%A_%a.out"
+#SBATCH --error="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/llama2_7b/slurm-%A_%a.err"
 #SBATCH --time=800
 #SBATCH --mem=48GB
 
-reader="llama3_70b"
-top_ks=( "20" )
+reader="llama2_7b"
+top_ks=( "1" "2" "5" "10" "20" "50" )
 # top_ks=("10")
 max_new_tokens=10
-max_truncation=8000
+max_truncation=4000
 # datasets=("nq")
 datasets=("complete_bioasq")
 retrievers=("colbert")
@@ -27,12 +27,12 @@ for retriever in "${retrievers[@]}"; do
             --model_name $reader \
             --retriever $retriever \
             --dataset $dataset \
-            --hosted_api_endpoint babel-8-15:8301 \
+            --hosted_api_endpoint babel-3-9:8300 \
             --k $topk \
             --batch_size 50 \
             --max_new_tokens $max_new_tokens \
             --max_truncation $max_truncation \
-            --retrieval_mode top_k
+            --retrieval_mode top_positive
         done
     done
 done
