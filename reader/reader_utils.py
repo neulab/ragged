@@ -50,8 +50,9 @@ def get_tokenizer(model_name):
         raise Exception(f"{model_name} is not supported. Add the corresponding tokenizer and tokenizer_path in utils")
 
 def truncate_prompt(prompt, tokenizer, instruction_str_tokens, total_tokens, max_new_tokens):
+    format_tokens =  tokenizer("\nContext: \nQuestion: \nAnswer:")
     question_tokens = tokenizer(prompt["question"])["input_ids"]
-    remaining_length = total_tokens-len(instruction_str_tokens)-len(question_tokens)-max_new_tokens-5 #additional buffer of 5
+    remaining_length = total_tokens-len(format_tokens)-len(instruction_str_tokens)-len(question_tokens)-max_new_tokens-10 #additional buffer of 5
     context_tokens_before_truncation = tokenizer(prompt["context"], add_special_tokens=False)["input_ids"]
     context_tokens_after_truncation = tokenizer(prompt["context"], max_length=remaining_length, truncation=True, add_special_tokens=False)["input_ids"]
     context_str_after_truncation = tokenizer.decode(context_tokens_after_truncation)

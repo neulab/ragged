@@ -121,11 +121,8 @@ class GPT_Reader():
 
 
         for messages in modified_prompts:
-            response = router.completion(model = self.model_identifier, messages = messages, temperature = 0.0)
+            response = router.completion(model = self.model_identifier, messages = messages, temperature = 0.0, max_tokens = max_new_tokens)
             responses.append(response)
-
-
-            
 
         # responses = self.batch_generate(modified_prompts, max_new_tokens)
         return [r.choices[0].message.content for r in responses], context_length_changes

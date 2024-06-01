@@ -11,7 +11,8 @@ complete_model_names = {
     "flanT5": "huggingface/google/flan-t5-xxl",
     "flanUl2": "huggingface/google/flan-ul2",
     "llama3_8b": "huggingface/meta-llama/Meta-Llama-3-8B",
-    "llama3_70b": "huggingface/meta-llama/Meta-Llama-3-70B"
+    "llama3_70b": "huggingface/meta-llama/Meta-Llama-3-70B",
+    "gpt-3.5": "gpt-3.5-turbo-0125"
 }
 
 dataset_map = {
