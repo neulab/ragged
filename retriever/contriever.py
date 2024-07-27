@@ -72,36 +72,41 @@ def main(args):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     index_file_name = os.path.join(args.index_dir, retriever_name, args.corpus)
-    if os.path.exists(index_file_name):
-        print('Loading encoded corpus from', index_file_name)
-        encoded_corpus_dataset = Dataset.load_from_disk(index_file_name)
-        if isinstance(encoded_corpus_dataset, DatasetDict):
-            encoded_corpus_dataset = encoded_corpus_dataset['train']
-        corpus_dataset = encoded_corpus_dataset
+    faiss_index_path = os.path.join(args.index_dir, 'faiss_' + retriever_name, args.corpus)
+    if os.path.exists(faiss_index_path):
+        print('Loading Faiss index from', faiss_index_path)
+        index = faiss.read_index(faiss_index_path)
     else:
-        print("Loading the corpus dataset")
-        corpus_file_name = f'/data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files/{args.corpus}/{args.corpus}_jsonl/{args.corpus}.jsonl'
-        corpus_dataset = load_dataset('json', data_files=corpus_file_name)
+        if os.path.exists(index_file_name):
+            print('Loading encoded corpus from', index_file_name)
+            encoded_corpus_dataset = Dataset.load_from_disk(index_file_name)
+            if isinstance(encoded_corpus_dataset, DatasetDict):
+                encoded_corpus_dataset = encoded_corpus_dataset['train']
+            corpus_dataset = encoded_corpus_dataset
+        else:
+            print("Loading the corpus dataset")
+            corpus_file_name = f'/data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files/{args.corpus}/{args.corpus}_jsonl/{args.corpus}.jsonl'
+            corpus_dataset = load_dataset('json', data_files=corpus_file_name)
 
-        # subset of datset
-        # passages = []
-        # with open(corpus_file_name, 'r') as file:
-        #     for i, line in enumerate(file):
-        #         data = json.loads(line)
-        #         passages.append({'id': data['id'], 'contents': data['contents']})
-        #         if i == 50:
-        #             break
-        # corpus_dataset = Dataset.from_list(passages)
-        
-        print('Getting corpus embeddings')
-        encoded_corpus_dataset = corpus_dataset.map(encode_passages, batched=True, batch_size=2000, fn_kwargs={'tokenizer': tokenizer, 'model': model})
-        os.makedirs(os.path.dirname(index_file_name), exist_ok=True)
-        print('Saving encoded corpus to', index_file_name)
-        encoded_corpus_dataset.save_to_disk(index_file_name)
+            # subset of datset
+            # passages = []
+            # with open(corpus_file_name, 'r') as file:
+            #     for i, line in enumerate(file):
+            #         data = json.loads(line)
+            #         passages.append({'id': data['id'], 'contents': data['contents']})
+            #         if i == 50:
+            #             break
+            # corpus_dataset = Dataset.from_list(passages)
+            
+            print('Getting corpus embeddings')
+            encoded_corpus_dataset = corpus_dataset.map(encode_passages, batched=True, batch_size=2000, fn_kwargs={'tokenizer': tokenizer, 'model': model})
+            os.makedirs(os.path.dirname(index_file_name), exist_ok=True)
+            print('Saving encoded corpus to', index_file_name)
+            encoded_corpus_dataset.save_to_disk(index_file_name)
 
-    context_embeddings = np.vstack(encoded_corpus_dataset['embeddings']).astype(np.float32)
-    index = faiss.IndexFlatIP(context_embeddings.shape[1]) 
-    index.add(context_embeddings)
+        context_embeddings = np.vstack(encoded_corpus_dataset['embeddings']).astype(np.float32)
+        index = faiss.IndexFlatIP(context_embeddings.shape[1]) 
+        index.add(context_embeddings)
 
     # 4. Load query dataset
     print('Loading the query dataset')

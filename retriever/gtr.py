@@ -72,18 +72,23 @@ def main(args):
     # 3. Get corpus embeddings
     print('Getting corpus embeddings')
     index_file_name = os.path.join(args.index_dir, retriever_name, args.corpus + '.npy')
-    if os.path.exists(index_file_name):
-        print('Loading encoded corpus from', index_file_name)
-        context_embeddings = np.load(index_file_name)
+    faiss_index_path = os.path.join(args.index_dir, 'faiss_' + retriever_name, args.corpus)
+    if os.path.exists(faiss_index_path):
+        print('Loading Faiss index from', faiss_index_path)
+        index = faiss.read_index(faiss_index_path)
     else:
-        passages = corpus_dataset['contents']
-        context_embeddings = model.encode(passages, convert_to_numpy=True, show_progress_bar=True)
-        context_embeddings = context_embeddings.astype(np.float32)
-        os.makedirs(os.path.dirname(index_file_name), exist_ok=True)
-        # print('Saving encoded corpus to', index_file_name)
-        # np.save(index_file_name, context_embeddings)
-    index = faiss.IndexFlatIP(context_embeddings.shape[1]) 
-    index.add(context_embeddings)
+        if os.path.exists(index_file_name):
+            print('Loading encoded corpus from', index_file_name)
+            context_embeddings = np.load(index_file_name)
+        else:
+            passages = corpus_dataset['contents']
+            context_embeddings = model.encode(passages, convert_to_numpy=True, show_progress_bar=True, batch_size = 500)
+            context_embeddings = context_embeddings.astype(np.float32)
+            os.makedirs(os.path.dirname(index_file_name), exist_ok=True)
+            # print('Saving encoded corpus to', index_file_name)
+            # np.save(index_file_name, context_embeddings)
+        index = faiss.IndexFlatIP(context_embeddings.shape[1]) 
+        index.add(context_embeddings)
 
     # 4. Load query dataset
     print('Loading the query dataset')

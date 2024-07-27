@@ -10,14 +10,14 @@ import numpy as np
 import argparse
 
 def encode_passages(examples, context_tokenizer, context_encoder):
-        inputs = context_tokenizer(examples['contents'], return_tensors='pt', truncation=True, padding=True)
+        inputs = context_tokenizer(examples['contents'], return_tensors='pt', truncation=True, padding=True, max_length = 512)
         with torch.no_grad():
             embeddings = context_encoder(**inputs).pooler_output.cpu().numpy()
         return {'embeddings': embeddings}
 
 def retrieve(query, index, question_tokenizer, question_encoder, top_k):
     # Encode the query using the question encoder
-    inputs = question_tokenizer(query, return_tensors='pt', truncation=True, padding=True)
+    inputs = question_tokenizer(query, return_tensors='pt', truncation=True, padding=True, max_length = 512)
     with torch.no_grad():
         query_embedding = question_encoder(**inputs).pooler_output.cpu().numpy()
 
@@ -68,38 +68,47 @@ def main(args):
     # 1. Load the corpus dataset
     
     index_file_name = os.path.join(args.index_dir, retriever_name, args.corpus)
-    if os.path.exists(index_file_name):
-        print('Loading encoded corpus from', index_file_name)
-        encoded_corpus_dataset = Dataset.load_from_disk(index_file_name)
-        if isinstance(encoded_corpus_dataset, DatasetDict):
-            encoded_corpus_dataset = encoded_corpus_dataset['train']
-        corpus_dataset = encoded_corpus_dataset
+    faiss_index_path = os.path.join(args.index_dir, 'faiss_' + retriever_name, args.corpus)
+    if os.path.exists(faiss_index_path):
+        print('Loading Faiss index from', faiss_index_path)
+        index = faiss.read_index(faiss_index_path)
     else:
-        print("Loading the corpus dataset")
-        corpus_file_name = f'/data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files/{args.corpus}/{args.corpus}_jsonl/{args.corpus}.jsonl'
-        corpus_dataset = load_dataset('json', data_files=corpus_file_name)
+        if os.path.exists(index_file_name):
+            print('Loading encoded corpus from', index_file_name)
+            encoded_corpus_dataset = Dataset.load_from_disk(index_file_name)
+            if isinstance(encoded_corpus_dataset, DatasetDict):
+                encoded_corpus_dataset = encoded_corpus_dataset['train']
+            corpus_dataset = encoded_corpus_dataset
+        else:
+            print("Loading the corpus dataset")
+            corpus_file_name = f'/data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files/{args.corpus}/{args.corpus}_jsonl/{args.corpus}.jsonl'
+            corpus_dataset = load_dataset('json', data_files=corpus_file_name)
 
-        # subset of datset
-        # passages = []
-        # with open(corpus_file_name, 'r') as file:
-        #     for i, line in enumerate(file):
-        #         data = json.loads(line)
-        #         passages.append({'id': data['id'], 'contents': data['contents']})
-        #         if i == 50:
-        #             break
-        # corpus_dataset = Dataset.from_list(passages)
+            # subset of datset
+            # passages = []
+            # with open(corpus_file_name, 'r') as file:
+            #     for i, line in enumerate(file):
+            #         data = json.loads(line)
+            #         passages.append({'id': data['id'], 'contents': data['contents']})
+            #         if i == 50:
+            #             break
+            # corpus_dataset = Dataset.from_list(passages)
 
-        print('Getting corpus embeddings')
-        encoded_corpus_dataset = corpus_dataset.map(encode_passages, batched=True, batch_size=2000, fn_kwargs={'context_tokenizer': context_tokenizer, 'context_encoder': context_encoder})
-        os.makedirs(os.path.dirname(index_file_name), exist_ok=True)
-        print('Saving encoded corpus to', index_file_name)
-        encoded_corpus_dataset.save_to_disk(index_file_name)
-    # Run the following line of code if you want to save the encoded corpus dataset
-    # encoded_corpus_dataset.save_to_disk(index_file_name)
-    print('Creating Faiss index')
-    context_embeddings = np.vstack(encoded_corpus_dataset['embeddings']).astype(np.float32)
-    index = faiss.IndexFlatIP(context_embeddings.shape[1]) 
-    index.add(context_embeddings)
+            print('Getting corpus embeddings')
+            encoded_corpus_dataset = corpus_dataset.map(encode_passages, batched=True, batch_size=2000, fn_kwargs={'context_tokenizer': context_tokenizer, 'context_encoder': context_encoder})
+            os.makedirs(os.path.dirname(index_file_name), exist_ok=True)
+            print('Saving encoded corpus to', index_file_name)
+            encoded_corpus_dataset.save_to_disk(index_file_name)
+        # Run the following line of code if you want to save the encoded corpus dataset
+        # encoded_corpus_dataset.save_to_disk(index_file_name)
+        print('Creating Faiss index')
+        context_embeddings = np.vstack(encoded_corpus_dataset['embeddings']).astype(np.float32)
+        index = faiss.IndexFlatIP(context_embeddings.shape[1]) 
+        index.add(context_embeddings)
+    
+    os.makedirs(os.path.dirname(faiss_index_path), exist_ok=True)
+    faiss.write_index(index, faiss_index_path)
+
 
     # 4. Load query dataset
     print('Loading the query dataset')

@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name="dpr_b"
-#SBATCH --output="dpr_b.out"
-#SBATCH --error="dpr_b.err"
-#SBATCH --time=0-15:00:00
+#SBATCH --job-name="dpr_nq"
+#SBATCH --output="dpr_nq.out"
+#SBATCH --error="dpr_nq.err"
+#SBATCH --time=0-20:00:00
 #SBATCH --mail-type=END
 #SBATCH --mail-user=jhsia2@andrew.cmu.edu
 #SBATCH --gres=gpu:A6000:1
@@ -19,10 +19,10 @@ source /home/jhsia2/.bashrc
 conda activate ragged
 
 
-# export corpus='kilt_wikipedia'
-# export dataset='nq-dev-kilt'
+export corpus='kilt_wikipedia'
+export dataset='nq-dev-kilt'
 # export dataset='hotpotqa-dev-kilt'
-export corpus='pubmed'
-export dataset='complete_bioasq'
+# export corpus='pubmed'
+# export dataset='complete_bioasq'
 python dpr.py --corpus $corpus --dataset $dataset
                                     

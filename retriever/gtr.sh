@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name="gtr_b"
-#SBATCH --output="gtr_b.out"
-#SBATCH --error="gtr_b.err"
+#SBATCH --job-name="2gtr_nq"
+#SBATCH --output="2gtr_nq.out"
+#SBATCH --error="2gtr_nq.err"
 #SBATCH --time=0-15:00:00
 #SBATCH --mail-type=END
 #SBATCH --mail-user=jhsia2@andrew.cmu.edu
@@ -19,10 +19,10 @@ source /home/jhsia2/.bashrc
 conda activate ragged
 
 
-# export corpus='kilt_wikipedia'
+export corpus='kilt_wikipedia'
 # export dataset='nq-dev-kilt'
-# export dataset='hotpotqa-dev-kilt'
-export corpus='pubmed'
-export dataset='complete_bioasq'
+export dataset='hotpotqa-dev-kilt'
+# export corpus='pubmed'
+# export dataset='complete_bioasq'
 python gtr.py --corpus $corpus --dataset $dataset
                                     
