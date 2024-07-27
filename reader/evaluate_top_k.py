@@ -13,7 +13,6 @@ import string
 from rouge import Rouge
 from evaluate import load
 bertscore = load("bertscore")
-
 from collections import Counter
 
 # utility to get max
@@ -165,7 +164,7 @@ def do_eval_like_kilt(guess_answer, gold_candidate_answers, eval_info, WITH_BERT
         for g in gold_candidate_answers:
             g_new = normalize_answer(g)
             normalize_guess_answer = normalize_answer(guess_answer)
-            if normalize_guess_answer in g_new or g_new in normalize_guess_answer:
+            if normalize_guess_answer and (normalize_guess_answer in g_new or g_new in normalize_guess_answer):
                 substring_match = True
                 break
     else:
@@ -227,10 +226,8 @@ def evaluate_reader_results(reader_output, gold_data, WITH_BERT, args):
         gold_data_point = gold_data_id_map[reader_output_info["id"]]
         gold_candidate_answers = [x["answer"] for x in gold_data_point["output"] if "answer" in x] #considering only the short answers
         if args.merge_list_answers and gold_data_point.get("question_type", "")=="list":
-            # print("merge_list_answers")
             gold_candidate_answers = [" ".join(gold_candidate_answers)]
         reader_output_info["gold_answers"] = gold_candidate_answers
-        
         local_accuracy, local_em, substring_match, local_f1, local_rougel, local_bertscore = do_eval_like_kilt(guess_answer, gold_candidate_answers, reader_output_info.get("answer_evaluation"), WITH_BERT)
 
         accuracy+=local_accuracy
@@ -281,10 +278,10 @@ def evaluate_reader_results(reader_output, gold_data, WITH_BERT, args):
     
     return reader_output,method_metrics
 
-def baseline_evaluation(model, dataset, with_bert=False, args=None):
+def baseline_evaluation(reader, retriever, dataset, with_bert=False, args=None):
     #gold baseline evaluation
-    result_dir = os.path.join(READER_FOLDER, args.model, args.dataset, args.retriever)
-    print(model, dataset)
+    result_dir = os.path.join(READER_FOLDER, reader, dataset, retriever)
+    print(retriever, dataset)
 
     gold_data = load_jsonl(os.path.join(DATA_FOLDER, dataset_map[dataset]))
     reader_output = load_jsonl(os.path.join(result_dir, "reader_results.jsonl"))
@@ -296,13 +293,13 @@ def baseline_evaluation(model, dataset, with_bert=False, args=None):
     evaluation_file_path = os.path.join(result_dir, "all_data_evaluated.jsonl")
     save_jsonl(evaluated_data, evaluation_file_path)
 
-def top_k_evaluation(model, retriever, dataset, with_bert=False, args=None):
+def top_k_evaluation(reader, retriever, dataset, with_bert=False, args=None):
 
     k_list_str = re.split(r',\s*', args.k_list)
     k_list = [int(num) for num in k_list_str]
 
-    print(f"Eval - {model}/{dataset}/{retriever}/")
-    root_dir = os.path.join(READER_FOLDER, model, dataset, retriever, args.retrieval_mode)
+    print(f"Eval - {reader}/{dataset}/{retriever}/")
+    root_dir = os.path.join(READER_FOLDER, reader, dataset, retriever, args.retrieval_mode)
     gold_file = os.path.join(DATA_FOLDER, dataset_map[dataset])
 
     metrics_map = {}
@@ -339,10 +336,19 @@ def get_args():
 if __name__ == "__main__":
     args = get_args()
     if args.retriever == 'gold' or args.retriever == 'no_context':
-        baseline_evaluation(args.reader, args.dataset, with_bert=args.with_bert, args=args)
+        baseline_evaluation(args.reader, args.retriever, args.dataset, with_bert=args.with_bert, args=args)
     else:
         top_k_evaluation(args.reader, args.retriever, args.dataset, with_bert=args.with_bert, args=args)
 
 # python reader/evaluate_top_k.py --reader llama3_8b_8000truncation_10new_tokens --retriever colbert --dataset nq --retrieval_mode top_k --merge_list_answers
+# python reader/evaluate_top_k.py --reader gpt-3.5_16000truncation_10new_tokens --retriever no_context --dataset nq --retrieval_mode top_positive --merge_list_answers --k_list 1,2,5,10,20,50
+# python reader/evaluate_top_k.py --reader gpt-3.5_16000truncation_10new_tokens --retriever no_context --dataset hotpotqa --retrieval_mode top_positive --merge_list_answers --k_list 1,2,5,10,20,50
+# python reader/evaluate_top_k.py --reader gpt-3.5_16000truncation_10new_tokens --retriever no_context --dataset complete_bioasq --retrieval_mode top_positive --merge_list_answers --k_list 1,2,5,10,20,50
 
+# python reader/evaluate_top_k.py --reader gpt-3.5_16000truncation_10new_tokens --retriever colbert --dataset complete_bioasq --retrieval_mode top_k --merge_list_answers --k_list 1,2,5,10,20,50
+
+
+# python reader/evaluate_top_k.py --reader llama3_8b_8000truncation_10new_tokens --retriever no_context --dataset nq --retrieval_mode top_k --merge_list_answers
+
+# /data/tir/projects/tir6/general/afreens/dbqa/reader_results/gpt-3.5_16000truncation_10new_tokens
 
