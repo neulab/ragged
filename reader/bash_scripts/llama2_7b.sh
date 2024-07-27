@@ -1,13 +1,13 @@
 #!/bin/bash
 #
-#SBATCH --job-name=llama2_70bgen
-#SBATCH --output="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/llama2_70b/slurm-%A_%a.out"
-#SBATCH --error="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/llama2_70b/slurm-%A_%a.err"
+#SBATCH --job-name=llama2_7bgen
+#SBATCH --output="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/llama2_7b/slurm-%A_%a.out"
+#SBATCH --error="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/llama2_7b/slurm-%A_%a.err"
 #SBATCH --time=800
 #SBATCH --mem=48GB
 
-reader="llama2_70b"
-top_ks=( "50" )
+reader="llama2_7b"
+top_ks=( "1" "2" "5" "10" "20" "50" )
 # top_ks=("10")
 max_new_tokens=10
 max_truncation=4000
@@ -27,7 +27,7 @@ for retriever in "${retrievers[@]}"; do
             --model_name $reader \
             --retriever $retriever \
             --dataset $dataset \
-            --hosted_api_endpoint babel-0-31:8291 \
+            --hosted_api_endpoint babel-3-9:8300 \
             --k $topk \
             --batch_size 50 \
             --max_new_tokens $max_new_tokens \
