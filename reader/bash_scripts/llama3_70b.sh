@@ -1,38 +1,20 @@
 #!/bin/bash
-#
-#SBATCH --job-name=llama3_70bgen
-#SBATCH --output="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/llama3_70b/slurm-%A_%a.out"
-#SBATCH --error="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/llama3_70b/slurm-%A_%a.err"
-#SBATCH --time=800
-#SBATCH --mem=48GB
+#SBATCH --job-name=llama3_70b
+#SBATCH --output=host_logs/llama3_70b_1.log
+#SBATCH --error=host_logs/llama3_70b_1.err
+#SBATCH --nodes=1
+#SBATCH --gres=gpu:6000Ada:4
+#SBATCH --mem=100GB
+#SBATCH --time=12:00:00
 
-reader="llama3_70b"
-top_ks=("50")
-# top_ks=("10")
-max_new_tokens=10
-max_truncation=8000
-# datasets=("nq")
-datasets=("hotpotqa" "complete_bioasq")
-retrievers=("colbert")
+source /home/jhsia2/.bashrc
+conda activate tgi-env
 
-export PYTHONPATH="/home/afreens/ragged"
+echo $SLURM_JOB_ID
 
-# Loop through each retriever
-for retriever in "${retrievers[@]}"; do
-  # Loop through each dataset
-    for dataset in "${datasets[@]}"; do
-        # Loop through each topk
-        for topk in "${top_ks[@]}"; do
-            python reader/generate_top_k.py \
-            --model_name $reader \
-            --retriever $retriever \
-            --dataset $dataset \
-            --hosted_api_endpoint babel-3-9:8201 \
-            --k $topk \
-            --batch_size 50 \
-            --max_new_tokens $max_new_tokens \
-            --max_truncation $max_truncation \
-            --retrieval_mode top_k
-        done
-    done
-done
+model_id='meta-llama/Meta-Llama-3-70B'
+
+echo $model_id
+
+mkdir -p /scratch/jhsia2
+text-generation-launcher --model-id $model_id --port 8101 --master-port 23456 --shard-uds-path /scratch/jhsia2/tgi-uds-socket-1 --huggingface-hub-cache /data/tir/projects/tir2/models/tgi_cache/hub --max-input-length 8000 --max-total-tokens 8192 --max-batch-prefill-tokens 8192
