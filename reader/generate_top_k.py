@@ -4,7 +4,7 @@ import time
 import traceback
 from tqdm import tqdm
 from file_utils import save_jsonl, load_jsonl, save_json
-from reader.reader_model import Reader, GPT_Reader
+from reader.reader_model import Reader, GPT_Reader, ClaudeReader
 from reader.reader_utils import merge_retriever_data_and_eval_results, post_process_answers
 from utils import READER_FOLDER, RETRIEVER_FOLDER, get_tokenizer, dataset_map
 
@@ -21,15 +21,18 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
     batch_size = args.batch_size
     output_file = os.path.join(output_path, 'reader_results.jsonl')
     additional_metadata_file = os.path.join(output_path, 'additional_metadata.jsonl')
+    error_file_path = os.path.join(output_path, 'reader_errors.jsonl')
 
     if args.overwrite or not os.path.exists(output_file):
         reader_responses = []
+        error_logs = []
     else:
         reader_responses = load_jsonl(output_file)
+        error_file_path = os.path.join(output_path, 'reader_errors.jsonl')
+        error_logs = load_jsonl(error_file_path, sort_by_id=False) if os.path.exists(error_file_path) else []
     print(f"no.of. questions in range for which response is already generated = {len(reader_responses)}")
 
-    error_file_path = os.path.join(output_path, 'reader_errors.jsonl')
-    error_logs = load_jsonl(error_file_path, sort_by_id=False) if os.path.exists(error_file_path) else []
+    
 
     reader_ques_ids_already_generated = [x['id'] for x in reader_responses] #can modify this to combined_jsonl file
     all_prompts = []
@@ -108,7 +111,7 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--hosted_api_endpoint", type=str, help="the hosted endpoint of the TGI model server. SHould be of the format - <node>:<port>")
-    parser.add_argument("--api_key", type=str, help="the api key of your closed-source model")
+    parser.add_argument("--api_key", type=str, help="the api key of your closed-source model or HF model")
     parser.add_argument("--k", type=int, default=1, help="the number of retrieved contexts to include in input for reader generation")
     parser.add_argument("--batch_size", type=int, default=50, help="the number of reader inputs processed simultaneously")
     parser.add_argument("--model_name", type=str, help="model name; <results_base_folder>/<model>")
@@ -130,11 +133,17 @@ if __name__ == "__main__":
     if 'gpt' in args.model_name:
          print('gpt reader')
          reader= GPT_Reader(model_identifier=args.model_name, api_key = args.api_key)
+    elif 'claude' in args.model_name:
+        reader= ClaudeReader(model_identifier=args.model_name, api_key = args.api_key)
     else:
         print('hf reader')
         tokenizer = get_tokenizer(args.model_name)
-        reader=Reader(model_identifier=args.model_name, hosted_api_endpoint =f"http://{args.hosted_api_endpoint}/", tokenizer=tokenizer)
-
+        # use whichever of hosted_api_endpoint or api_key is provided. if both are provided, use hosted_api_endpoint
+        if args.hosted_api_endpoint:
+            reader=Reader(model_identifier=args.model_name, hosted_api_endpoint =f"http://{args.hosted_api_endpoint}/", hosted_api_key = None, tokenizer=tokenizer)
+        else:
+            reader=Reader(model_identifier=args.model_name, hosted_api_endpoint =None, hosted_api_key = args.api_key, tokenizer=tokenizer)
+    
     # get retriever data
     retriever_data_path = os.path.join(RETRIEVER_FOLDER, "predictions", args.retriever, dataset_map[args.dataset])
     retriever_eval_path = os.path.join(RETRIEVER_FOLDER, "evaluations", args.retriever, dataset_map[args.dataset])

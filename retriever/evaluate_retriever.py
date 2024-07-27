@@ -119,7 +119,7 @@ def main(args):
     guess_file = os.path.join(args.prediction_dir, args.retriever, args.dataset + '.jsonl')
     evaluation_dir = os.path.join(args.evaluation_dir, args.retriever)
     guess_data = load_jsonl(guess_file, sort_by_id = True)
-    gold_data = load_json(os.path.join(args.data_dir, 'gold_compilation_files', f"gold_{args.dataset}_compilation_file.json"), sort_by_id = True)
+    gold_data = load_json(os.path.join(args.data_dir, 'gold_compilation_files', f"gold_{args.dataset.split('-')[0]}_compilation_file.json"), sort_by_id = True)
 
     par_retriever_results = get_retriever_results(guess_data, gold_data)
 

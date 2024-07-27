@@ -12,7 +12,9 @@ complete_model_names = {
     "flanUl2": "huggingface/google/flan-ul2",
     "llama3_8b": "huggingface/meta-llama/Meta-Llama-3-8B",
     "llama3_70b": "huggingface/meta-llama/Meta-Llama-3-70B",
-    "gpt-3.5": "gpt-3.5-turbo-0125"
+    "gpt-3.5": "gpt-3.5-turbo-0125",
+    "claude_haiku": "claude-3-haiku-20240307",
+    "mistral3_7b": "huggingface/mistralai/Mistral-7B-v0.3"
 }
 
 dataset_map = {
@@ -27,7 +29,8 @@ tokenizer_path_map = {
     "flanT5": "google/flan-ul2",
     "flanUl2": "google/flan-ul2",
     "llama3_8b": "/data/models/huggingface/meta-llama/Llama-2-7b-hf/",
-    "llama3_70b": "/data/models/huggingface/meta-llama/Llama-2-7b-hf/"
+    "llama3_70b": "/data/models/huggingface/meta-llama/Llama-2-7b-hf/",
+    "mistral3_7b": "mistralai/Mistral-7B-v0.3"
 }
 
 tokenizer_map = {
@@ -36,7 +39,8 @@ tokenizer_map = {
     "flanT5": T5Tokenizer,
     "flanUl2": T5Tokenizer,
     "llama3_8b": LlamaTokenizer,
-    "llama3_70b": LlamaTokenizer
+    "llama3_70b": LlamaTokenizer,
+    "mistral3_7b": LlamaTokenizer
 }
 
 

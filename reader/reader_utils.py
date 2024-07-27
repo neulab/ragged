@@ -9,40 +9,6 @@ NO_CONTEXT_INSTRUCTION_STR = "Give simple short one phrase answers for the quest
 
 from transformers import LlamaTokenizer, T5Tokenizer
 
-BASE_FOLDER = os.getenv('DBQA')
-DATA_FOLDER = f"{BASE_FOLDER}/data"
-RETRIEVER_FOLDER = f"{BASE_FOLDER}/retriever_results"
-READER_FOLDER = f"{BASE_FOLDER}/reader_results"
-
-complete_model_names = {
-   "llama2_7b": "huggingface/meta-llama/Llama-2-7b-hf",
-    "llama2_70b": "huggingface/meta-llama/Llama-2-70b-hf",
-    "flanT5": "huggingface/google/flan-t5-xxl",
-    "flanUl2": "huggingface/google/flan-ul2",
-    "gpt-3.5": "gpt-3.5-turbo-0125"
-}
-
-dataset_map = {
-    "hotpotqa" : "hotpotqa-dev-kilt.jsonl",
-    "nq": "nq-dev-kilt.jsonl",
-    "bioasq": "bioasq.jsonl",
-}
-
-tokenizer_path_map = {
-    "llama2_7b": "/data/datasets/models/meta-ai/llama2/weights/",
-    "llama2_70b": "/data/datasets/models/meta-ai/llama2/weights/",
-    "flanT5": "google/flan-ul2",
-    "flanUl2": "google/flan-ul2"
-}
-
-tokenizer_map = {
-    "llama2_7b": LlamaTokenizer,
-    "llama2_70b": LlamaTokenizer,
-    "flanT5": T5Tokenizer,
-    "flanUl2": T5Tokenizer
-}
-
-
 def get_tokenizer(model_name):
     if model_name in tokenizer_map and model_name in tokenizer_path_map:
         return tokenizer_map[model_name].from_pretrained(tokenizer_path_map[model_name])
@@ -85,7 +51,7 @@ def num_gpt_tokens_per_message(messages, model="gpt-3.5-turbo-0613"):
     try:
         encoding = tiktoken.encoding_for_model(model)
     except KeyError:
-        print("Warning: model not found. Using cl100k_base encoding.")
+        # print("Warning: model not found. Using cl100k_base encoding.")
         encoding = tiktoken.get_encoding("cl100k_base")
     if model in {
         "gpt-3.5-turbo-0613",
@@ -107,9 +73,10 @@ def num_gpt_tokens_per_message(messages, model="gpt-3.5-turbo-0613"):
         # print("Warning: gpt-4 may update over time. Returning num tokens assuming gpt-4-0613.")
         return num_gpt_tokens_per_message(messages, model="gpt-4-0613")
     else:
-        raise NotImplementedError(
-            f"""num_tokens_from_messages() is not implemented for model {model}. See https://github.com/openai/openai-python/blob/main/chatml.md for information on how messages are converted to tokens."""
-        )
+        return num_gpt_tokens_per_message(messages, model="gpt-4-0613")
+        # raise NotImplementedError(
+        #     f"""num_tokens_from_messages() is not implemented for model {model}. See https://github.com/openai/openai-python/blob/main/chatml.md for information on how messages are converted to tokens."""
+        # )
     num_tokens = 0
     # if (self_enclosed):
     for message in messages:
@@ -126,7 +93,7 @@ def num_gpt_tokens_per_content(content, model="gpt-3.5-turbo-0613"):
     try:
         encoding = tiktoken.encoding_for_model(model)
     except KeyError:
-        print("Warning: model not found. Using cl100k_base encoding.")
+        # print("Warning: model not found. Using cl100k_base encoding.")
         encoding = tiktoken.get_encoding("cl100k_base")
     
     # num_tokens = 0
