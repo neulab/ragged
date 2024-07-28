@@ -5,7 +5,7 @@
 #SBATCH --time=0-10:00:00
 #SBATCH --mail-type=END
 #SBATCH --mail-user=jhsia2@andrew.cmu.edu
-#SBATCH --gres=gpu:A6000:8
+#SBATCH --gres=gpu:L40:8
 #SBATCH --mem=150GB
 
 

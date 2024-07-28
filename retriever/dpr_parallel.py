@@ -9,11 +9,12 @@ import torch
 import numpy as np
 import argparse
 from tqdm import tqdm
+import pdb
 def encode_passages(examples, context_tokenizer, context_encoder, device):
     inputs = context_tokenizer(examples['contents'], return_tensors='pt', truncation=True, padding=True, max_length=512).to(device)
     with torch.no_grad():
         embeddings = context_encoder(**inputs).pooler_output.cpu().numpy()
-    return {'embeddings': embeddings}
+    return embeddings
 def retrieve(query, index, question_tokenizer, question_encoder, top_k, device):
     inputs = question_tokenizer(query, return_tensors='pt', truncation=True, padding=True, max_length=512).to(device)
     with torch.no_grad():
@@ -63,34 +64,40 @@ def main(args):
     context_encoder.to(device)
     context_tokenizer = DPRContextEncoderTokenizer.from_pretrained("facebook/dpr-ctx_encoder-single-nq-base")
     index_file_name = os.path.join(args.index_dir, f'{retriever_name}_{batch_run}', args.corpus)
-    print("index file", index_file_name)
-    if os.path.exists(index_file_name):
-        print('Loading encoded corpus from', index_file_name)
-        encoded_corpus_dataset = Dataset.load_from_disk(index_file_name)
-        if isinstance(encoded_corpus_dataset, DatasetDict):
-            encoded_corpus_dataset = encoded_corpus_dataset['train']
-        corpus_dataset = encoded_corpus_dataset
-    else:
-        print("Loading the corpus dataset")
-        corpus_file_name = f'/data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files/{args.corpus}/{args.corpus}_jsonl/{args.corpus}.jsonl'
-        corpus_dataset = load_dataset('json', data_files=corpus_file_name)["train"]
-        print('Getting corpus embeddings in batches on GPU')
-        batch_size = 7000
-        encoded_batches = []
-        print(corpus_dataset)
-        for i in tqdm(range(int(1e7*(int(batch_run)-1)), int(1e7*int(batch_run)), batch_size), desc="Encoding Corpus"):
-            print(i)
-            # print(len(corpus_dataset[:100000]))
-            batch = corpus_dataset[i:i + batch_size]
-            # print(batch, len(batch))
-            # pdb.set_trace()
-            encoded_batch = encode_passages(batch, context_tokenizer, context_encoder, device)
-            encoded_batches.append(encoded_batch['embeddings'])
-        context_embeddings = np.vstack(encoded_batches).astype(np.float32)
-        encoded_corpus_dataset = Dataset.from_dict({'embeddings': context_embeddings})
-        os.makedirs(os.path.dirname(index_file_name), exist_ok=True)
-        print('Saving encoded corpus to', index_file_name)
-        encoded_corpus_dataset.save_to_disk(index_file_name)
+    # print("index file", index_file_name)
+    # if os.path.exists(index_file_name):
+    #     print('Loading encoded corpus from', index_file_name)
+    #     encoded_corpus_dataset = Dataset.load_from_disk(index_file_name)
+    #     if isinstance(encoded_corpus_dataset, DatasetDict):
+    #         encoded_corpus_dataset = encoded_corpus_dataset['train']
+    #     corpus_dataset = encoded_corpus_dataset
+    # else:
+    print("Loading the corpus dataset")
+    corpus_file_name = f'/data/tir/projects/tir6/general/afreens/dbqa/data/corpus_files/{args.corpus}/{args.corpus}_jsonl/{args.corpus}.jsonl'
+    corpus_dataset = load_dataset('json', data_files=corpus_file_name)["train"]
+    print('Getting corpus embeddings in batches on GPU')
+    batch_size = 8000
+    encoded_batches = []
+    print(corpus_dataset)
+    for i in tqdm(range(int(1e7*(int(batch_run)-1)), int(1e7*int(batch_run)), batch_size), desc="Encoding Corpus"):
+        print(i)
+        # print(len(corpus_dataset[:100000]))
+        batch = corpus_dataset[i:i + batch_size]
+        # print(batch, len(batch))
+        # pdb.set_trace()
+        embeddings = encode_passages(batch, context_tokenizer, context_encoder, device)
+        encoded_batches.append(embeddings)
+        # pdb.set_trace()
+        # break
+    context_embeddings = np.vstack(encoded_batches).astype(np.float32)
+    embeddings_filename = os.path.join(args.index_dir, f'{retriever_name}', f'{args.corpus}_{batch_run}.npy')
+    os.makedirs(os.path.dirname(embeddings_filename), exist_ok=True)
+    np.save(embeddings_filename, context_embeddings)
+        # pdb.set_trace()
+        # encoded_corpus_dataset = Dataset.from_dict({'embeddings': context_embeddings})
+        
+    print('Saving encoded corpus to', embeddings_filename)
+    # encoded_corpus_dataset.save_to_disk(index_file_name)
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Process input, gold, and output files")
     parser.add_argument("--prediction_dir", help="retriever model name", default='/data/tir/projects/tir6/general/afreens/dbqa/data/predictions')
