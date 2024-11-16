@@ -7,12 +7,12 @@
 #SBATCH --mem=48GB
 
 reader="llama3_70b"
-top_ks=("50")
+top_ks=( "20" )
 # top_ks=("10")
 max_new_tokens=10
 max_truncation=8000
 # datasets=("nq")
-datasets=("hotpotqa" "complete_bioasq")
+datasets=("complete_bioasq")
 retrievers=("colbert")
 
 export PYTHONPATH="/home/afreens/ragged"
@@ -27,7 +27,7 @@ for retriever in "${retrievers[@]}"; do
             --model_name $reader \
             --retriever $retriever \
             --dataset $dataset \
-            --hosted_api_endpoint babel-3-9:8201 \
+            --hosted_api_endpoint babel-8-15:8301 \
             --k $topk \
             --batch_size 50 \
             --max_new_tokens $max_new_tokens \

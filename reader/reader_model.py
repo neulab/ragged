@@ -1,4 +1,4 @@
-from reader.reader_utils import INSTRUCTION_STR, NO_CONTEXT_INSTRUCTION_STR, truncate_prompt, num_gpt_tokens_per_content, num_gpt_tokens_per_message
+from reader.reader_utils import context_instruction_dict, no_context_instruction_dict, truncate_prompt, num_gpt_tokens_per_content, num_gpt_tokens_per_message
 from utils import complete_model_names
 import litellm
 from litellm import batch_completion, Router
@@ -8,7 +8,6 @@ import pdb
 time_map = {}
 
 # litellm.set_verbose=True
-        
 class Reader:
     def __init__(self, model_identifier=None, hosted_api_endpoint=None, hosted_api_key = None, tokenizer=None):
         self.model_identifier = model_identifier
@@ -18,28 +17,30 @@ class Reader:
     
     def batch_generate(self, texts, max_new_tokens=10):
         messages = [[{"role":"user", "content":text}] for text in texts]
-        pdb.set_trace()
+        # pdb.set_trace()
         if self.hosted_api_endpoint:
-            return batch_completion(model=complete_model_names[self.model_identifier], 
-                                messages=messages, 
-                                api_base=self.hosted_api_endpoint,
-                                max_tokens = max_new_tokens
-                                )
+            # pdb.set_trace()
+            return batch_completion(model=complete_model_names[self.model_identifier], messages=messages, api_base=self.hosted_api_endpoint,max_tokens = max_new_tokens)
         else:
             return batch_completion(model=complete_model_names[self.model_identifier], 
                                 messages=messages, 
                                 api_key=self.api_key,
                                 max_tokens = max_new_tokens
                                 )
-        
+    
 
-    def generate(self, prompts, max_new_tokens=10, truncate=2000):
+
+    def generate(self, prompts, max_new_tokens=10, truncate=2000, prompt_mode = 'default'):
         total_tokens = truncate
         modified_prompts = []
         context_length_changes = []
-        instruction_str_tokens = self.tokenizer(INSTRUCTION_STR)["input_ids"]
+        # update instr str
+        # context_instruction_str = context_instruction_dict[prompt_mode]
+        # no_context_instruction_str = no_context_instruction_dict[prompt_mode]
+        # instruction_str_tokens = self.tokenizer(context_instruction_str)["input_ids"]
+        # print(prompt_mode)
         for prompt in prompts:
-            modified_prompt, context_length_change_info = truncate_prompt(prompt, self.tokenizer, instruction_str_tokens, total_tokens, max_new_tokens)
+            modified_prompt, context_length_change_info = truncate_prompt(prompt, self.tokenizer, total_tokens, max_new_tokens, prompt_mode)
             modified_prompts.append(modified_prompt)
             context_length_changes.append(context_length_change_info)
         responses = self.batch_generate(modified_prompts, max_new_tokens)
@@ -57,9 +58,10 @@ class GPT_Reader():
             self.tokenizer = tiktoken.get_encoding("cl100k_base")
     
     
-    def truncate_prompt(self, prompt, total_tokens, max_new_tokens):
-
-        system_prompt = f"{INSTRUCTION_STR}\nContext: " if prompt['context'] else NO_CONTEXT_INSTRUCTION_STR
+    def truncate_prompt(self, prompt, total_tokens, max_new_tokens, prompt_mode):
+        context_instruction_str = context_instruction_dict[prompt_mode]
+        no_context_instruction_str = no_context_instruction_dict[prompt_mode]
+        system_prompt = f"{context_instruction_str}\nContext: " if prompt['context'] else no_context_instruction_str
         user_prompt = f"Question: {prompt['question']}\nAnswer: "
         system_prompt_len = num_gpt_tokens_per_message([{"role": "system", "content": system_prompt}], complete_model_names[self.model_identifier])
         user_prompt_len = num_gpt_tokens_per_message([{"role": "user", "content": user_prompt}], complete_model_names[self.model_identifier])
@@ -86,18 +88,18 @@ class GPT_Reader():
             "context_token_length_after_truncation": trunc_context_len
         }
     
-        messages = self.create_prompt(question=prompt["question"], context=trun_decoded_context)
+        messages = self.create_prompt(question=prompt["question"], context=trun_decoded_context, context_instruction_str=context_instruction_str, no_context_instruction_str=no_context_instruction_str)
         return messages, context_length_change_info
     
-    def create_prompt(self, question, context):
+    def create_prompt(self, question, context, context_instruction_str, no_context_instruction_str):
         messages = []
 
         if context:
-            system_prompt = f"{INSTRUCTION_STR}\nContext: {context}".strip()
+            system_prompt = f"{context_instruction_str}\nContext: {context}".strip()
             user_prompt = f"Question: {question}\nAnswer: ".strip()
             # system_prompt =  f"{INSTRUCTION_STR}\nContext: {context}".strip()
         else:
-            system_prompt = f"{NO_CONTEXT_INSTRUCTION_STR}".strip()
+            system_prompt = f"{no_context_instruction_str}".strip()
             user_prompt = f"Question: {question}\nAnswer: ".strip()
             # system_prompt = f"{NO_CONTEXT_INSTRUCTION_STR}".strip()
     
@@ -151,9 +153,11 @@ class ClaudeReader():
             self.tokenizer = tiktoken.get_encoding("cl100k_base")
     
     
-    def truncate_prompt(self, prompt, total_tokens, max_new_tokens):
-
-        system_prompt = f"{INSTRUCTION_STR}\nContext: " if prompt['context'] else NO_CONTEXT_INSTRUCTION_STR
+    def truncate_prompt(self, prompt, total_tokens, max_new_tokens, prompt_mode):
+        context_instruction_str = context_instruction_dict[prompt_mode]
+        no_context_instruction_str = no_context_instruction_dict[prompt_mode]
+        system_prompt = f"{context_instruction_str}\nContext: " if prompt['context'] else no_context_instruction_str
+        # system_prompt = f"{INSTRUCTION_STR}\nContext: " if prompt['context'] else NO_CONTEXT_INSTRUCTION_STR
         user_prompt = f"Question: {prompt['question']}\nAnswer: "
         system_prompt_len = num_gpt_tokens_per_message([{"role": "system", "content": system_prompt}], complete_model_names[self.model_identifier])
         user_prompt_len = num_gpt_tokens_per_message([{"role": "user", "content": user_prompt}], complete_model_names[self.model_identifier])
@@ -180,18 +184,18 @@ class ClaudeReader():
             "context_token_length_after_truncation": trunc_context_len
         }
     
-        messages = self.create_prompt(question=prompt["question"], context=trun_decoded_context)
+        messages = self.create_prompt(question=prompt["question"], context=trun_decoded_context, context_instruction_str = context_instruction_str, no_context_instruction_str = no_context_instruction_str)
         return messages, context_length_change_info
     
-    def create_prompt(self, question, context):
+    def create_prompt(self, question, context, context_instruction_str, no_context_instruction_str):
         messages = []
 
         if context:
-            system_prompt = f"{INSTRUCTION_STR}\nContext: {context}".strip()
+            system_prompt = f"{context_instruction_str}\nContext: {context}".strip()
             user_prompt = f"Question: {question}\nAnswer: ".strip()
             # system_prompt =  f"{INSTRUCTION_STR}\nContext: {context}".strip()
         else:
-            system_prompt = f"{NO_CONTEXT_INSTRUCTION_STR}".strip()
+            system_prompt = f"{no_context_instruction_str}".strip()
             user_prompt = f"Question: {question}\nAnswer: ".strip()
             # system_prompt = f"{NO_CONTEXT_INSTRUCTION_STR}".strip()
     

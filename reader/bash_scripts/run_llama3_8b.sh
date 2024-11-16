@@ -7,7 +7,7 @@
 #SBATCH --mem=48GB
 
 reader="llama3_8b"
-top_ks=("50")
+top_ks=("1" "2" "5" "10" "20" "50")
 # top_ks=("10")
 max_new_tokens=10
 max_truncation=8000
@@ -27,12 +27,12 @@ for retriever in "${retrievers[@]}"; do
             --model_name $reader \
             --retriever $retriever \
             --dataset $dataset \
-            --hosted_api_endpoint babel-3-13:8200  \
+            --hosted_api_endpoint babel-4-28:8100  \
             --k $topk \
             --batch_size 50 \
             --max_new_tokens $max_new_tokens \
             --max_truncation $max_truncation \
-            --retrieval_mode top_k
+            --retrieval_mode top_negative
         done
     done
 done

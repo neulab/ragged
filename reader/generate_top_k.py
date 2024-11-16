@@ -7,7 +7,9 @@ from file_utils import save_jsonl, load_jsonl, save_json
 from reader.reader_model import Reader, GPT_Reader, ClaudeReader
 from reader.reader_utils import merge_retriever_data_and_eval_results, post_process_answers
 from utils import READER_FOLDER, RETRIEVER_FOLDER, get_tokenizer, dataset_map
-
+import pdb
+import litellm
+# litellm.set_verbose=True
 time_map = {}
 
 def generate_reader_outputs(retriever_data, reader_object, output_path=None, args=None):
@@ -30,15 +32,19 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
         reader_responses = load_jsonl(output_file)
         error_file_path = os.path.join(output_path, 'reader_errors.jsonl')
         error_logs = load_jsonl(error_file_path, sort_by_id=False) if os.path.exists(error_file_path) else []
-    print(f"no.of. questions in range for which response is already generated = {len(reader_responses)}")
-
-    
+    print(f"no. of questions in range for which response is already generated = {len(reader_responses)}")
 
     reader_ques_ids_already_generated = [x['id'] for x in reader_responses] #can modify this to combined_jsonl file
     all_prompts = []
     prompt_indices = []
     context_document_list = []
-    for i, ques_info in tqdm(enumerate(retriever_data)):
+    # id_start = 1493-1
+    # id_end = 1493+1
+    id_start = 0
+    id_end = len(retriever_data)
+    # for i, ques_info in tqdm(enumerate(retriever_data[1493-1:1493+1])):
+    for i in tqdm(range(id_start, id_end)):
+        ques_info = retriever_data[i]
         if ques_info["id"] in reader_ques_ids_already_generated:
             continue
         question = ques_info["input"].strip("?")+"?"
@@ -76,7 +82,7 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
     for chunkid, (chunked_indices, chunked_prompts, chunked_contexts) in enumerate(zip(chunked_indices_list, chunked_prompts_list, chunked_contexts_list)):
         print(f'{chunkid}/{len(chunked_indices_list)}')
         try:
-            answers, context_length_changes = reader_object.generate(chunked_prompts, max_new_tokens=args.max_new_tokens, truncate=args.max_truncation)
+            answers, context_length_changes = reader_object.generate(chunked_prompts, max_new_tokens=args.max_new_tokens, truncate=args.max_truncation, prompt_mode = args.prompt_mode)
             all_context_length_changes.extend(context_length_changes)
             answers = post_process_answers(answers)
             all_answers.extend(answers)
@@ -84,6 +90,7 @@ def generate_reader_outputs(retriever_data, reader_object, output_path=None, arg
                 ques_info = retriever_data[q_index]
                 reader_responses.append({
                     "id" : ques_info["id"],
+                    # "id" : '6057bf0694d57fd879000031',
                     "input" : ques_info["input"],
                     "retrieved_passages": chunked_docs,
                     "answer": answer
@@ -121,6 +128,8 @@ def get_args():
     parser.add_argument("--max_truncation", type=int, default=4000, help="number of tokens fed to the reader model. If the input (i.e instruction+contexts+question) are greater than this value, they are truncated to these many tokens")
     parser.add_argument("--retrieval_mode", help = 'top_k, top_negative, top_positive')
     parser.add_argument("--overwrite", action=argparse.BooleanOptionalAction, help = 'overwrite even if there are existing results')
+    parser.add_argument("--prompt_mode", default = 'cot', type=str, help="default or cot")
+    parser.add_argument("--reranker", default = 'no', type=str, help="bm25 or bert")
     
     args = parser.parse_args()
     print(f"args: {vars(args)}")
@@ -151,8 +160,10 @@ if __name__ == "__main__":
         
     final_model_name = f"{args.model_name}_{args.max_truncation}truncation_{args.max_new_tokens}new_tokens"
     
-    output_path  = os.path.join(READER_FOLDER, final_model_name, args.dataset, args.retriever)
+    # new_path = os.path.join(model_path, prompt_type, reranker, dataset, retriever)
     
+    output_path  = os.path.join(READER_FOLDER, final_model_name, f'{args.prompt_mode}_prompt', f'{args.reranker}_reranker', args.dataset, args.retriever)
+    print(f"output_path: {output_path}")
     if args.retriever != 'no_context' and args.retriever != 'gold':
         output_path = os.path.join(output_path, args.retrieval_mode, f'top{args.k}')
 

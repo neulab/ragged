@@ -1,21 +1,24 @@
 #!/bin/bash
-#
-#SBATCH --job-name=llama3_70bgen
-#SBATCH --output="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/llama3_70b/slurm-%A_%a.out"
-#SBATCH --error="/data/tir/projects/tir6/general/afreens/dbqa/logs/reader/llama3_70b/slurm-%A_%a.err"
-#SBATCH --time=800
-#SBATCH --mem=48GB
+#SBATCH --job-name=flanul2_dpr_b_tk
+#SBATCH --output=gen_logs/flanul2_dpr_b_tk.out
+#SBATCH --error=gen_logs/flanul2_dpr_b_tk.err
+#SBATCH --time=10:00:00
+#SBATCH --nodes=1
+#SBATCH --mem=100GB
 
-reader="llama3_70b"
-top_ks=( "20" )
-# top_ks=("10")
+source /home/jhsia2/.bashrc
+conda activate ragged
+
+reader="flanUl2"
+# top_ks=( "1" "2" "5" "10" "20")
+top_ks=("20")
 max_new_tokens=10
-max_truncation=8000
+max_truncation=2000
 # datasets=("nq")
 datasets=("complete_bioasq")
-retrievers=("colbert")
+retrievers=("dpr")
 
-export PYTHONPATH="/home/afreens/ragged"
+export PYTHONPATH="/home/jhsia2/ragged"
 
 # Loop through each retriever
 for retriever in "${retrievers[@]}"; do
@@ -23,13 +26,13 @@ for retriever in "${retrievers[@]}"; do
     for dataset in "${datasets[@]}"; do
         # Loop through each topk
         for topk in "${top_ks[@]}"; do
-            python reader/generate_top_k.py \
+            python /home/jhsia2/ragged/reader/generate_top_k.py \
             --model_name $reader \
             --retriever $retriever \
             --dataset $dataset \
-            --hosted_api_endpoint babel-8-15:8301 \
+            --hosted_api_endpoint babel-0-23:9100 \
             --k $topk \
-            --batch_size 50 \
+            --batch_size 1 \
             --max_new_tokens $max_new_tokens \
             --max_truncation $max_truncation \
             --retrieval_mode top_k

@@ -4,21 +4,38 @@ from file_utils import load_jsonl
 import tiktoken
 
 INSTRUCTION_STR = "Give simple short one phrase answers for the questions based on the context"
+COT_INSTRUCTION_STR = "Answer the question based on the context passages provided. First, explain your reasoning step-by-step. Conclude with a simple, short answer in the format \"The answer is [ANSWER].\""
 NO_CONTEXT_INSTRUCTION_STR = "Give simple short one phrase answers for the question"
+NO_CONTEXT_COT_INSTRUCTION_STR = "First, explain your reasoning step-by-step. Conclude with a simple, short answer in the format \"The answer is [ANSWER].\""
+
+context_instruction_dict = {
+    "default": INSTRUCTION_STR,
+    "cot": COT_INSTRUCTION_STR
+}
+
+no_context_instruction_dict = {
+    "default": NO_CONTEXT_INSTRUCTION_STR,
+    "cot": NO_CONTEXT_COT_INSTRUCTION_STR
+}
 
 
 from transformers import LlamaTokenizer, T5Tokenizer
 
-def get_tokenizer(model_name):
-    if model_name in tokenizer_map and model_name in tokenizer_path_map:
-        return tokenizer_map[model_name].from_pretrained(tokenizer_path_map[model_name])
-    else:
-        raise Exception(f"{model_name} is not supported. Add the corresponding tokenizer and tokenizer_path in utils")
+# def get_tokenizer(model_name):
+#     if model_name in tokenizer_map and model_name in tokenizer_path_map:
+#         return tokenizer_map[model_name].from_pretrained(tokenizer_path_map[model_name])
+#     else:
+#         raise Exception(f"{model_name} is not supported. Add the corresponding tokenizer and tokenizer_path in utils")
 
-def truncate_prompt(prompt, tokenizer, instruction_str_tokens, total_tokens, max_new_tokens):
+def truncate_prompt(prompt, tokenizer, total_tokens, max_new_tokens, prompt_mode):
     format_tokens =  tokenizer("\nContext: \nQuestion: \nAnswer:")
     question_tokens = tokenizer(prompt["question"])["input_ids"]
-    remaining_length = total_tokens-len(format_tokens)-len(instruction_str_tokens)-len(question_tokens)-max_new_tokens-10 #additional buffer of 5
+    if prompt['context']:
+        instruction_str_tokens = tokenizer(context_instruction_dict[prompt_mode])["input_ids"]
+    else:
+        instruction_str_tokens = tokenizer(no_context_instruction_dict[prompt_mode])["input_ids"]
+    # print(instruction_)
+    remaining_length = total_tokens-len(format_tokens)-len(instruction_str_tokens)-len(question_tokens)-max_new_tokens-15 #additional buffer of 5
     context_tokens_before_truncation = tokenizer(prompt["context"], add_special_tokens=False)["input_ids"]
     context_tokens_after_truncation = tokenizer(prompt["context"], max_length=remaining_length, truncation=True, add_special_tokens=False)["input_ids"]
     context_str_after_truncation = tokenizer.decode(context_tokens_after_truncation)
@@ -28,7 +45,7 @@ def truncate_prompt(prompt, tokenizer, instruction_str_tokens, total_tokens, max
         "original_context_token_length": len(context_tokens_before_truncation),
         "context_token_length_after_truncation": len(context_tokens_after_truncation)
     }
-    modified_prompt = create_prompt(question=prompt["question"], context=context_str_after_truncation)
+    modified_prompt = create_prompt(question=prompt["question"], context=context_str_after_truncation, prompt_mode = prompt_mode)
     return modified_prompt, context_length_change_info
 
 def post_process_answers(answers):
@@ -40,11 +57,13 @@ def post_process_answers(answers):
             modified_answers.append(x.strip().split("\n")[0])
     return modified_answers
 
-def create_prompt(question, context):
+def create_prompt(question, context, prompt_mode):
+    context_instruction_str = context_instruction_dict[prompt_mode]
+    no_context_instruction_str = no_context_instruction_dict[prompt_mode]
     if context:
-        return f"{INSTRUCTION_STR}\nContext: {context}\nQuestion: {question}\nAnswer: ".strip()
+        return f"{context_instruction_str}\nContext: {context}\nQuestion: {question}\nAnswer: ".strip()
     else:
-        return f"{NO_CONTEXT_INSTRUCTION_STR}\nQuestion: {question}\nAnswer: ".strip()
+        return f"{no_context_instruction_str}\nQuestion: {question}\nAnswer: ".strip()
 
 def num_gpt_tokens_per_message(messages, model="gpt-3.5-turbo-0613"):
     """Return the number of tokens used by a list of messages."""
