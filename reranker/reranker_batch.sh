@@ -1,9 +1,11 @@
 #!/bin/bash
 
 # Define combinations of parameters
+rerankers=("bge_large")
 rerankers=("bge_large" "bge_v2_m3")
 retrievers=("colbert" "bm25")
-ks=(50 100)
+# ks=(50 100)
+ks=(50)
 
 # rerankers=("bge_large")
 # retrievers=("colbert" "bm25")

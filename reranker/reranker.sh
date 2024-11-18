@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=0-12:00:00
+#SBATCH --time=0-48:00:00
 #SBATCH --mail-type=END
 #SBATCH --mail-user=jhsia2@andrew.cmu.edu
 #SBATCH --gres=gpu:A6000:1
