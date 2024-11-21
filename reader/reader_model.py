@@ -1,12 +1,12 @@
-from reader.reader_utils import context_instruction_dict, no_context_instruction_dict, truncate_prompt, num_gpt_tokens_per_content, num_gpt_tokens_per_message
+from reader.reader_utils import context_instruction_dict, no_context_instruction_dict, num_gpt_tokens_per_content, num_gpt_tokens_per_message
 from utils import complete_model_names
 import litellm
-from litellm import batch_completion, Router
+from litellm import batch_completion, Router, encode, decode, token_counter
 import os
 import tiktoken
 import pdb
 time_map = {}
-
+# litellm.set_verbose=True
 # litellm.set_verbose=True
 class Reader:
     def __init__(self, model_identifier=None, hosted_api_endpoint=None, hosted_api_key = None, tokenizer=None):
@@ -17,10 +17,11 @@ class Reader:
     
     def batch_generate(self, texts, max_new_tokens=10):
         messages = [[{"role":"user", "content":text}] for text in texts]
-        # pdb.set_trace()
         if self.hosted_api_endpoint:
-            # pdb.set_trace()
-            return batch_completion(model=complete_model_names[self.model_identifier], messages=messages, api_base=self.hosted_api_endpoint,max_tokens = max_new_tokens)
+            return batch_completion(model=complete_model_names[self.model_identifier], 
+                                    messages=messages, 
+                                    api_base=self.hosted_api_endpoint,
+                                    max_tokens = max_new_tokens)
         else:
             return batch_completion(model=complete_model_names[self.model_identifier], 
                                 messages=messages, 
@@ -40,11 +41,46 @@ class Reader:
         # instruction_str_tokens = self.tokenizer(context_instruction_str)["input_ids"]
         # print(prompt_mode)
         for prompt in prompts:
-            modified_prompt, context_length_change_info = truncate_prompt(prompt, self.tokenizer, total_tokens, max_new_tokens, prompt_mode)
+            modified_prompt, context_length_change_info = self.truncate_prompt(prompt, self.tokenizer, total_tokens, max_new_tokens, prompt_mode)
             modified_prompts.append(modified_prompt)
             context_length_changes.append(context_length_change_info)
         responses = self.batch_generate(modified_prompts, max_new_tokens)
         return [r.choices[0].message.content for r in responses], context_length_changes
+
+    def get_token_len(self, text):
+        messages = [{"role": "user", "content": text}]
+        # pdb.set_trace()
+        return token_counter(model=complete_model_names[self.model_identifier].split('huggingface/')[1], messages=messages)
+    
+    def truncate_prompt(self, prompt, tokenizer, total_tokens, max_new_tokens, prompt_mode):
+        format_text = "\nContext: \nQuestion: \nAnswer:"
+        question_text = prompt["question"]
+        if prompt['context']:
+            instruction_str_text = context_instruction_dict[prompt_mode]
+        else:
+            instruction_str_text = no_context_instruction_dict[prompt_mode]
+
+        remaining_length = total_tokens-self.get_token_len(format_text)-self.get_token_len(instruction_str_text)-self.get_token_len(question_text)-max_new_tokens-100 #additional buffer
+        context_tokens_before_truncation = encode(model=complete_model_names[self.model_identifier].split('huggingface/')[1], text = prompt["context"])
+        # pdb.set_trace()
+        context_tokens_after_truncation =  context_tokens_before_truncation.ids[0:remaining_length]
+        context_str_after_truncation = decode(model=complete_model_names[self.model_identifier].split('huggingface/')[1], tokens = context_tokens_after_truncation)
+        context_length_change_info = {
+            "original_context_str_length": len(prompt["context"]),
+            "context_str_length_after_truncation": len(context_str_after_truncation),
+            "original_context_token_length": len(context_tokens_before_truncation),
+            "context_token_length_after_truncation": len(context_tokens_after_truncation)
+        }
+        modified_prompt = self.create_prompt(question=prompt["question"], context=context_str_after_truncation, prompt_mode = prompt_mode)
+        return modified_prompt, context_length_change_info
+
+    def create_prompt(self, question, context, prompt_mode):
+        context_instruction_str = context_instruction_dict[prompt_mode]
+        no_context_instruction_str = no_context_instruction_dict[prompt_mode]
+        if context:
+            return f"{context_instruction_str}\nContext: {context}\nQuestion: {question}\nAnswer: ".strip()
+        else:
+            return f"{no_context_instruction_str}\nQuestion: {question}\nAnswer: ".strip()
 
 class GPT_Reader():
     def __init__(self, model_identifier, api_key):
@@ -240,7 +276,6 @@ class ClaudeReader():
 
         for mi, messages in enumerate(modified_prompts):
             print(mi)
-            # pdb.set_trace()
             response = router.completion(model = self.model_identifier, messages = messages, temperature = 0.0, max_tokens = max_new_tokens)
             responses.append(response)
 
