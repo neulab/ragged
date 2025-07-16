@@ -11,15 +11,10 @@ Bioasq (complete medline corpus): https://hub.zenoml.com/project/17d95f38-aa53-4
 
 Bioasq (sampled): https://hub.zenoml.com/project/e7a27fce-bf84-4f52-ac1b-3d7975c44bf4/Document%20QA%20-%20bioasq/explore -->
 
-# [RAGGED: Towards Informed Design of Retrieval Augmented Generation Systems](https://arxiv.org/abs/2403.09040)
+# [RAGGED: Towards Informed Design of Scalable and Stable RAG Systems](https://openreview.net/forum?id=4ufjBV6S4I)
 
 ## Description
-Retrieval-augmented generation (RAG) greatly benefits language models (LMs) by providing additional context for tasks such as document-based question answering (DBQA). 
-Despite its potential, the power of RAG is highly dependent on its configuration, raising the question: *What is the optimal RAG configuration?*
-To answer this, we introduce the RAGGED framework to analyze and optimize RAG systems. On the representative DBQA tasks, we study two classic sparse and dense retrievers, and four top-performing LMs in encoder-decoder and decoder-only architectures.
-Through RAGGED, we uncover that *different models suit substantially varied RAG setups*.
-While encoder-decoder models monotonically improve with more documents, we find decoder-only models can only effectively use <5 documents, despite often having a longer context window.
-RAGGED offers further insights into LMs' context utilization habits, where we find encoder-decoder models rely more on contexts and are thus more sensitive to retrieval quality, while decoder-only models tend to rely on knowledge memorized during training.
+Retrieval-augmented generation (RAG) enhances language models by integrating external knowledge, but its effectiveness is highly dependent on system configuration. Improper retrieval settings can degrade performance, making RAG less reliable than closed-book generation. In this work, we introduce RAGGED, a framework for systematically evaluating RAG systems across diverse retriever-reader configurations, retrieval depths, and datasets. Our analysis reveals that reader robustness to noise is the key determinant of RAG stability and scalability. Some readers benefit from increased retrieval depth, while others degrade due to their sensitivity to distracting content. Through large-scale experiments on open-domain, multi-hop, and specialized-domain datasets, we show that retrievers, rerankers, and prompts influence performance but do not fundamentally alter these reader-driven trends. By providing a principled framework and new metrics to assess RAG stability and scalability, RAGGED enables systematic evaluation of retrieval-augmented generation systems, guiding future research on optimizing retrieval depth and model robustness.
 
 ## Installation
 To recreate the conda environment, run 
@@ -88,11 +83,10 @@ To adapt for ColBERT, format your corpus and query datasets as instructed [here]
 ## Citation
 If you use our code, datasets, or concepts from our paper in your research, we would appreciate citing it in your work. Here is an example BibTeX entry for citing our paper:
 ```bibtex
-@article{hsia2024ragged,
-  title={RAGGED: Towards Informed Design of Retrieval Augmented Generation Systems},
-  author={Jennifer Hsia and Afreen Shaikh and Zhiruo Wang and Graham Neubig},
-  journal={arXiv preprint arXiv:2403.09040},
-  year={2024}
+@inproceedings{hsiaragged,
+  title={RAGGED: Towards Informed Design of Scalable and Stable RAG Systems},
+  author={Hsia, Jennifer and Shaikh, Afreen and Wang, Zora Zhiruo and Neubig, Graham},
+  booktitle={Forty-second International Conference on Machine Learning}
 }
 ```
 ## Contact
